@@ -92,7 +92,7 @@ export const level4 = {
            ['Pri silných heslách je správca hesiel zbytočný.', 'Bez nástroja sa desiatky hesiel spravujú len ťažko.']],
           'Vďaka správcovi hesiel môžeš používať veľa jedinečných hesiel.'),
         choice('Aké má byť hlavné heslo do správcu hesiel?',
-          ['Dlhá fráza, ktorú nepoužívam nikde inde, a k tomu zapnuté MFA.', 'Hlavné heslo chráni všetky ostatné, preto musí byť výnimočne silné.'],
+          ['Dlhé heslo z náhodných slov, ktoré nepoužívam nikde inde, a k tomu zapnuté MFA.', 'Hlavné heslo chráni všetky ostatné, preto musí byť výnimočne silné.'],
           [['Heslo, ktoré už používam inde. Ľahko sa pamätá.', 'Hlavné heslo sa nesmie opakovať v iných službách.'],
            ['Krátke slovo so symbolom.', 'Krátke heslá s predvídateľnými vzormi sú slabé.']],
           'Hlavné heslo je kľúč ku všetkému. Musí byť silné a jedinečné.'),
@@ -193,8 +193,8 @@ export const level4 = {
       intro: ['Navrhni bezpečnostný plán pre vymyslenú školu. Pri každej oblasti vyber najlepšie pravidlo.', 'Zo správnych odpovedí sa na konci zostaví tvoj plán.'],
       rounds: [
         rowsPer('Navrhni pravidlá pre prvé štyri oblasti.', [
-          { label: 'Pravidlá pre heslá', plan: 'Heslá: aspoň 14 znakov, najlepšie fráza z viacerých nesúvisiacich slov; kontrola proti bežným a uniknutým heslám.',
-            good: ['Heslá sú dlhé a nepredvídateľné (napríklad fráza z viacerých slov) a kontrolujú sa proti zoznamom uniknutých hesiel.', 'Dĺžka a nepredvídateľnosť sú dôležitejšie ako mechanické pravidlá.'],
+          { label: 'Pravidlá pre heslá', plan: 'Heslá: aspoň 14 znakov, napríklad tri alebo viac náhodných slov; kontrola proti bežným a uniknutým heslám.',
+            good: ['Heslá sú dlhé a nepredvídateľné (napríklad tri alebo viac náhodných slov) a kontrolujú sa proti zoznamom uniknutých hesiel.', 'Dĺžka a nepredvídateľnosť sú dôležitejšie ako mechanické pravidlá.'],
             bad: [['Heslo má aspoň 8 znakov a jeden symbol.', 'Krátke heslá s povinným symbolom vedú k predvídateľným vzorom.'], ['Heslá sa menia každý týždeň.', 'Časté nútené zmeny vedú k predvídateľným úpravám hesiel.']] },
           { label: 'Jedinečnosť prihlasovacích údajov', plan: 'Jedinečnosť: každá služba má iné heslo; používa sa schválený správca hesiel.',
             good: ['Každý účet má vlastné jedinečné heslo a používa sa schválený správca hesiel.', 'Únik jedného hesla neohrozí ostatné účty.'],

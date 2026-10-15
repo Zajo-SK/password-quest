@@ -1,4 +1,4 @@
-// Obrazovky aplikácie (okrem misií, Password Lab a učiteľského režimu).
+// Obrazovky aplikácie (okrem misií, Dielne hesiel a učiteľského režimu).
 import { h, clear, append, embedded } from './util.js';
 import { icon, bot } from './icons.js';
 import * as store from './store.js';
@@ -176,7 +176,7 @@ export function levelSummary(root, id) {
       h('div', { class: 'actions' },
         p.complete ? h('a', { class: 'btn btn-primary btn-lg', href: `#/certificate/${lv.id}` }, icon('trophy', 22), ' ', t('summary.certificate')) : null,
         nextLevel ? h('a', { class: 'btn btn-secondary btn-lg', href: `#/level/${nextLevel.id}` }, t('summary.next_level'), ' ', icon('forward', 22)) : null,
-        h('a', { class: 'btn btn-secondary btn-lg', href: '#/lab' }, icon('search', 22), ' Password Lab'))),
+        h('a', { class: 'btn btn-secondary btn-lg', href: '#/lab' }, icon('key', 22), ' ', t('nav.lab')))),
   );
 }
 

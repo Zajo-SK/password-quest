@@ -1,10 +1,10 @@
 // Offline režim: network-first (vždy čerstvé súbory, keď je pripojenie), inak z cache.
 // Cache obsahuje len statické súbory aplikácie, nikdy žiadne údaje žiaka.
-const CACHE = 'password-quest-v2';
+const CACHE = 'password-quest-v3';
 const FILES = [
   './', 'index.html', 'icon.svg', 'manifest.webmanifest', 'css/styles.css',
   'js/main.js', 'js/config.js', 'js/i18n.js', 'js/i18n/sk.js', 'js/i18n/en.js', 'js/util.js', 'js/icons.js', 'js/store.js',
-  'js/progress.js', 'js/wordlists.js', 'js/analyzer.js', 'js/lab.js', 'js/engine.js', 'js/views.js', 'js/teacher.js',
+  'js/progress.js', 'js/wordlists.js', 'js/lab.js', 'js/engine.js', 'js/views.js', 'js/teacher.js',
   'js/content/index.js', 'js/content/helpers.js',
   'js/content/sk/meta.js', 'js/content/sk/level1.js', 'js/content/sk/level2.js', 'js/content/sk/level3.js', 'js/content/sk/level4.js',
   'js/content/en/meta.js', 'js/content/en/level1.js', 'js/content/en/level2.js', 'js/content/en/level3.js', 'js/content/en/level4.js',

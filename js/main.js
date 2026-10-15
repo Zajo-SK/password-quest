@@ -17,7 +17,7 @@ let cleanup = null;
 
 const NAV = [
   ['levels', 'nav.missions', 'shield'],
-  ['lab', 'nav.lab', 'search'],
+  ['lab', 'nav.lab', 'key'],
   ['progress', 'nav.progress', 'star'],
   ...(FEATURES.teacher ? [['teacher', 'nav.teacher', 'users']] : []),
 ];
@@ -97,7 +97,7 @@ function render() {
 }
 
 window.addEventListener('hashchange', render);
-// Pri zatvorení stránky sa upratuje aj Password Lab (testovacie texty nikam neodchádzajú).
+// Pri zatvorení stránky sa upratuje aj Dielňa hesiel (testovacie texty nikam neodchádzajú).
 window.addEventListener('pagehide', () => { if (cleanup) { try { cleanup(); } catch (e) { /* ignoruj */ } } });
 
 try {

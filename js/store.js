@@ -1,5 +1,5 @@
 // Lokálne ukladanie NEOSOBNÉHO herného postupu (body, odznaky, štatistiky úloh).
-// Nikdy sa sem neukladá obsah Password Lab ani žiadne heslo.
+// Nikdy sa sem neukladá obsah Dielne hesiel ani žiadne heslo.
 
 const KEY = 'pq.progress.v1';
 

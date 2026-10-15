@@ -3,7 +3,7 @@
 *Chráň svoj digitálny svet.* Interaktívna vzdelávacia hra o bezpečných heslách a základoch kybernetickej bezpečnosti pre školy. Rozhranie aj obsah sú v slovenčine a angličtine, jazyk sa prepína v hornej lište (SK / EN).
 
 - 4 úrovne obtiažnosti (ľahká, stredná, náročná, expertná), 16 misií a 83 interaktívnych úloh v oboch jazykoch
-- Password Lab: lokálna, vysvetliteľná kontrola ukážkových hesiel a generátor ukážkových fráz
+- Dielňa hesiel: žiak si z kartičiek alebo vlastných slov postaví heslo z troch náhodných slov a hneď vidí jeho silu a jednoduché pravidlá
 - Body (XP), 8 odznakov, záverečné hodnotenie úrovne a certifikát za preukázané zvládnutie
 - Opakovanie nesprávne zodpovedaných úloh, rozpracovanú misiu možno dokončiť aj po obnovení stránky
 - Učiteľský režim (relácia triedy, premietanie úloh, súhrn tém, export CSV) je pripravený, ale zatiaľ skrytý
@@ -30,7 +30,7 @@ Odporúčané hlavičky (voliteľné, ak ich server vie nastaviť): `Content-Sec
 - Texty rozhrania sú v `js/i18n/sk.js` a `js/i18n/en.js`, obsah úloh v `js/content/sk/` a `js/content/en/`.
 - Zvolený jazyk sa pamätá v prehliadači (`pq.lang`). Predvolená je slovenčina.
 - Úlohy majú v oboch jazykoch rovnaké identifikátory aj poradie odpovedí, takže postup, body a odznaky platia aj po prepnutí jazyka. Zhodu štruktúry kontrolujú testy.
-- Nový jazyk: pridaj slovník do `js/i18n/`, obsah do `js/content/<jazyk>/`, zoznam slov do `js/wordlists.js` a záznam do `LANGS` v `js/i18n.js` a `CONTENT` v `js/content/index.js`.
+- Nový jazyk: pridaj slovník do `js/i18n/`, obsah do `js/content/<jazyk>/`, kartičky so slovami do `js/wordlists.js` a záznam do `LANGS` v `js/i18n.js` a `CONTENT` v `js/content/index.js`.
 
 ## Učiteľský režim
 
@@ -40,7 +40,7 @@ Je zatiaľ skrytý. Zapína sa v `js/config.js` nastavením `FEATURES.teacher = 
 
 Otvor `/tests/` na lokálnom serveri. Stránka v oboch jazykoch skontroluje:
 
-- analyzátor hesiel,
+- kontrolu hesla v Dielni hesiel a kartičky so slovami,
 - integritu obsahu (jedna správna odpoveď, vysvetlenia, zhrnutia, len vymyslené domény),
 - rovnakú štruktúru slovenského a anglického obsahu,
 - úplnosť slovníkov,
@@ -63,9 +63,8 @@ js/i18n.js             jazyk rozhrania a funkcia t()
 js/i18n/sk.js, en.js   texty rozhrania
 js/engine.js           vykresľovanie a vyhodnocovanie typov úloh, body, odznaky, premietanie
 js/views.js            úvod, úrovne, hodnotenie, certifikát, postup, návody
-js/lab.js              Password Lab a generátor ukážkových fráz
-js/analyzer.js         vysvetliteľná kontrola hesiel (len v prehliadači)
-js/wordlists.js        slová pre ukážkové frázy a zoznam bežných hesiel
+js/lab.js              Dielňa hesiel: kontrola hesla, kartičky so slovami a obrazovka (len v prehliadači)
+js/wordlists.js        kartičky so slovami pre Dielňu hesiel a zoznam bežných hesiel
 js/teacher.js          učiteľský režim, relácia triedy, premietanie, CSV
 js/store.js            ukladanie neosobného postupu do localStorage
 js/progress.js         výpočty nad postupom
@@ -77,7 +76,7 @@ sw.js                  offline režim (network-first)
 
 ## Ochrana údajov a bezpečnosť
 
-- Heslá z Password Lab sa nikam neposielajú, neukladajú ani nelogujú. Pole sa vymaže, keď obrazovku opustíš.
+- Heslá z Dielne hesiel sa nikam neposielajú, neukladajú ani nelogujú. Pole sa vymaže, keď obrazovku opustíš.
 - V `localStorage` je len herný postup (body, odznaky, splnené misie, počty správnych odpovedí) a zvolený jazyk.
 - Žiadne externé API, fonty ani analytika. Content-Security-Policy povoľuje iba vlastný pôvod.
 - Všetok obsah sa do stránky vkladá ako text, nie ako HTML.

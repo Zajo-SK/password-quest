@@ -15,11 +15,10 @@
   <p id="summary">Beží…</p>
   <ul id="out"></ul>
   <script type="module">
-    import { analyze, checkGoal } from '../js/analyzer.js';
     import { CONTENT } from '../js/content/index.js';
     import { DICTS, setLang, getLang, t } from '../js/i18n.js';
-    import { WORDS, COMMON } from '../js/wordlists.js';
-    import { generatePhrase } from '../js/lab.js';
+    import { CARDS, COMMON } from '../js/wordlists.js';
+    import { checkPassword, splitWords, drawCards, drawCardSet, cardWord, normalize } from '../js/lab.js';
     import { newClassCode, buildCsv } from '../js/teacher.js';
 
     const out = document.getElementById('out');
@@ -38,33 +37,33 @@
     const originalLang = getLang();
     const LANG_IDS = Object.keys(CONTENT);
 
-    // --- Analyzátor hesiel (v oboch jazykoch) ---
+    // --- Dielňa hesiel: kontrola hesla (v oboch jazykoch) ---
+    const ok = (pw, id, terms) => checkPassword(pw, terms).checks.find((c) => c.id === id).ok;
+    test('slová v hesle sa rozpoznajú podľa veľkých písmen aj oddeľovačov', () => {
+      eq(splitWords('SlonDazdnikRaketa').join(), 'Slon,Dazdnik,Raketa');
+      eq(splitWords('slon-dazdnik raketa').length, 3);
+      eq(splitWords('Macko123!').join(), 'Macko');
+      eq(splitWords('ŤavaĎalekohľadSlon').length, 3);
+    });
     for (const lang of LANG_IDS) {
       setLang(lang);
-      test(`[${lang}] bežné heslo je veľmi predvídateľné`, () => eq(analyze('123456').verdict.key, 'very-weak'));
-      test(`[${lang}] rad klávesnice`, () => truthy(analyze('qwertyuiop').findings.some((f) => f.id === 'keyboard')));
-      test(`[${lang}] slovo + rok`, () => truthy(analyze('Futbal2026').findings.some((f) => f.id === 'word-year')));
-      test(`[${lang}] slovo + čísla + symbol`, () => truthy(analyze('Macko123!').findings.some((f) => ['word-digits', 'common-part', 'common'].includes(f.id))));
-      test(`[${lang}] zámena znakov p@ssw0rd`, () => eq(analyze('P@ssw0rd').findings.some((f) => f.id === 'common'), true));
-      test(`[${lang}] dlhá fráza prejde kontrolami`, () => eq(analyze('Vlak-Mrak-Les-72').verdict.key, 'passed'));
-      test(`[${lang}] opakovaný znak nie je „prešlo“`, () => truthy(analyze('aaaaaaaaaaaa').verdict.key !== 'passed'));
-      test(`[${lang}] osobný údaj z profilu`, () => truthy(analyze('Rex-Lampa-Skala-Lipa', ['Rex']).findings.some((f) => f.id === 'personal')));
-      test(`[${lang}] texty nálezov sú preložené`, () => analyze('Futbal2026!').findings.forEach((f) => { truthy(!f.title.startsWith('an.'), f.title); truthy(!f.detail.startsWith('an.'), f.detail); }));
-      test(`[${lang}] prázdny vstup`, () => eq(analyze('').verdict.key, 'empty'));
-      test(`[${lang}] checkGoal minLen`, () => eq(checkGoal(analyze('abc'), { minLen: 14 }, 'abc').ok, false));
-      test(`[${lang}] checkGoal splnený`, () => { const pw = 'Dazd-Skala-Kocka-Lipa-47'; eq(checkGoal(analyze(pw), { minLen: 14, noIssues: true }, pw).ok, true); });
+      test(`[${lang}] prázdne heslo`, () => eq(checkPassword('').step, 0));
+      test(`[${lang}] bežné heslá sú slabé`, () => ['123456', 'heslo', 'password', 'P@ssw0rd', 'qwertyuiop'].forEach((pw) => eq(checkPassword(pw).step, 1, pw)));
+      test(`[${lang}] slovo + čísla je slabé`, () => { eq(checkPassword('Macko123').step, 1); eq(ok('Macko123!', 'common'), false); });
+      test(`[${lang}] slovo + rok nie je silné`, () => { eq(ok('Futbal2026', 'pattern'), false); truthy(checkPassword('Futbal2026').step <= 2); });
+      test(`[${lang}] tri náhodné slová sú silné`, () => { const r = checkPassword('SlonDazdnikRaketa'); eq(r.step, 3); truthy(r.checks.every((c) => c.ok)); });
+      test(`[${lang}] rovnaké písmená na hranici slov nevadia`, () => eq(checkPassword('HillLionTractor').step, 3));
+      test(`[${lang}] štyri slová sú výborné`, () => eq(checkPassword('SlonDazdnikRaketaKotva').step, 4));
+      test(`[${lang}] dve slová nestačia`, () => { eq(checkPassword('SlonDazdnik').step, 2); eq(ok('SlonDazdnik', 'three'), false); });
+      test(`[${lang}] bežné slovo v hesle sa nájde`, () => { eq(ok('SlonHesloRaketa', 'common'), false); eq(checkPassword('SlonHesloRaketa').step, 2); });
+      test(`[${lang}] krátke slová dostanú radu`, () => { const r = checkPassword('PesLesMak'); truthy(r.step <= 2); });
+      test(`[${lang}] osobný údaj z profilu`, () => { eq(ok('RexLampaSkala', 'personal', ['Rex']), false); eq(checkPassword('KotvaLampaSkala', ['Rex']).step, 3); });
+      test(`[${lang}] texty kontrol sú preložené`, () => checkPassword('Futbal2026', ['Rex']).checks.forEach((c) => truthy(!c.text.startsWith('ws.'), c.text)));
+      test(`[${lang}] kartičky: 3 rôzne slová`, () => { const c = drawCards(3, lang); eq(c.length, 3); eq(new Set(c.map((x) => x[1])).size, 3); });
+      test(`[${lang}] kartičky nie sú bežné slová a dajú sa písať bez diakritiky`, () => CARDS[lang].forEach(([, w]) => { truthy(!COMMON.has(normalize(w)), w); truthy(/^[A-Z][a-z]+$/.test(cardWord(w)), cardWord(w)); }));
+      test(`[${lang}] heslo z troch kartičiek je vždy silné`, () => { for (let i = 0; i < 200; i++) { const pw = drawCardSet(lang).map(([, w]) => cardWord(w)).join(''); truthy(checkPassword(pw).step >= 3, pw); } });
     }
-    test('verdikt „prešlo“ v oboch jazykoch upozorňuje, že nejde o záruku', () => {
-      truthy(DICTS.sk['an.v.passed.d'].includes('záruka'));
-      truthy(DICTS.en['an.v.passed.d'].includes('guarantee'));
-    });
 
-    // --- Generátor, zoznamy slov, kód triedy ---
-    for (const lang of LANG_IDS) {
-      test(`[${lang}] generátor vyrobí frázu s číslom`, () => truthy(/^([A-Z][a-z]+-){4}\d{2}$/.test(generatePhrase(4, lang))));
-      test(`[${lang}] generátor nevracia stále rovnaké`, () => truthy(new Set(Array.from({ length: 20 }, () => generatePhrase(4, lang))).size > 15));
-      test(`[${lang}] slová generátora neobsahujú bežné heslá`, () => WORDS[lang].forEach((w) => [...COMMON].forEach((c) => truthy(!(c.length >= 4 && w.includes(c)), `${w} obsahuje ${c}`))));
-    }
     test('kód triedy má správny formát', () => truthy(/^[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/.test(newClassCode())));
     test('kódy tried sú rôzne', () => truthy(new Set(Array.from({ length: 50 }, newClassCode)).size === 50));
     test('CSV obsahuje hlavičku', () => { setLang('sk'); truthy(buildCsv().includes('typ;id;nazov')); });
@@ -75,7 +74,7 @@
       const missingEn = sk.filter((k) => !(k in DICTS.en)), missingSk = en.filter((k) => !(k in DICTS.sk));
       truthy(!missingEn.length && !missingSk.length, `chýba v EN: ${missingEn.join(', ')} | chýba v SK: ${missingSk.join(', ')}`);
     });
-    const files = ['main.js', 'views.js', 'engine.js', 'lab.js', 'analyzer.js', 'teacher.js', 'icons.js'];
+    const files = ['main.js', 'views.js', 'engine.js', 'lab.js', 'teacher.js', 'icons.js'];
     const sources = await Promise.all(files.map((f) => fetch('../js/' + f, { cache: 'no-store' }).then((r) => r.text())));
     test('všetky statické kľúče t(…) v kóde existujú v slovníkoch', () => {
       const keys = new Set(sources.flatMap((s) => [...s.matchAll(/\bt\('([^']+)'\s*[,)]/g)].map((m) => m[1])));
@@ -86,9 +85,9 @@
       const dyn = [
         ...[1, 2, 3, 4, 5, 6].flatMap((n) => [`howto.s${n}.t`, `howto.s${n}.d`]),
         ...Object.keys(CONTENT.sk.meta.TOPICS).map((id) => `learn.topic.${id}`),
-        ...['pet', 'hobby', 'city', 'year'].map((k) => `lab.field.${k}`),
-        ...['empty', 'very-weak', 'weak', 'improve', 'passed'].flatMap((k) => [`an.v.${k}`, `an.v.${k}.d`]),
-        ...['common', 'common-part', 'sequence', 'keyboard', 'repeat-char', 'repeat-block', 'low-variety', 'word-year', 'word-digits', 'personal', 'phrase-common', 'phrase', 'variety', 'len.vshort', 'len.short', 'len.good', 'len.long'].flatMap((k) => [`an.${k}`, `an.${k}.d`]),
+        ...[0, 1, 2, 3, 4].flatMap((n) => [`ws.step.${n}`, `ws.step.${n}.d`]),
+        ...[1, 2, 3].flatMap((n) => [`ws.why${n}`, `ws.limit${n}`]),
+        ...[1, 2, 3, 4].map((n) => `difficulty.${n}`),
         ...[1, 2, 3, 4, 5].map((n) => `teacher.priv${n}`),
         'rank.novice', 'rank.guardian', 'rank.detective', 'rank.expert',
       ];
@@ -152,7 +151,7 @@
     // --- Úložisko: nikdy nie heslá ---
     test('localStorage neobsahuje zadané testovacie heslá', () => {
       const raw = JSON.stringify(Object.fromEntries(Object.keys(localStorage).map((k) => [k, localStorage.getItem(k)])));
-      truthy(!raw.includes('Dazd-Skala-Kocka-Lipa-47'));
+      truthy(!raw.includes('SlonDazdnikRaketa'));
     });
 
     setLang(originalLang);

@@ -92,7 +92,7 @@ export const level4 = {
            ['With strong passwords, a password manager is pointless.', 'Without a tool, dozens of passwords are hard to manage.']],
           'A password manager lets you use lots of unique passwords.'),
         choice('What should the main password for a password manager be like?',
-          ['A long phrase I don’t use anywhere else, plus MFA turned on.', 'The main password protects all the others, so it must be exceptionally strong.'],
+          ['A long password made of random words that I don’t use anywhere else, plus MFA turned on.', 'The main password protects all the others, so it must be exceptionally strong.'],
           [['A password I already use elsewhere. It is easy to remember.', 'The main password must never be reused on other services.'],
            ['A short word with a symbol.', 'Short passwords with predictable patterns are weak.']],
           'The main password is the key to everything. It must be strong and unique.'),
@@ -193,8 +193,8 @@ export const level4 = {
       intro: ['Design a security plan for a made-up school. For each area, choose the best rule.', 'At the end, your correct answers are put together into your plan.'],
       rounds: [
         rowsPer('Set rules for the first four areas.', [
-          { label: 'Password rules', plan: 'Passwords: at least 14 characters, ideally a phrase of several unrelated words; checked against common and leaked passwords.',
-            good: ['Passwords are long and unpredictable (for example a phrase of several words) and are checked against lists of leaked passwords.', 'Length and unpredictability matter more than mechanical rules.'],
+          { label: 'Password rules', plan: 'Passwords: at least 14 characters, for example three or more random words; checked against common and leaked passwords.',
+            good: ['Passwords are long and unpredictable (for example three or more random words) and are checked against lists of leaked passwords.', 'Length and unpredictability matter more than mechanical rules.'],
             bad: [['A password has at least 8 characters and one symbol.', 'Short passwords with a required symbol lead to predictable patterns.'], ['Passwords are changed every week.', 'Frequent forced changes lead to predictable tweaks.']] },
           { label: 'Unique login details', plan: 'Uniqueness: every service has a different password; an approved password manager is used.',
             good: ['Every account has its own unique password and an approved password manager is used.', 'A leak of one password does not put other accounts at risk.'],

@@ -6,8 +6,7 @@ import { icon, bot } from './icons.js';
 import * as store from './store.js';
 import { t } from './i18n.js';
 import { getTask, getLevel, badge, topicLabel } from './content/index.js';
-import { createLab } from './lab.js';
-import { checkGoal } from './analyzer.js';
+import { createWorkshop } from './lab.js';
 import { levelProgress } from './progress.js';
 
 /* ---------- Ukážky (e-mail, SMS, upozornenie, časová os) ---------- */
@@ -352,36 +351,23 @@ function renderReuse(round, ctx) {
 }
 
 function renderLab(round, ctx) {
-  const goalList = h('ul', { class: 'goal-list' });
   const note = h('p', { class: 'muted', role: 'status' });
-  const lab = createLab({ profile: round.profile, onResult: (r, value) => updateGoals(r, value) });
-  ctx.onCleanup(() => lab.destroy());
+  const ws = createWorkshop({ profile: round.profile });
+  ctx.onCleanup(() => ws.destroy());
   const check = checkButton(t('btn.check_task'), evaluate);
 
-  function updateGoals(r, value) {
-    clear(goalList);
-    note.textContent = '';
-    const g = round.goal;
-    const res = checkGoal(r, g, value);
-    const item = (ok, text) => goalList.append(h('li', { class: ok ? 'ok' : '' }, icon(ok ? 'check' : 'flag', 20), ' ', text));
-    if (g.minLen) item(r.length >= g.minLen, t('lab.goal_len', { n: g.minLen }));
-    if (g.noIssues) item(!!value && !res.unmet.some((u) => u.id !== 'len'), t('lab.goal_clean'));
-  }
-
   function evaluate() {
-    const value = lab.getValue();
-    if (!value) { note.textContent = t('lab.enter_first'); return; }
-    const res = checkGoal(lab.getAnalysis(), round.goal, value);
+    if (!ws.getValue()) { note.textContent = t('lab.enter_first'); return; }
+    const r = ws.getResult();
+    const ok = r.step >= 3;
     check.hidden = true;
-    const explain = res.ok
+    ws.lock();
+    const explain = ok
       ? [{ ok: true, text: t('lab.goal_ok') }]
-      : [{ ok: false, text: t('lab.goal_todo') }, ...res.unmet.map((u) => ({ ok: false, text: u.text }))];
-    ctx.submit({ correct: res.ok, explain });
+      : [{ ok: false, text: t('lab.goal_todo') }, ...r.checks.filter((c) => !c.ok).map((c) => ({ ok: false, text: c.text })), ...r.tips.map((tip) => ({ ok: null, text: tip }))];
+    ctx.submit({ correct: ok, explain });
   }
-  lab.goalBox.hidden = false;
-  lab.goalBox.append(h('strong', null, t('lab.goal_title')), goalList, note);
-  updateGoals(lab.getAnalysis(), '');
-  return { el: h('div', null, round.hint ? h('p', { class: 'hint' }, icon('bulb', 22), ' ', round.hint) : null, lab.el, h('div', { class: 'actions' }, check)) };
+  return { el: h('div', null, round.hint ? h('p', { class: 'hint' }, icon('bulb', 22), ' ', round.hint) : null, ws.el, note, h('div', { class: 'actions' }, check)) };
 }
 
 const RENDERERS = {
