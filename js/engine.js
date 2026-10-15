@@ -1,10 +1,11 @@
 // Engine úloh: vykresľuje jednotlivé typy úloh, vyhodnocuje odpovede, počíta body a odznaky.
-// Obsah úloh je v js/content/*. Engine pozná len typy úloh, nie konkrétne otázky.
+// Obsah úloh je v js/content/<jazyk>/. Engine pozná len typy úloh, nie konkrétne otázky.
 
 import { h, clear, rich, shuffle, announce, pct, embedded } from './util.js';
 import { icon, bot } from './icons.js';
 import * as store from './store.js';
-import { getTask, getLevel, BADGES, TOPICS } from './content/index.js';
+import { t } from './i18n.js';
+import { getTask, getLevel, badge, topicLabel } from './content/index.js';
 import { createLab } from './lab.js';
 import { checkGoal } from './analyzer.js';
 import { levelProgress } from './progress.js';
@@ -35,29 +36,29 @@ export function renderMock(mock, opts = {}) {
 
   let el;
   if (mock.kind === 'email') {
-    el = h('div', { class: 'mock mock-email', role: 'group', 'aria-label': 'Ukážka e-mailovej správy' },
+    el = h('div', { class: 'mock mock-email', role: 'group', 'aria-label': t('mock.email_aria') },
       h('div', { class: 'mock-head' },
-        h('div', null, h('span', { class: 'k' }, 'Od: '), part(mock.from)),
-        h('div', null, h('span', { class: 'k' }, 'Predmet: '), h('strong', null, part(mock.subject)))),
+        h('div', null, h('span', { class: 'k' }, t('mock.from')), part(mock.from)),
+        h('div', null, h('span', { class: 'k' }, t('mock.subject')), h('strong', null, part(mock.subject)))),
       h('div', { class: 'mock-body' }, mock.paragraphs.map((para) => h('p', null,
         para.map(part),
-        para.filter((p) => typeof p !== 'string' && p.link).map((p) => h('span', { class: 'link-dest' }, icon('link', 18), ' Odkaz vedie na: ', h('code', null, p.url)))))));
+        para.filter((p) => typeof p !== 'string' && p.link).map((p) => h('span', { class: 'link-dest' }, icon('link', 18), t('mock.link_dest'), h('code', null, p.url)))))));
   } else if (mock.kind === 'sms') {
-    el = h('div', { class: 'mock mock-sms', role: 'group', 'aria-label': 'Ukážka SMS správy' },
-      h('div', { class: 'k' }, 'Od: ' + mock.from), h('div', { class: 'bubble' }, mock.text));
+    el = h('div', { class: 'mock mock-sms', role: 'group', 'aria-label': t('mock.sms_aria') },
+      h('div', { class: 'k' }, t('mock.from') + mock.from), h('div', { class: 'bubble' }, mock.text));
   } else if (mock.kind === 'push') {
-    el = h('div', { class: 'mock mock-push', role: 'group', 'aria-label': 'Ukážka upozornenia na prihlásenie' },
-      mock.steps ? h('ol', { class: 'steps' }, mock.steps.map((s) => h('li', { class: s.done ? 'done' : '' }, s.label + (s.done ? ' – hotovo' : ' – čaká na teba')))) : null,
+    el = h('div', { class: 'mock mock-push', role: 'group', 'aria-label': t('mock.push_aria') },
+      mock.steps ? h('ol', { class: 'steps' }, mock.steps.map((s) => h('li', { class: s.done ? 'done' : '' }, s.label + (s.done ? t('mock.step_done') : t('mock.step_wait'))))) : null,
       h('strong', null, mock.title),
       h('ul', null, mock.lines.map((l) => h('li', null, l))),
       h('div', { class: 'fake-btns', 'aria-hidden': 'true' }, mock.buttons.map((b) => h('span', { class: 'fake-btn' }, b))),
-      h('p', { class: 'muted small' }, 'Ukážka obrazovky. Odpoveď vyber nižšie.'));
+      h('p', { class: 'muted small' }, t('mock.push_note')));
   } else if (mock.kind === 'timeline') {
     el = h('div', { class: 'mock mock-timeline', role: 'group', 'aria-label': mock.title },
       h('strong', null, mock.title),
       h('ol', null, mock.events.map((e) => h('li', null, h('time', null, e.time), h('span', null, e.text)))),
-      h('strong', { class: 'sub' }, 'Ďalšie informácie'),
-      h('ul', null, mock.facts.map((f) => h('li', null, f))));
+      h('strong', { class: 'sub' }, t('mock.more_info')),
+      h('ul', null, mock.facts.map((x) => h('li', null, x))));
   } else {
     el = h('div');
   }
@@ -85,7 +86,7 @@ function renderChoice(round, ctx) {
     o.icon ? icon(o.icon, 34, 'option-icon') : null,
     h('span', { class: 'option-text' }, o.text),
     h('span', { class: 'option-mark', 'aria-hidden': 'true' })));
-  const list = h('div', { class: 'options' + (withIcons ? ' options-icons' : ''), role: 'group', 'aria-label': 'Možnosti odpovede' }, btns);
+  const list = h('div', { class: 'options' + (withIcons ? ' options-icons' : ''), role: 'group', 'aria-label': t('answer.options_aria') }, btns);
 
   function pick(o) {
     if (done) return;
@@ -99,7 +100,7 @@ function renderChoice(round, ctx) {
     });
     const explain = o.correct
       ? [{ ok: true, text: o.why }]
-      : [{ ok: false, text: `Tvoja voľba „${o.text}“: ${o.why}` }, { ok: true, text: `Správne je „${good.text}“: ${good.why}` }];
+      : [{ ok: false, text: t('explain.your_choice', { text: o.text, why: o.why }) }, { ok: true, text: t('explain.correct_is', { text: good.text, why: good.why }) }];
     ctx.submit({ correct: !!o.correct, explain });
   }
   return { el: list };
@@ -108,6 +109,8 @@ function renderChoice(round, ctx) {
 function renderMulti(round, ctx) {
   const opts = round.options;
   const sel = new Set();
+  const check = checkButton(t('btn.check'), evaluate);
+  check.disabled = true;
   const btns = opts.map((o, i) => {
     const b = h('button', { type: 'button', class: 'option option-toggle', 'aria-pressed': 'false', onclick: () => {
       if (sel.has(i)) sel.delete(i); else sel.add(i);
@@ -117,8 +120,6 @@ function renderMulti(round, ctx) {
     } }, h('span', { class: 'option-text' }, o.text), h('span', { class: 'option-mark', 'aria-hidden': 'true' }));
     return b;
   });
-  const check = checkButton('Skontrolovať', evaluate);
-  check.disabled = true;
 
   function evaluate() {
     const explain = [];
@@ -127,20 +128,20 @@ function renderMulti(round, ctx) {
       b.disabled = true;
       const o = opts[i];
       const picked = sel.has(i);
-      if (picked && o.correct) { b.classList.add('is-correct'); mark(b, 'check'); explain.push({ ok: true, text: `„${o.text}“ – ${o.why}` }); }
-      else if (picked && !o.correct) { b.classList.add('is-wrong'); mark(b, 'x'); correct = false; explain.push({ ok: false, text: `„${o.text}“ do výberu nepatrí. ${o.why}` }); }
-      else if (!picked && o.correct) { b.classList.add('is-missed'); mark(b, 'flag'); correct = false; explain.push({ ok: false, text: `Chýbalo „${o.text}“. ${o.why}` }); }
+      if (picked && o.correct) { b.classList.add('is-correct'); mark(b, 'check'); explain.push({ ok: true, text: t('explain.picked_ok', { text: o.text, why: o.why }) }); }
+      else if (picked && !o.correct) { b.classList.add('is-wrong'); mark(b, 'x'); correct = false; explain.push({ ok: false, text: t('explain.picked_wrong', { text: o.text, why: o.why }) }); }
+      else if (!picked && o.correct) { b.classList.add('is-missed'); mark(b, 'flag'); correct = false; explain.push({ ok: false, text: t('explain.missed', { text: o.text, why: o.why }) }); }
     });
     check.hidden = true;
     ctx.submit({ correct, explain });
   }
-  return { el: h('div', null, h('div', { class: 'options', role: 'group', 'aria-label': 'Možnosti, vyber viac' }, btns), h('div', { class: 'actions' }, check)) };
+  return { el: h('div', null, h('div', { class: 'options', role: 'group', 'aria-label': t('answer.multi_aria') }, btns), h('div', { class: 'actions' }, check)) };
 }
 
 function renderRows(round, ctx) {
   const rowsEls = [];
   const answers = round.rows.map(() => null);
-  const check = checkButton('Skontrolovať', evaluate);
+  const check = checkButton(t('btn.check'), evaluate);
   check.disabled = true;
 
   round.rows.forEach((row, ri) => {
@@ -169,8 +170,7 @@ function renderRows(round, ctx) {
       const ok = given === good.id;
       if (!ok) correct = false;
       r.pills.forEach((p, pi) => {
-        const input = p.querySelector('input');
-        input.disabled = true;
+        p.querySelector('input').disabled = true;
         if (r.choices[pi].id === good.id) p.classList.add('is-correct');
         if (r.choices[pi].id === given && !ok) p.classList.add('is-wrong');
       });
@@ -180,10 +180,10 @@ function renderRows(round, ctx) {
       if (own) {
         const chosen = r.choices.find((c) => c.id === given);
         explain.push(ok
-          ? { ok: true, text: `${r.row.text}: ${good.why}` }
-          : { ok: false, text: `${r.row.text}: „${chosen.label}“ nie je ideálne. ${chosen.why} Lepšie je „${good.label}“: ${good.why}` });
+          ? { ok: true, text: t('explain.row_ok', { row: r.row.text, why: good.why }) }
+          : { ok: false, text: t('explain.row_own_wrong', { row: r.row.text, chosen: chosen.label, why: chosen.why, good: good.label, goodWhy: good.why }) });
       } else {
-        explain.push({ ok, text: ok ? `${r.row.text} → ${good.label}. ${r.row.why}` : `${r.row.text} patrí do „${good.label}“. ${r.row.why}` });
+        explain.push({ ok, text: t(ok ? 'explain.cat_ok' : 'explain.cat_wrong', { row: r.row.text, cat: good.label, why: r.row.why }) });
       }
     });
     check.hidden = true;
@@ -193,8 +193,8 @@ function renderRows(round, ctx) {
 }
 
 function renderHotspot(round, ctx) {
-  const check = checkButton('Skontrolovať označené', () => evaluate(false));
-  const legit = h('button', { type: 'button', class: 'btn btn-secondary btn-lg', onclick: () => evaluate(true) }, icon('shield-check', 22), ' Správa je v poriadku');
+  const check = checkButton(t('btn.check_marked'), () => evaluate(false));
+  const legit = h('button', { type: 'button', class: 'btn btn-secondary btn-lg', onclick: () => evaluate(true) }, icon('shield-check', 22), ' ', t('btn.message_ok'));
   const hint = h('p', { class: 'muted', role: 'status' });
   const { el, picks } = renderMock(round.mock, { interactive: true, onChange: () => { hint.textContent = ''; } });
 
@@ -202,23 +202,24 @@ function renderHotspot(round, ctx) {
     const flagged = picks.filter((p) => p.part.flag);
     const marked = picks.filter((p) => p.selected);
     if (!claimsOk && marked.length === 0) {
-      hint.textContent = 'Najprv označ aspoň jednu podozrivú časť, alebo vyber, že je správa v poriadku.';
+      hint.textContent = t('hotspot.need_mark');
       return;
     }
-    let correct;
-    if (claimsOk) correct = flagged.length === 0;
-    else correct = flagged.every((p) => p.selected) && marked.every((p) => p.part.flag);
+    const correct = claimsOk
+      ? flagged.length === 0
+      : flagged.every((p) => p.selected) && marked.every((p) => p.part.flag);
     const explain = [];
     picks.forEach((p) => {
       p.locked = true;
       p.btn.disabled = true;
-      if (p.part.flag && p.selected) { p.btn.classList.add('is-correct'); explain.push({ ok: true, text: `„${p.part.text}“ – ${p.part.why}` }); }
-      else if (p.part.flag && !p.selected) { p.btn.classList.add('is-missed'); explain.push({ ok: false, text: `Prehliadol si „${p.part.text}“ – ${p.part.why}` }); }
-      else if (!p.part.flag && p.selected) { p.btn.classList.add('is-wrong'); explain.push({ ok: false, text: `„${p.part.text}“ nie je samo osebe podozrivé. ${p.part.why}` }); }
+      const vars = { text: p.part.text, why: p.part.why };
+      if (p.part.flag && p.selected) { p.btn.classList.add('is-correct'); explain.push({ ok: true, text: t('explain.picked_ok', vars) }); }
+      else if (p.part.flag && !p.selected) { p.btn.classList.add('is-missed'); explain.push({ ok: false, text: t('explain.overlooked', vars) }); }
+      else if (!p.part.flag && p.selected) { p.btn.classList.add('is-wrong'); explain.push({ ok: false, text: t('explain.not_suspicious', vars) }); }
     });
-    if (claimsOk && flagged.length === 0) explain.unshift({ ok: true, text: 'Správne, táto správa nežiada nič podozrivé: žiadne heslo, žiadny nátlak a žiadny zavádzajúci odkaz.' });
-    if (claimsOk && flagged.length > 0) explain.unshift({ ok: false, text: 'Táto správa v poriadku nie je. Pozri, čo si prehliadol.' });
-    if (!claimsOk && flagged.length === 0) explain.unshift({ ok: false, text: 'Táto správa je v poriadku, nežiada nič podozrivé.' });
+    if (claimsOk && flagged.length === 0) explain.unshift({ ok: true, text: t('hotspot.legit_ok') });
+    if (claimsOk && flagged.length > 0) explain.unshift({ ok: false, text: t('hotspot.legit_wrong') });
+    if (!claimsOk && flagged.length === 0) explain.unshift({ ok: false, text: t('hotspot.was_legit') });
     check.hidden = true;
     legit.hidden = true;
     ctx.submit({ correct, explain });
@@ -229,23 +230,22 @@ function renderHotspot(round, ctx) {
 function renderOrder(round, ctx) {
   const items = round.items.map((it, i) => ({ ...it, i }));
   const plan = [];
-  const available = h('div', { class: 'options', role: 'group', 'aria-label': 'Dostupné kroky' });
-  const planList = h('ol', { class: 'plan-list', 'aria-label': 'Tvoj plán' });
-  const empty = h('p', { class: 'muted plan-empty' }, 'Plán je zatiaľ prázdny. Klikaj na kroky vyššie v poradí podľa priority. Kliknutím na krok v pláne ho vrátiš späť.');
-  const check = checkButton('Skontrolovať plán', evaluate);
+  const available = h('div', { class: 'options', role: 'group', 'aria-label': t('order.available') });
+  const planList = h('ol', { class: 'plan-list', 'aria-label': t('order.plan') });
+  const empty = h('p', { class: 'muted plan-empty' }, t('order.empty'));
+  const check = checkButton(t('btn.check_plan'), evaluate);
   let locked = false;
   const btnFor = new Map();
 
   items.forEach((it) => {
-    const b = h('button', { type: 'button', class: 'option', onclick: () => add(it) }, h('span', { class: 'option-text' }, it.text), h('span', { class: 'option-mark', 'aria-hidden': 'true' }));
-    btnFor.set(it.i, b);
+    btnFor.set(it.i, h('button', { type: 'button', class: 'option', onclick: () => add(it) }, h('span', { class: 'option-text' }, it.text), h('span', { class: 'option-mark', 'aria-hidden': 'true' })));
   });
   shuffle(items).forEach((it) => available.append(btnFor.get(it.i)));
 
   function redraw() {
     clear(planList);
     plan.forEach((it, n) => {
-      planList.append(h('li', null, h('button', { type: 'button', class: 'plan-item', 'aria-label': `Krok ${n + 1}: ${it.text}. Kliknutím ho vrátiš späť.`, onclick: () => remove(it) }, it.text)));
+      planList.append(h('li', null, h('button', { type: 'button', class: 'plan-item', 'aria-label': t('order.item_aria', { n: n + 1, text: it.text }), onclick: () => remove(it) }, it.text)));
     });
     empty.hidden = plan.length > 0;
     check.disabled = plan.length === 0;
@@ -260,10 +260,10 @@ function renderOrder(round, ctx) {
     const tiersOk = plan.every((p, n) => p.tier != null && (n === 0 || plan[n - 1].tier <= p.tier));
     const correct = plan.length === required.length && tiersOk;
     const sorted = [...required].sort((a, b) => a.tier - b.tier || a.i - b.i);
-    const explain = [{ ok: correct, text: correct ? 'Poradie krokov je správne.' : 'Správne poradie krokov je nižšie. Pozri, prečo je každý z nich dôležitý.' }];
+    const explain = [{ ok: correct, text: correct ? t('order.ok') : t('order.fix') }];
     sorted.forEach((it, n) => explain.push({ ok: true, text: `${n + 1}. ${it.text} ${it.why}` }));
-    plan.filter((p) => p.tier == null).forEach((p) => explain.push({ ok: false, text: `Do plánu nepatrí: „${p.text}“ ${p.why}` }));
-    items.filter((it) => it.tier == null && !plan.includes(it)).forEach((it) => explain.push({ ok: null, text: `Správne si nevybral „${it.text}“. ${it.why}` }));
+    plan.filter((p) => p.tier == null).forEach((p) => explain.push({ ok: false, text: t('order.not_in_plan', { text: p.text, why: p.why }) }));
+    items.filter((it) => it.tier == null && !plan.includes(it)).forEach((it) => explain.push({ ok: null, text: t('order.left_out', { text: it.text, why: it.why }) }));
     redraw();
     [...planList.querySelectorAll('.plan-item')].forEach((b, n) => {
       b.disabled = true;
@@ -275,23 +275,20 @@ function renderOrder(round, ctx) {
     ctx.submit({ correct, explain });
   }
   redraw();
-  return { el: h('div', null, h('h3', { class: 'lab-sub' }, 'Dostupné kroky'), available, h('h3', { class: 'lab-sub' }, 'Tvoj plán'), empty, planList, h('div', { class: 'actions' }, check)) };
+  return { el: h('div', null, h('h3', { class: 'lab-sub' }, t('order.available')), available, h('h3', { class: 'lab-sub' }, t('order.plan')), empty, planList, h('div', { class: 'actions' }, check)) };
 }
 
 function renderReuse(round, ctx) {
   let predicted = null;
-  let phase = 'predict';
-  const root = h('div', { class: 'reuse' });
   const status = {};
   const cards = {};
   round.accounts.forEach((a) => {
     status[a.id] = h('span', { class: 'acc-status' });
     cards[a.id] = h('div', { class: 'acc', dataset: { id: a.id } },
-      icon(a.icon, 32), h('div', { class: 'acc-info' }, h('strong', null, a.name), h('span', { class: 'acc-pw' }, 'Heslo: ', h('code', null, '••••••••'))), status[a.id]);
+      icon(a.icon, 32), h('div', { class: 'acc-info' }, h('strong', null, a.name), h('span', { class: 'acc-pw' }, t('reuse.pw'), h('code', null, '••••••••'))), status[a.id]);
   });
   const accWrap = h('div', { class: 'accs', hidden: true }, round.accounts.map((a) => cards[a.id]));
   const out = h('div', { class: 'reuse-out', 'aria-live': 'polite' });
-  const unique = new Set();
 
   const setStatus = (id, text, cls) => {
     status[id].textContent = text;
@@ -299,7 +296,7 @@ function renderReuse(round, ctx) {
   };
 
   const optBtns = round.options.map((o) => h('button', { type: 'button', class: 'option', onclick: () => predict(o) }, h('span', { class: 'option-text' }, o.text), h('span', { class: 'option-mark', 'aria-hidden': 'true' })));
-  const optList = h('div', { class: 'options', role: 'group', 'aria-label': 'Možnosti odpovede' }, shuffle(optBtns));
+  const optList = h('div', { class: 'options', role: 'group', 'aria-label': t('answer.options_aria') }, shuffle(optBtns));
 
   function predict(o) {
     predicted = o;
@@ -309,53 +306,46 @@ function renderReuse(round, ctx) {
     mark(optBtns[i], o.correct ? 'check' : 'x');
     if (!o.correct) { const gi = round.options.findIndex((x) => x.correct); optBtns[gi].classList.add('is-correct'); mark(optBtns[gi], 'check'); }
     clear(out);
-    out.append(h('p', { class: o.correct ? 'ok-text' : 'bad-text' }, icon(o.correct ? 'check' : 'bulb', 22), ' ', o.correct ? 'Tvoj odhad je správny. Pozrime sa na to v simulácii.' : 'Pozrime sa v simulácii, čo sa naozaj stane.'));
-    startSim1();
-  }
-
-  function startSim1() {
-    phase = 'sim1';
+    out.append(h('p', { class: o.correct ? 'ok-text' : 'bad-text' }, icon(o.correct ? 'check' : 'bulb', 22), ' ', o.correct ? t('reuse.predict_ok') : t('reuse.predict_wrong')));
     accWrap.hidden = false;
-    round.accounts.forEach((a) => setStatus(a.id, 'Rovnaké heslo', ''));
+    round.accounts.forEach((a) => setStatus(a.id, t('reuse.same'), ''));
     out.append(
-      h('p', null, `Všetky tri účty majú rovnaké ukážkové heslo (${round.sample}).`),
-      h('button', { type: 'button', class: 'btn btn-danger btn-lg', onclick: leak1 }, icon('warning', 22), ' Simulovať únik z herného webu'));
+      h('p', null, t('reuse.intro', { sample: round.sample })),
+      h('button', { type: 'button', class: 'btn btn-danger btn-lg', onclick: leak1 }, icon('warning', 22), ' ', t('reuse.leak')));
   }
 
   function leak1(e) {
     e.currentTarget.disabled = true;
     round.accounts.forEach((a) => {
-      if (a.id === round.leakFrom) setStatus(a.id, 'Uniklo', 'leaked');
-      else setStatus(a.id, 'Ohrozené (rovnaké heslo)', 'at-risk');
+      if (a.id === round.leakFrom) setStatus(a.id, t('reuse.leaked'), 'leaked');
+      else setStatus(a.id, t('reuse.at_risk'), 'at-risk');
     });
     out.append(
-      h('p', { class: 'bad-text' }, icon('warning', 22), ' Heslo uniklo z hernej služby. Útočníci ho skúšajú aj na iných službách. Školský e-mail a ďalší účet sú teraz ohrozené.'),
-      h('p', null, 'Teraz skús to isté s jedinečnými heslami. Klikni na každý účet a nastav mu iné ukážkové heslo.'));
-    unique.clear();
+      h('p', { class: 'bad-text' }, icon('warning', 22), ' ', t('reuse.leak_text')),
+      h('p', null, t('reuse.try_unique')));
+    const unique = new Set();
+    const sim2 = h('button', { type: 'button', class: 'btn btn-danger btn-lg', disabled: true, onclick: leak2 }, icon('warning', 22), ' ', t('reuse.leak_again'));
     const setBtns = round.accounts.map((a) => {
       const b = h('button', { type: 'button', class: 'btn btn-secondary', onclick: () => {
-        unique.add(a.id); b.disabled = true; b.textContent = `${a.name}: jedinečné heslo nastavené`;
-        setStatus(a.id, 'Jedinečné heslo', 'unique');
+        unique.add(a.id);
+        b.disabled = true;
+        b.textContent = t('reuse.set_done', { name: a.name });
+        setStatus(a.id, t('reuse.unique'), 'unique');
         sim2.disabled = unique.size < round.accounts.length;
-      } }, `Nastaviť jedinečné heslo: ${a.name}`);
+      } }, t('reuse.set', { name: a.name }));
       return b;
     });
-    const sim2 = h('button', { type: 'button', class: 'btn btn-danger btn-lg', disabled: true, onclick: leak2 }, icon('warning', 22), ' Simulovať únik znova');
     out.append(h('div', { class: 'row-gap' }, setBtns), sim2);
   }
 
   function leak2(e) {
     e.currentTarget.disabled = true;
     round.accounts.forEach((a) => {
-      if (a.id === round.leakFrom) setStatus(a.id, 'Uniklo len toto heslo', 'leaked');
-      else setStatus(a.id, 'V bezpečí (iné heslo)', 'safe');
+      if (a.id === round.leakFrom) setStatus(a.id, t('reuse.leaked_only'), 'leaked');
+      else setStatus(a.id, t('reuse.safe'), 'safe');
     });
-    out.append(h('p', { class: 'ok-text' }, icon('check', 22), ' Teraz uniklo iba jedno heslo. Školský e-mail a ďalšia služba zostali v bezpečí.'));
-    const explain = [
-      { ok: predicted.correct, text: predicted.why },
-      { ok: true, text: 'V simulácii si videl, že rovnaké heslo vedie k ohrozeniu viacerých účtov, kým jedinečné heslá škodu obmedzia na jednu službu.' },
-    ];
-    ctx.submit({ correct: predicted.correct, explain });
+    out.append(h('p', { class: 'ok-text' }, icon('check', 22), ' ', t('reuse.safe_text')));
+    ctx.submit({ correct: !!predicted.correct, explain: [{ ok: !!predicted.correct, text: predicted.why }, { ok: true, text: t('reuse.explain') }] });
   }
 
   return { el: h('div', null, h('p', { class: 'lead' }, round.question), optList, accWrap, out) };
@@ -363,34 +353,33 @@ function renderReuse(round, ctx) {
 
 function renderLab(round, ctx) {
   const goalList = h('ul', { class: 'goal-list' });
-  const lab = createLab({
-    profile: round.profile,
-    onResult: (r, value) => updateGoals(r, value),
-  });
+  const note = h('p', { class: 'muted', role: 'status' });
+  const lab = createLab({ profile: round.profile, onResult: (r, value) => updateGoals(r, value) });
   ctx.onCleanup(() => lab.destroy());
-  const check = checkButton('Skontrolovať úlohu', evaluate);
+  const check = checkButton(t('btn.check_task'), evaluate);
 
   function updateGoals(r, value) {
     clear(goalList);
+    note.textContent = '';
     const g = round.goal;
     const res = checkGoal(r, g, value);
     const item = (ok, text) => goalList.append(h('li', { class: ok ? 'ok' : '' }, icon(ok ? 'check' : 'flag', 20), ' ', text));
-    if (g.minLen) item(r.length >= g.minLen, `Aspoň ${g.minLen} znakov`);
-    if (g.noIssues) item(value.length > 0 && res.unmet.filter((u) => !u.startsWith('Fráza má mať')).length === 0 && !!value, 'Laboratórium nenašlo žiadny problémový vzor');
+    if (g.minLen) item(r.length >= g.minLen, t('lab.goal_len', { n: g.minLen }));
+    if (g.noIssues) item(!!value && !res.unmet.some((u) => u.id !== 'len'), t('lab.goal_clean'));
   }
 
   function evaluate() {
     const value = lab.getValue();
+    if (!value) { note.textContent = t('lab.enter_first'); return; }
     const res = checkGoal(lab.getAnalysis(), round.goal, value);
-    if (!value) { goalList.after(h('p', { class: 'muted', role: 'status' }, 'Najprv zadaj ukážkovú frázu.')); return; }
     check.hidden = true;
     const explain = res.ok
-      ? [{ ok: true, text: 'Splnil si všetky ciele. Pripomíname, že aj vtedy nejde o záruku bezpečnosti a vymyslenú ukážku nepoužívaj ako skutočné heslo.' }]
-      : [{ ok: false, text: 'Cieľ ešte nie je splnený:' }, ...res.unmet.map((u) => ({ ok: false, text: u }))];
+      ? [{ ok: true, text: t('lab.goal_ok') }]
+      : [{ ok: false, text: t('lab.goal_todo') }, ...res.unmet.map((u) => ({ ok: false, text: u.text }))];
     ctx.submit({ correct: res.ok, explain });
   }
   lab.goalBox.hidden = false;
-  lab.goalBox.append(h('strong', null, 'Cieľ úlohy'), goalList);
+  lab.goalBox.append(h('strong', null, t('lab.goal_title')), goalList, note);
   updateGoals(lab.getAnalysis(), '');
   return { el: h('div', null, round.hint ? h('p', { class: 'hint' }, icon('bulb', 22), ' ', round.hint) : null, lab.el, h('div', { class: 'actions' }, check)) };
 }
@@ -410,7 +399,7 @@ const RENDERERS = {
 export function mountTask(root, taskId) {
   const task = getTask(taskId);
   if (!task) {
-    root.append(h('div', { class: 'card' }, h('h1', null, 'Misia sa nenašla'), h('a', { class: 'btn btn-primary', href: '#/levels' }, 'Späť na výber úrovne')));
+    root.append(h('div', { class: 'card' }, h('h1', null, t('task.not_found')), h('a', { class: 'btn btn-primary', href: '#/levels' }, t('levels.back'))));
     return () => {};
   }
   const level = getLevel(task.level);
@@ -425,12 +414,11 @@ export function mountTask(root, taskId) {
   function header(showProgress) {
     const total = run ? run.queue.length : 0;
     const head = h('header', { class: 'task-head' },
-      h('a', { class: 'btn btn-ghost', href: `#/level/${level.id}` }, icon('back', 22), ' Späť na úroveň'),
+      h('a', { class: 'btn btn-ghost', href: `#/level/${level.id}` }, icon('back', 22), ' ', t('summary.back')),
       h('div', { class: 'task-title' }, icon(task.icon, 28), h('span', null, task.title)));
     if (showProgress && run) {
-      const value = run.pos;
-      head.append(h('div', { class: 'progress', role: 'progressbar', 'aria-label': 'Postup v misii', 'aria-valuemin': '0', 'aria-valuemax': String(total), 'aria-valuenow': String(value) },
-        h('span', { class: 'progress-fill', style: `width:${pct(value, total)}%` })));
+      head.append(h('div', { class: 'progress', role: 'progressbar', 'aria-label': t('task.progress_bar'), 'aria-valuemin': '0', 'aria-valuemax': String(total), 'aria-valuenow': String(run.pos) },
+        h('span', { class: 'progress-fill', style: `width:${pct(run.pos, total)}%` })));
     }
     if (task.timer && !store.getState().settings.hideTimer) head.append(timerChip());
     return head;
@@ -445,55 +433,15 @@ export function mountTask(root, taskId) {
     tick();
     if (timerId) clearInterval(timerId);
     timerId = setInterval(tick, 1000);
-    return h('div', { class: 'chip timer-chip' }, icon('clock', 18), txt,
-      h('span', { class: 'small' }, 'Čas je len informácia, nič sa za neho neodpočítava.'),
-      h('button', { type: 'button', class: 'btn btn-ghost btn-sm', onclick: () => { store.setSetting('hideTimer', true); clearInterval(timerId); timerId = null; head2remove(); } }, 'Skryť'));
-  }
-  function head2remove() { const c = shell.querySelector('.timer-chip'); if (c) c.remove(); }
-
-  function showIntro() {
-    runCleanup();
-    clear(shell);
-    const st = store.getState();
-    const t = store.getTask(taskId);
-    const resume = st.resume && st.resume.taskId === taskId && st.resume.queue.every((i) => i < task.rounds.length) ? st.resume : null;
-    const unmastered = task.rounds.map((_, i) => i).filter((i) => !t.mastered[i]);
-    const actions = h('div', { class: 'actions' });
-    if (resume) {
-      actions.append(
-        h('button', { type: 'button', class: 'btn btn-primary btn-lg', onclick: () => { run = resume; showRound(); } }, icon('play', 22), ` Pokračovať (úloha ${Math.min(resume.pos + 1, resume.queue.length)} z ${resume.queue.length})`),
-        h('button', { type: 'button', class: 'btn btn-secondary btn-lg', onclick: () => startRun('all') }, icon('repeat', 22), ' Začať odznova'));
-    } else if (t.done) {
-      actions.append(h('button', { type: 'button', class: 'btn btn-primary btn-lg', onclick: () => startRun('all') }, icon('repeat', 22), ' Zopakovať celú misiu'));
-    } else if (unmastered.length < task.rounds.length && unmastered.length > 0) {
-      actions.append(
-        h('button', { type: 'button', class: 'btn btn-primary btn-lg', onclick: () => startRun('unmastered') }, icon('repeat', 22), ` Zopakovať nezvládnuté (${unmastered.length})`),
-        h('button', { type: 'button', class: 'btn btn-secondary btn-lg', onclick: () => startRun('all') }, 'Hrať celú misiu od začiatku'));
-    } else {
-      actions.append(h('button', { type: 'button', class: 'btn btn-primary btn-lg', onclick: () => startRun('all') }, icon('play', 22), ' Začať misiu'));
-    }
-    shell.append(header(false), h('section', { class: 'card intro-card' },
-      bot('happy', 120),
-      h('div', { class: 'intro-body' },
-        h('p', { class: 'eyebrow' }, `Úroveň ${level.id} · ${level.name} · Misia ${task.order}`),
-        h('h1', { id: 'task-h1', tabindex: '-1' }, task.title),
-        task.intro.map((p) => h('p', { class: 'lead' }, rich(p))),
-        h('div', { class: 'chips' },
-          h('span', { class: 'chip' }, icon('list', 18), ` ${task.rounds.length} ${task.rounds.length < 5 ? 'úlohy' : 'úloh'}`),
-          h('span', { class: 'chip' }, icon('clock', 18), ` približne ${task.minutes} min`),
-          h('span', { class: 'chip' }, icon('book', 18), ` ${TOPICS[task.topic]}`),
-          task.badge ? h('span', { class: 'chip chip-badge' }, icon(BADGES[task.badge].icon, 18), ` Odznak: ${BADGES[task.badge].name}`) : null),
-        h('p', { class: 'muted' }, 'Za chyby ti nič neubúda. Nesprávne odpovede si po vysvetlení zopakuješ.'),
-        actions)));
-    focusHeading('#task-h1');
-  }
-
-  function startRun(mode) {
-    const t = store.getTask(taskId);
-    const idxs = task.rounds.map((_, i) => i).filter((i) => mode === 'all' || !t.mastered[i]);
-    run = { taskId, mode, phase: 'main', queue: idxs, mainCount: idxs.length, pos: 0, wrong: [], firstTry: {}, streak: 0, earned: 0, started: Date.now() };
-    store.setResume(run);
-    showRound();
+    const chip = h('div', { class: 'chip timer-chip' }, icon('clock', 18), txt,
+      h('span', { class: 'small' }, t('timer.note')),
+      h('button', { type: 'button', class: 'btn btn-ghost btn-sm', onclick: () => {
+        store.setSetting('hideTimer', true);
+        clearInterval(timerId);
+        timerId = null;
+        chip.remove();
+      } }, t('timer.hide')));
+    return chip;
   }
 
   function focusHeading(sel) {
@@ -501,14 +449,59 @@ export function mountTask(root, taskId) {
     if (el) el.focus({ preventScroll: false });
   }
 
+  function showIntro() {
+    runCleanup();
+    clear(shell);
+    const st = store.getState();
+    const saved = store.getTask(taskId);
+    const resume = st.resume && st.resume.taskId === taskId && st.resume.queue.every((i) => i < task.rounds.length) ? st.resume : null;
+    const unmastered = task.rounds.map((_, i) => i).filter((i) => !saved.mastered[i]);
+    const actions = h('div', { class: 'actions' });
+    const btn = (cls, ic, label, fn) => h('button', { type: 'button', class: `btn ${cls} btn-lg`, onclick: fn }, ic ? icon(ic, 22) : null, ic ? ' ' : null, label);
+    if (resume) {
+      actions.append(
+        btn('btn-primary', 'play', t('task.continue', { n: Math.min(resume.pos + 1, resume.queue.length), total: resume.queue.length }), () => { run = resume; showRound(); }),
+        btn('btn-secondary', 'repeat', t('task.restart'), () => startRun('all')));
+    } else if (saved.done) {
+      actions.append(btn('btn-primary', 'repeat', t('task.replay_all'), () => startRun('all')));
+    } else if (unmastered.length > 0 && unmastered.length < task.rounds.length) {
+      actions.append(
+        btn('btn-primary', 'repeat', t('task.retry_n', { n: unmastered.length }), () => startRun('unmastered')),
+        btn('btn-secondary', null, t('task.play_all'), () => startRun('all')));
+    } else {
+      actions.append(btn('btn-primary', 'play', t('task.start'), () => startRun('all')));
+    }
+    const b = task.badge ? badge(task.badge) : null;
+    shell.append(header(false), h('section', { class: 'card intro-card' },
+      bot('happy', 120),
+      h('div', { class: 'intro-body' },
+        h('p', { class: 'eyebrow' }, t('task.intro_eyebrow', { id: level.id, name: level.name, n: task.order })),
+        h('h1', { id: 'task-h1', tabindex: '-1' }, task.title),
+        task.intro.map((p) => h('p', { class: 'lead' }, rich(p))),
+        h('div', { class: 'chips' },
+          h('span', { class: 'chip' }, icon('list', 18), ' ', t('task.n_tasks', { n: task.rounds.length })),
+          h('span', { class: 'chip' }, icon('clock', 18), ' ', t('task.minutes', { n: task.minutes })),
+          h('span', { class: 'chip' }, icon('book', 18), ' ', topicLabel(task.topic)),
+          b ? h('span', { class: 'chip chip-badge' }, icon(b.icon, 18), ' ', t('task.badge', { name: b.name })) : null),
+        h('p', { class: 'muted' }, t('task.no_penalty')),
+        actions)));
+    focusHeading('#task-h1');
+  }
+
+  function startRun(mode) {
+    const saved = store.getTask(taskId);
+    const idxs = task.rounds.map((_, i) => i).filter((i) => mode === 'all' || !saved.mastered[i]);
+    run = { taskId, mode, phase: 'main', queue: idxs, mainCount: idxs.length, pos: 0, wrong: [], firstTry: {}, streak: 0, earned: 0, started: Date.now() };
+    store.setResume(run);
+    showRound();
+  }
+
   function showRound() {
     runCleanup();
     clear(shell);
     const idx = run.queue[run.pos];
     const round = task.rounds[idx];
-    const total = run.queue.length;
     let submitted = false;
-
     const feedback = h('div', { class: 'feedback' });
     const ctx = {
       round,
@@ -519,8 +512,8 @@ export function mountTask(root, taskId) {
 
     const card = h('section', { class: 'card round-card', 'aria-labelledby': 'round-title' },
       h('div', { class: 'round-meta' },
-        h('span', { class: 'chip' }, `${run.phase === 'retry' ? 'Opakovanie · ' : ''}Úloha ${run.pos + 1} z ${total}`),
-        h('span', { class: 'chip' }, TOPICS[round.topic] || round.topic)),
+        h('span', { class: 'chip' }, t('round.counter', { retry: run.phase === 'retry', n: run.pos + 1, total: run.queue.length })),
+        h('span', { class: 'chip' }, topicLabel(round.topic))),
       round.scenario ? h('p', { class: 'scenario' }, icon('info', 22), ' ', round.scenario) : null,
       h('h1', { id: 'round-title', class: 'round-prompt', tabindex: '-1' }, round.prompt),
       round.mock && round.type !== 'hotspot' ? renderMock(round.mock).el : null,
@@ -534,8 +527,7 @@ export function mountTask(root, taskId) {
   function handleResult(round, idx, res, feedback) {
     let gained = 0;
     let streakBonus = 0;
-    const t = store.getTask(taskId);
-    const mastered = { ...t.mastered };
+    const mastered = { ...store.getTask(taskId).mastered };
     if (run.phase === 'main') {
       store.recordRound(round.id, round.topic, res.correct);
       run.firstTry[idx] = res.correct;
@@ -558,24 +550,24 @@ export function mountTask(root, taskId) {
     const retry = run.phase === 'retry';
     const last = run.pos + 1 >= run.queue.length;
     const willRepeat = run.phase === 'main' && last && run.wrong.length > 0;
-    const nextLabel = last ? (willRepeat ? 'Zopakovať nesprávne' : 'Dokončiť misiu') : 'Ďalej';
+    const nextLabel = last ? (willRepeat ? t('btn.retry_wrong') : t('btn.finish')) : t('btn.next');
     const nextBtn = h('button', { type: 'button', class: 'btn btn-primary btn-lg', onclick: () => next() }, nextLabel, ' ', icon('forward', 22));
 
     clear(feedback);
     feedback.append(h('div', { class: 'fb ' + (res.correct ? 'fb-ok' : 'fb-bad'), role: 'status' },
       bot(res.correct ? 'cheer' : 'oops', 84),
       h('div', { class: 'fb-body' },
-        h('h2', { class: 'fb-title' }, icon(res.correct ? 'check' : 'bulb', 28), res.correct ? ' Správne!' : retry ? ' Pozri správne riešenie' : ' Ešte nie, pozrime sa prečo'),
+        h('h2', { class: 'fb-title' }, icon(res.correct ? 'check' : 'bulb', 28), ' ', res.correct ? t('fb.correct') : retry ? t('fb.retry_solution') : t('fb.not_yet')),
         h('div', { class: 'chips' },
-          gained > 0 ? h('span', { class: 'chip chip-xp' }, icon('star', 18), ` +${gained} XP`) : null,
-          streakBonus > 0 ? h('span', { class: 'chip chip-xp' }, icon('trophy', 18), ` Séria! +${streakBonus} XP`) : null,
-          res.correct && gained === 0 ? h('span', { class: 'chip' }, 'Body za túto úlohu už máš') : null),
+          gained > 0 ? h('span', { class: 'chip chip-xp' }, icon('star', 18), ' ', t('fb.xp', { n: gained })) : null,
+          streakBonus > 0 ? h('span', { class: 'chip chip-xp' }, icon('trophy', 18), ' ', t('fb.streak', { n: streakBonus })) : null,
+          res.correct && gained === 0 ? h('span', { class: 'chip' }, t('fb.already')) : null),
         h('ul', { class: 'explain' }, res.explain.map((e) => h('li', { class: e.ok === true ? 'ok' : e.ok === false ? 'bad' : '' },
           icon(e.ok === true ? 'check' : e.ok === false ? 'x' : 'info', 20), h('span', null, rich(e.text))))),
-        round.summary ? h('p', { class: 'summary' }, icon('bulb', 22), h('span', null, h('strong', null, 'Zapamätaj si: '), round.summary)) : null,
-        !res.correct && !retry ? h('p', { class: 'muted' }, 'Túto úlohu si na konci misie zopakujeme, aby si to zvládol.') : null,
+        round.summary ? h('p', { class: 'summary' }, icon('bulb', 22), h('span', null, h('strong', null, t('fb.remember')), round.summary)) : null,
+        !res.correct && !retry ? h('p', { class: 'muted' }, t('fb.will_repeat')) : null,
         h('div', { class: 'actions' }, nextBtn))));
-    announce(res.correct ? 'Správne.' : 'Odpoveď nie je správna. Prečítaj si vysvetlenie.');
+    announce(res.correct ? t('fb.announce_ok') : t('fb.announce_bad'));
     nextBtn.focus({ preventScroll: true });
     nextBtn.scrollIntoView({ block: 'nearest', behavior: 'auto' });
   }
@@ -594,26 +586,27 @@ export function mountTask(root, taskId) {
   function showInterlude() {
     runCleanup();
     clear(shell);
-    const n = run.wrong.length;
-    store.setResume({ ...run, pos: run.queue.length });
+    run.phase = 'retry';
+    run.queue = [...run.wrong];
+    run.wrong = [];
+    run.pos = 0;
+    store.setResume(run);
     shell.append(header(false), h('section', { class: 'card intro-card' },
       bot('think', 120),
       h('div', { class: 'intro-body' },
-        h('h1', { id: 'inter-h1', tabindex: '-1' }, 'Zopakujeme si to'),
-        h('p', { class: 'lead' }, `${n} ${n === 1 ? 'úloha sa nepodarila' : n < 5 ? 'úlohy sa nepodarili' : 'úloh sa nepodarilo'} na prvý pokus. To je v poriadku, učíme sa. Skús ich ešte raz, teraz už s vysvetlením.`),
-        h('p', { class: 'muted' }, 'Za zvládnutie po vysvetlení dostaneš 50 XP.'),
-        h('div', { class: 'actions' }, h('button', { type: 'button', class: 'btn btn-primary btn-lg', onclick: () => {
-          run.phase = 'retry'; run.queue = [...run.wrong]; run.wrong = []; run.pos = 0; store.setResume(run); showRound();
-        } }, icon('repeat', 22), ' Zopakovať')))));
+        h('h1', { id: 'inter-h1', tabindex: '-1' }, t('inter.title')),
+        h('p', { class: 'lead' }, t('inter.text', { n: run.queue.length })),
+        h('p', { class: 'muted' }, t('inter.xp')),
+        h('div', { class: 'actions' }, h('button', { type: 'button', class: 'btn btn-primary btn-lg', onclick: () => showRound() }, icon('repeat', 22), ' ', t('inter.go'))))));
     focusHeading('#inter-h1');
   }
 
   function finish() {
-    const t = store.getTask(taskId);
-    const allMastered = task.rounds.every((_, i) => t.mastered[i]);
+    const saved = store.getTask(taskId);
+    const allMastered = task.rounds.every((_, i) => saved.mastered[i]);
     const newBadges = [];
     let levelDone = false;
-    store.setTask(taskId, { plays: (t.plays || 0) + 1, done: allMastered });
+    store.setTask(taskId, { plays: (saved.plays || 0) + 1, done: allMastered });
     if (allMastered) {
       run.earned += store.awardXp(`${taskId}:done`, 200);
       if (task.badge && store.addBadge(task.badge)) newBadges.push(task.badge);
@@ -631,10 +624,10 @@ export function mountTask(root, taskId) {
     runCleanup();
     clear(shell);
     if (timerId) { clearInterval(timerId); timerId = null; }
-    const t = store.getTask(taskId);
-    const left = task.rounds.map((_, i) => i).filter((i) => !t.mastered[i]);
+    const saved = store.getTask(taskId);
+    const left = task.rounds.map((_, i) => i).filter((i) => !saved.mastered[i]);
     const firstOk = Object.values(run.firstTry).filter(Boolean).length;
-    const next = level.tasks[task.order];
+    const nextTask = level.tasks[task.order];
     const planLines = allMastered && task.planTitle
       ? task.rounds.flatMap((r) => (r.type === 'rows' && r.rows.every((x) => x.options) ? r.rows.map((x) => x.plan) : []))
       : [];
@@ -642,29 +635,30 @@ export function mountTask(root, taskId) {
     shell.append(header(false), h('section', { class: 'card summary-card' },
       bot(allMastered ? 'cheer' : 'think', 120),
       h('div', { class: 'intro-body' },
-        h('h1', { id: 'sum-h1', tabindex: '-1' }, allMastered ? 'Misia splnená!' : 'Skoro tam!'),
-        h('p', { class: 'lead' }, allMastered
-          ? 'Zvládol si všetky úlohy tejto misie.'
-          : `Zostáva zopakovať ${left.length} ${left.length === 1 ? 'úlohu' : left.length < 5 ? 'úlohy' : 'úloh'}. Skús to znova, stále sa dá všetko zvládnuť.`),
+        h('h1', { id: 'sum-h1', tabindex: '-1' }, allMastered ? t('sum.done') : t('sum.almost')),
+        h('p', { class: 'lead' }, allMastered ? t('sum.done_lead') : t('sum.left', { n: left.length })),
         h('div', { class: 'stats' },
-          h('div', { class: 'stat' }, h('strong', null, `+${run.earned} XP`), h('span', null, 'získané v tejto misii')),
-          h('div', { class: 'stat' }, h('strong', null, `${firstOk} / ${run.mainCount}`), h('span', null, 'správne na prvý pokus')),
-          h('div', { class: 'stat' }, h('strong', null, `${task.rounds.length - left.length} / ${task.rounds.length}`), h('span', null, 'zvládnuté úlohy'))),
-        newBadges.map((id) => h('div', { class: 'badge-card new', role: 'status' }, icon(BADGES[id].icon, 40), h('div', null, h('strong', null, `Nový odznak: ${BADGES[id].name}`), h('span', null, BADGES[id].desc)))),
-        levelDone ? h('p', { class: 'ok-text' }, icon('trophy', 22), ` Dokončil si celú úroveň ${level.name}! Pozri si záverečné hodnotenie.`) : null,
+          h('div', { class: 'stat' }, h('strong', null, t('fb.xp', { n: run.earned })), h('span', null, t('sum.xp_label'))),
+          h('div', { class: 'stat' }, h('strong', null, `${firstOk} / ${run.mainCount}`), h('span', null, t('stat.first_try'))),
+          h('div', { class: 'stat' }, h('strong', null, `${task.rounds.length - left.length} / ${task.rounds.length}`), h('span', null, t('sum.mastered_label')))),
+        newBadges.map((id) => {
+          const b = badge(id);
+          return h('div', { class: 'badge-card new', role: 'status' }, icon(b.icon, 40), h('div', null, h('strong', null, t('sum.new_badge', { name: b.name })), h('span', null, b.desc)));
+        }),
+        levelDone ? h('p', { class: 'ok-text' }, icon('trophy', 22), ' ', t('sum.level_done', { name: level.name })) : null,
         h('div', { class: 'actions' },
-          left.length ? h('button', { type: 'button', class: 'btn btn-primary btn-lg', onclick: () => startRun('unmastered') }, icon('repeat', 22), ' Zopakovať nesprávne') : null,
-          levelDone ? h('a', { class: 'btn btn-primary btn-lg', href: `#/level/${level.id}/summary` }, icon('trophy', 22), ' Záverečné hodnotenie') : null,
-          allMastered && next ? h('a', { class: 'btn btn-primary btn-lg', href: `#/task/${next.id}` }, 'Ďalšia misia ', icon('forward', 22)) : null,
-          h('button', { type: 'button', class: 'btn btn-secondary btn-lg', onclick: () => startRun('all') }, icon('repeat', 22), ' Hrať znova celé'),
-          h('a', { class: 'btn btn-ghost btn-lg', href: `#/level/${level.id}` }, 'Späť na úroveň')))));
+          left.length ? h('button', { type: 'button', class: 'btn btn-primary btn-lg', onclick: () => startRun('unmastered') }, icon('repeat', 22), ' ', t('btn.retry_wrong')) : null,
+          levelDone ? h('a', { class: 'btn btn-primary btn-lg', href: `#/level/${level.id}/summary` }, icon('trophy', 22), ' ', t('final.title')) : null,
+          allMastered && nextTask ? h('a', { class: 'btn btn-primary btn-lg', href: `#/task/${nextTask.id}` }, t('sum.next_mission'), ' ', icon('forward', 22)) : null,
+          h('button', { type: 'button', class: 'btn btn-secondary btn-lg', onclick: () => startRun('all') }, icon('repeat', 22), ' ', t('sum.replay')),
+          h('a', { class: 'btn btn-ghost btn-lg', href: `#/level/${level.id}` }, t('summary.back'))))));
     if (planLines.length) {
-      const printBtn = h('button', { type: 'button', class: 'btn btn-secondary', onclick: () => {
+      const printBtn = embedded() ? null : h('button', { type: 'button', class: 'btn btn-secondary', onclick: () => {
         document.body.classList.add('print-mode');
         window.addEventListener('afterprint', () => document.body.classList.remove('print-mode'), { once: true });
         window.print();
-      } }, icon('print', 22), ' Vytlačiť plán');
-      shell.append(h('section', { class: 'card printable' }, h('h2', null, task.planTitle), h('ol', { class: 'plan-final' }, planLines.map((l) => h('li', null, l))), embedded() ? null : printBtn));
+      } }, icon('print', 22), ' ', t('plan.print'));
+      shell.append(h('section', { class: 'card printable' }, h('h2', null, task.planTitle), h('ol', { class: 'plan-final' }, planLines.map((l) => h('li', null, l))), printBtn));
     }
     focusHeading('#sum-h1');
     window.scrollTo({ top: 0 });
@@ -682,7 +676,8 @@ export function renderPresentation(round, reveal) {
   if (round.scenario) wrap.append(h('p', { class: 'scenario' }, icon('info', 28), ' ', round.scenario));
   if (round.mock && round.type !== 'hotspot') wrap.append(renderMock(round.mock).el);
 
-  if (round.type === 'choice' || round.type === 'multi') {
+  if (round.type === 'choice' || round.type === 'multi' || round.type === 'reuse') {
+    if (round.type === 'reuse') wrap.append(h('p', { class: 'lead' }, round.question));
     wrap.append(h('ul', { class: 'present-options' }, round.options.map((o, i) => h('li', { class: reveal && o.correct ? 'is-correct' : '' },
       h('span', { class: 'letter' }, letters[i]), h('span', null, o.text),
       reveal ? h('span', { class: 'why' }, (o.correct ? '✓ ' : '✗ ') + o.why) : null))));
@@ -690,36 +685,33 @@ export function renderPresentation(round, reveal) {
     wrap.append(h('ul', { class: 'present-options' }, round.rows.map((r) => {
       const own = !!r.options;
       const good = own ? r.options.find((o) => o.correct).text : round.categories.find((c) => c.id === r.answer).label;
-      return h('li', { class: reveal ? 'is-correct' : '' }, h('span', null, r.text),
-        reveal ? h('span', { class: 'why' }, '→ ' + good + (own ? '' : '. ' + r.why)) : own ? h('span', { class: 'why' }, r.options.map((o) => o.text).join(' / ')) : null);
+      let extra = null;
+      if (reveal) extra = h('span', { class: 'why' }, '→ ' + good + (own ? '' : '. ' + r.why));
+      else if (own) extra = h('span', { class: 'why' }, r.options.map((o) => o.text).join(' / '));
+      return h('li', { class: reveal ? 'is-correct' : '' }, h('span', null, r.text), extra);
     })));
-    if (round.categories) wrap.append(h('p', { class: 'muted' }, 'Kategórie: ' + round.categories.map((c) => c.label).join(' · ')));
+    if (round.categories) wrap.append(h('p', { class: 'muted' }, t('present.categories') + round.categories.map((c) => c.label).join(' · ')));
   } else if (round.type === 'hotspot') {
     wrap.append(renderMock(round.mock, { reveal }).el);
     if (reveal) {
       const items = [];
       const walk = (p) => { if (p && typeof p === 'object' && p.pick && p.flag) items.push(p); };
-      walk(round.mock.from); walk(round.mock.subject);
+      walk(round.mock.from);
+      walk(round.mock.subject);
       round.mock.paragraphs.forEach((para) => para.forEach(walk));
       wrap.append(items.length
-        ? h('ul', { class: 'explain' }, items.map((p) => h('li', { class: 'ok' }, icon('flag', 20), h('span', null, `„${p.text}“ – ${p.why}`))))
-        : h('p', { class: 'ok-text' }, icon('check', 22), ' Táto správa je v poriadku, nič v nej nie je podozrivé.'));
+        ? h('ul', { class: 'explain' }, items.map((p) => h('li', { class: 'ok' }, icon('flag', 20), h('span', null, t('explain.picked_ok', { text: p.text, why: p.why })))))
+        : h('p', { class: 'ok-text' }, icon('check', 22), ' ', t('present.legit')));
     }
   } else if (round.type === 'order') {
-    const list = reveal
-      ? round.items.filter((i) => i.tier != null).sort((a, b) => a.tier - b.tier)
-      : round.items;
+    const list = reveal ? round.items.filter((i) => i.tier != null).sort((a, b) => a.tier - b.tier) : round.items;
     wrap.append(h('ol', { class: 'present-options' }, list.map((i) => h('li', { class: reveal ? 'is-correct' : '' }, h('span', null, i.text), reveal ? h('span', { class: 'why' }, i.why) : null))));
-    if (reveal) wrap.append(h('p', { class: 'muted' }, 'Ďalšie kroky v ponuke do plánu nepatria: ' + round.items.filter((i) => i.tier == null).map((i) => i.text).join(' | ')));
-  } else if (round.type === 'reuse') {
-    wrap.append(h('p', { class: 'lead' }, round.question));
-    wrap.append(h('ul', { class: 'present-options' }, round.options.map((o, i) => h('li', { class: reveal && o.correct ? 'is-correct' : '' },
-      h('span', { class: 'letter' }, letters[i]), h('span', null, o.text), reveal ? h('span', { class: 'why' }, o.why) : null))));
+    if (reveal) wrap.append(h('p', { class: 'muted' }, t('present.not_in_plan') + round.items.filter((i) => i.tier == null).map((i) => i.text).join(' | ')));
   } else if (round.type === 'lab') {
     wrap.append(h('p', { class: 'lead' }, round.hint || ''));
     if (round.profile) wrap.append(h('p', null, Object.entries(round.profile).map(([k, v]) => `${k}: ${v}`).join(' · ')));
-    wrap.append(h('p', { class: 'muted' }, reveal ? 'Riešenie nie je jedno. Skúste spoločne v Password Lab vymyslieť ukážkovú frázu a rozobrať výsledok.' : 'Úloha sa rieši v Password Lab.'));
+    wrap.append(h('p', { class: 'muted' }, reveal ? t('present.lab_reveal') : t('present.lab')));
   }
-  if (reveal && round.summary) wrap.append(h('p', { class: 'summary' }, icon('bulb', 24), h('span', null, h('strong', null, 'Zhrnutie: '), round.summary)));
+  if (reveal && round.summary) wrap.append(h('p', { class: 'summary' }, icon('bulb', 24), h('span', null, h('strong', null, t('present.summary')), round.summary)));
   return wrap;
 }

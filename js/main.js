@@ -1,7 +1,9 @@
-// Vstupný bod: hash router (späť/dopredu a obnovenie stránky fungujú), navigácia a registrácia offline režimu.
-import { h, clear } from './util.js';
+// Vstupný bod: hash router (späť/dopredu a obnovenie stránky fungujú), navigácia, prepínač jazyka a offline režim.
+import { h, clear, append } from './util.js';
 import { icon } from './icons.js';
 import * as store from './store.js';
+import { t, getLang, setLang, LANGS } from './i18n.js';
+import { FEATURES } from './config.js';
 import * as views from './views.js';
 import { mountTask } from './engine.js';
 import { renderLabPage } from './lab.js';
@@ -9,28 +11,53 @@ import { renderTeacher, renderPresent, handleJoin } from './teacher.js';
 
 const app = document.getElementById('app');
 const navHost = document.getElementById('nav');
+const footer = document.getElementById('footer');
+const skip = document.querySelector('.skip-link');
 let cleanup = null;
 
 const NAV = [
-  ['levels', 'Misie', 'shield'],
-  ['lab', 'Password Lab', 'search'],
-  ['progress', 'Môj postup', 'star'],
-  ['teacher', 'Učiteľský režim', 'users'],
+  ['levels', 'nav.missions', 'shield'],
+  ['lab', 'nav.lab', 'search'],
+  ['progress', 'nav.progress', 'star'],
+  ...(FEATURES.teacher ? [['teacher', 'nav.teacher', 'users']] : []),
 ];
 
-function drawNav(active) {
+const xpChip = () => h('span', { class: 'chip chip-xp xp-chip', 'aria-label': t('xp.aria', { n: store.getState().xp }) }, icon('star', 18), ' ', t('xp.chip', { n: store.getState().xp }));
+
+function langSwitch() {
+  return h('div', { class: 'lang-switch', role: 'group', 'aria-label': t('lang.label') },
+    LANGS.map((l) => h('button', {
+      type: 'button',
+      class: 'lang-btn',
+      lang: l.id,
+      'aria-label': l.name,
+      'aria-pressed': String(l.id === getLang()),
+      onclick: () => {
+        if (l.id === getLang()) return;
+        setLang(l.id);
+        render();
+        const again = navHost.querySelector(`.lang-btn[lang="${l.id}"]`);
+        if (again) again.focus();
+      },
+    }, l.short)));
+}
+
+function drawChrome(active) {
   clear(navHost);
-  const xp = h('span', { class: 'chip chip-xp xp-chip', 'aria-label': `Získané body: ${store.getState().xp}` }, icon('star', 18), ` ${store.getState().xp} XP`);
-  navHost.append(
-    h('a', { class: 'brand', href: '#/', 'aria-label': 'Password Quest, úvodná obrazovka' }, icon('shield-check', 30), h('span', null, 'PASSWORD QUEST')),
-    h('nav', { 'aria-label': 'Hlavná navigácia' }, h('ul', null, NAV.map(([id, label, ic]) => h('li', null,
-      h('a', { href: `#/${id}`, 'aria-label': label, 'aria-current': active === id ? 'page' : null }, icon(ic, 20), h('span', { class: 'nav-label' }, label)))))),
-    xp);
+  append(navHost,
+    h('a', { class: 'brand', href: '#/', 'aria-label': t('nav.home_aria') }, icon('shield-check', 30), h('span', null, 'PASSWORD QUEST')),
+    h('nav', { 'aria-label': t('nav.aria') }, h('ul', null, NAV.map(([id, key, ic]) => h('li', null,
+      h('a', { href: `#/${id}`, 'aria-label': t(key), 'aria-current': active === id ? 'page' : null }, icon(ic, 20), h('span', { class: 'nav-label' }, t(key))))))),
+    h('div', { class: 'topbar-end' }, xpChip(), langSwitch()));
+  if (footer) { clear(footer); footer.append(h('p', null, t('footer.text'))); }
+  if (skip) skip.textContent = t('skip');
+  document.documentElement.lang = getLang();
+  document.title = t('doc.title');
 }
 
 store.subscribe(() => {
   const chip = navHost.querySelector('.xp-chip');
-  if (chip) { clear(chip); chip.append(icon('star', 18), ` ${store.getState().xp} XP`); chip.setAttribute('aria-label', `Získané body: ${store.getState().xp}`); }
+  if (chip) chip.replaceWith(xpChip());
 });
 
 function render() {
@@ -39,25 +66,29 @@ function render() {
   clear(app);
   const parts = (location.hash.replace(/^#/, '') || '/').split('/').filter(Boolean);
   const [a, b, c] = parts;
+  const teacherRoute = ['teacher', 'present', 'join'].includes(a);
   let result;
-  switch (a) {
-    case undefined: result = views.home(app); break;
-    case 'levels': result = views.levels(app); break;
-    case 'level': result = c === 'summary' ? views.levelSummary(app, b) : views.level(app, b, c === 'all'); break;
-    case 'task': result = mountTask(app, b); break;
-    case 'lab': result = renderLabPage(app); break;
-    case 'howto': result = views.howto(app); break;
-    case 'learn': result = views.learn(app); break;
-    case 'progress': result = views.progress(app); break;
-    case 'certificate': result = views.certificate(app, b); break;
-    case 'teacher': result = renderTeacher(app); break;
-    case 'present': result = renderPresent(app, b); break;
-    case 'join': location.replace(handleJoin(parts)); return;
-    default: result = views.notFound(app);
+  if (teacherRoute && !FEATURES.teacher) {
+    result = views.notFound(app);
+  } else {
+    switch (a) {
+      case undefined: result = views.home(app); break;
+      case 'levels': result = views.levels(app); break;
+      case 'level': result = c === 'summary' ? views.levelSummary(app, b) : views.level(app, b, c === 'all'); break;
+      case 'task': result = mountTask(app, b); break;
+      case 'lab': result = renderLabPage(app); break;
+      case 'howto': result = views.howto(app); break;
+      case 'learn': result = views.learn(app); break;
+      case 'progress': result = views.progress(app); break;
+      case 'certificate': result = views.certificate(app, b); break;
+      case 'teacher': result = renderTeacher(app); break;
+      case 'present': result = renderPresent(app, b); break;
+      case 'join': location.replace(handleJoin(parts)); return;
+      default: result = views.notFound(app);
+    }
   }
   cleanup = typeof result === 'function' ? result : null;
-  drawNav(a);
-  document.title = 'Password Quest – Chráň svoj digitálny svet';
+  drawChrome(a);
   if (!app.contains(document.activeElement) || document.activeElement === document.body) {
     const heading = app.querySelector('h1');
     if (heading) { heading.setAttribute('tabindex', '-1'); heading.focus({ preventScroll: true }); }
@@ -73,10 +104,10 @@ try {
   render();
 } catch (err) {
   clear(app);
-  app.append(h('div', { class: 'card' }, h('h1', null, 'Niečo sa pokazilo'), h('p', null, 'Obnov stránku alebo sa vráť na úvod.'), h('a', { class: 'btn btn-primary', href: '#/' }, 'Úvod')));
+  app.append(h('div', { class: 'card' }, h('h1', null, t('error.title')), h('p', null, t('error.text')), h('a', { class: 'btn btn-primary', href: '#/' }, t('nav.home'))));
 }
 
-// Offline režim (len cez https alebo localhost).
+// Offline režim (len cez https alebo localhost a mimo vloženej verzie).
 if (!window.PQ_EMBEDDED && 'serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
   navigator.serviceWorker.register('sw.js').catch(() => { /* offline režim je voliteľný */ });
 }

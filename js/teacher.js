@@ -1,12 +1,13 @@
-// Učiteľský režim (verzia bez servera).
-// Transparentne: výsledky sú len z tohto zariadenia a obrazovka nie je chránená heslom, pretože neobsahuje
+// Učiteľský režim (verzia bez servera). Momentálne je skrytý cez FEATURES.teacher v js/config.js.
+// Výsledky sú len z tohto zariadenia a obrazovka nie je chránená heslom, pretože neobsahuje
 // žiadne citlivé údaje (iba anonymné súhrny). Zdieľanie výsledkov medzi zariadeniami a prihlásenie učiteľov
 // vyžaduje server, pozri docs/BACKEND.md.
 
-import { h, clear, pct, shuffle, append, embedded } from './util.js';
+import { h, clear, pct, append, embedded } from './util.js';
 import { icon } from './icons.js';
 import * as store from './store.js';
-import { LEVELS, TOPICS, getLevel, getTask, findRound } from './content/index.js';
+import { t } from './i18n.js';
+import { levels, topicLabel, getLevel, getTask, findRound } from './content/index.js';
 import { renderPresentation } from './engine.js';
 
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 32 znakov, bez zameniteľných (0/O, 1/I)
@@ -28,34 +29,24 @@ export function handleJoin(parts) {
   const [, code, levelId, missions] = parts;
   const level = getLevel(levelId);
   if (!/^[A-Z2-9]{4}-[A-Z2-9]{4}$/.test(code || '') || !level) return '#/levels';
-  const valid = (missions || '').split(',').filter((id) => level.tasks.some((t) => t.id === id));
+  const valid = (missions || '').split(',').filter((id) => level.tasks.some((x) => x.id === id));
   store.setSession({ code, level: level.id, missions: valid });
   return `#/level/${level.id}`;
 }
 
-const DEMO = {
-  participants: 24,
-  finished: 22,
-  topics: [
-    ['safe-passwords', 91],
-    ['unique', 76],
-    ['phishing', 83],
-    ['mfa', 68],
-    ['incident', 72],
-  ],
-};
+const DEMO = { participants: 24, finished: 22, topics: [['safe-passwords', 91], ['unique', 76], ['phishing', 83], ['mfa', 68], ['incident', 72]] };
+const pctText = (n) => t('pct', { n });
 
 function topicRows() {
-  const topics = store.getState().stats.topics;
-  return Object.entries(topics).map(([id, s]) => ({ id, label: TOPICS[id] || id, ok: s.ok, total: s.total, rate: pct(s.ok, s.total) }))
+  return Object.entries(store.getState().stats.topics)
+    .map(([id, s]) => ({ id, label: topicLabel(id), ok: s.ok, total: s.total, rate: pct(s.ok, s.total) }))
     .sort((a, b) => a.rate - b.rate);
 }
 
 function roundRows() {
-  const rounds = store.getState().stats.rounds;
-  return Object.entries(rounds).map(([id, s]) => {
-    const f = findRound(id);
-    return f ? { id, task: f.task.title, level: f.task.level, prompt: f.round.prompt, ok: s.ok, total: s.total, rate: pct(s.ok, s.total) } : null;
+  return Object.entries(store.getState().stats.rounds).map(([id, s]) => {
+    const found = findRound(id);
+    return found ? { id, task: found.task.title, prompt: found.round.prompt, ok: s.ok, total: s.total, rate: pct(s.ok, s.total) } : null;
   }).filter(Boolean);
 }
 
@@ -65,16 +56,16 @@ function csvEscape(v) {
 }
 
 export function buildCsv() {
-  const lines = [['typ', 'id', 'nazov', 'pokusy_prvy_pokus', 'spravne_prvy_pokus', 'uspesnost_percent'].join(';')];
-  topicRows().forEach((r) => lines.push(['tema', r.id, r.label, r.total, r.ok, r.rate].map(csvEscape).join(';')));
-  roundRows().forEach((r) => lines.push(['uloha', r.id, `${r.task}: ${r.prompt}`, r.total, r.ok, r.rate].map(csvEscape).join(';')));
+  const lines = [t('csv.header')];
+  topicRows().forEach((r) => lines.push([t('csv.topic'), r.id, r.label, r.total, r.ok, r.rate].map(csvEscape).join(';')));
+  roundRows().forEach((r) => lines.push([t('csv.task'), r.id, `${r.task}: ${r.prompt}`, r.total, r.ok, r.rate].map(csvEscape).join(';')));
   return '﻿' + lines.join('\n');
 }
 
 function downloadCsv() {
   const blob = new Blob([buildCsv()], { type: 'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob);
-  const a = h('a', { href: url, download: 'password-quest-suhrn.csv' });
+  const a = h('a', { href: url, download: 'password-quest-summary.csv' });
   document.body.append(a);
   a.click();
   a.remove();
@@ -86,6 +77,7 @@ export function renderTeacher(root) {
   let selLevel = (st().session && st().session.level) || 2;
   let selMissions = new Set();
   let showDemo = false;
+  let resetMsg = '';
 
   const prep = h('section', { class: 'card' });
   const present = h('section', { class: 'card' });
@@ -94,30 +86,30 @@ export function renderTeacher(root) {
   function drawPrep() {
     clear(prep);
     const level = getLevel(selLevel);
-    if (selMissions.size === 0) level.tasks.forEach((t) => selMissions.add(t.id));
+    if (selMissions.size === 0) level.tasks.forEach((x) => selMissions.add(x.id));
     const session = st().session;
     const out = h('div', { class: 'session-out', 'aria-live': 'polite' });
     if (session) showSession(out, session);
 
     const levelSel = h('select', { id: 't-level', class: 'select', onchange: (e) => { selLevel = Number(e.target.value); selMissions = new Set(); drawPrep(); drawPresent(); } },
-      LEVELS.map((l) => h('option', { value: l.id, selected: l.id === selLevel }, `${l.id}. ${l.name} (${l.ages})`)));
-    const checks = level.tasks.map((t) => {
-      const input = h('input', { type: 'checkbox', checked: selMissions.has(t.id), onchange: (e) => { if (e.target.checked) selMissions.add(t.id); else selMissions.delete(t.id); } });
-      return h('label', { class: 'check' }, input, h('span', null, `Misia ${t.order}: ${t.title}`));
+      levels().map((l) => h('option', { value: l.id, selected: l.id === selLevel }, `${l.id}. ${l.name} (${l.ages})`)));
+    const checks = level.tasks.map((x) => {
+      const input = h('input', { type: 'checkbox', checked: selMissions.has(x.id), onchange: (e) => { if (e.target.checked) selMissions.add(x.id); else selMissions.delete(x.id); } });
+      return h('label', { class: 'check' }, input, h('span', null, t('teacher.mission_item', { n: x.order, title: x.title })));
     });
     prep.append(
-      h('h2', null, icon('users', 28), ' Príprava hodiny'),
-      h('p', { class: 'muted' }, 'Vytvor reláciu triedy: náhodný kód a odkaz, ktorý žiakom nastaví úroveň a misie. Kód neotvára žiadne cudzie údaje, lebo v tejto verzii žiadne neexistujú.'),
-      h('div', { class: 'field' }, h('label', { for: 't-level' }, 'Veková úroveň'), levelSel),
-      h('fieldset', { class: 'row-set' }, h('legend', null, 'Misie na hodinu'), h('div', { class: 'checks' }, checks)),
+      h('h2', null, icon('users', 28), ' ', t('teacher.prep')),
+      h('p', { class: 'muted' }, t('teacher.prep_text')),
+      h('div', { class: 'field' }, h('label', { for: 't-level' }, t('teacher.level')), levelSel),
+      h('fieldset', { class: 'row-set' }, h('legend', null, t('teacher.missions')), h('div', { class: 'checks' }, checks)),
       h('div', { class: 'actions' },
         h('button', { type: 'button', class: 'btn btn-primary', onclick: () => {
-          if (selMissions.size === 0) { out.textContent = 'Vyber aspoň jednu misiu.'; return; }
-          const s = { code: newClassCode(), level: selLevel, missions: level.tasks.filter((t) => selMissions.has(t.id)).map((t) => t.id) };
+          if (selMissions.size === 0) { out.textContent = t('teacher.pick_one'); return; }
+          const s = { code: newClassCode(), level: selLevel, missions: level.tasks.filter((x) => selMissions.has(x.id)).map((x) => x.id) };
           store.setSession(s);
           clear(out);
           showSession(out, s);
-        } }, icon('plus', 22), ' Vytvoriť reláciu triedy')),
+        } }, icon('plus', 22), ' ', t('teacher.create'))),
       out);
   }
 
@@ -126,16 +118,16 @@ export function renderTeacher(root) {
     const copyMsg = h('span', { class: 'small', role: 'status' });
     out.append(
       h('div', { class: 'session-box' },
-        h('p', null, 'Kód relácie: ', h('code', { class: 'phrase' }, s.code)),
+        h('p', null, t('teacher.code'), h('code', { class: 'phrase' }, s.code)),
         embedded()
-          ? h('p', { class: 'muted' }, 'Odkaz pre žiakov sa vytvorí až po nasadení na vlastný web školy. V tejto verzii vloženej do Claude ho nie je možné vygenerovať.')
-          : h('p', null, 'Odkaz pre žiakov: ', h('a', { href: link }, link)),
+          ? h('p', { class: 'muted' }, t('teacher.link_embedded'))
+          : h('p', null, t('teacher.link'), h('a', { href: link }, link)),
         h('div', { class: 'row-gap' },
           embedded() ? null : h('button', { type: 'button', class: 'btn btn-secondary btn-sm', onclick: async () => {
-            try { await navigator.clipboard.writeText(link); copyMsg.textContent = 'Odkaz je skopírovaný.'; } catch (e) { copyMsg.textContent = 'Kopírovanie sa nepodarilo, označ odkaz ručne.'; }
-          } }, icon('copy', 20), ' Kopírovať odkaz'),
-          h('a', { class: 'btn btn-secondary btn-sm', href: `#/level/${s.level}` }, 'Otvoriť na tomto zariadení'),
-          h('button', { type: 'button', class: 'btn btn-ghost btn-sm', onclick: () => { store.setSession(null); clear(out); } }, icon('x', 20), ' Ukončiť reláciu'),
+            try { await navigator.clipboard.writeText(link); copyMsg.textContent = t('teacher.copied'); } catch (e) { copyMsg.textContent = t('teacher.copy_fail'); }
+          } }, icon('copy', 20), ' ', t('teacher.copy')),
+          h('a', { class: 'btn btn-secondary btn-sm', href: `#/level/${s.level}` }, t('teacher.open_here')),
+          h('button', { type: 'button', class: 'btn btn-ghost btn-sm', onclick: () => { store.setSession(null); clear(out); } }, icon('x', 20), ' ', t('teacher.end')),
           copyMsg)));
   }
 
@@ -143,77 +135,76 @@ export function renderTeacher(root) {
     clear(present);
     const level = getLevel(selLevel);
     present.append(
-      h('h2', null, icon('play', 28), ' Režim celej triedy'),
-      h('p', { class: 'muted' }, 'Premietni úlohu na tabuľu. Trieda diskutuje a ty potom zobrazíš správne riešenie s vysvetlením.'),
-      h('div', { class: 'task-list compact' }, level.tasks.map((t) => h('div', { class: 'row-between' }, h('span', null, `Misia ${t.order}: ${t.title}`),
-        h('a', { class: 'btn btn-secondary btn-sm', href: `#/present/${t.id}` }, icon('play', 20), ' Premietnuť')))));
+      h('h2', null, icon('play', 28), ' ', t('teacher.present')),
+      h('p', { class: 'muted' }, t('teacher.present_text')),
+      h('div', { class: 'task-list compact' }, level.tasks.map((x) => h('div', { class: 'row-between' }, h('span', null, t('teacher.mission_item', { n: x.order, title: x.title })),
+        h('a', { class: 'btn btn-secondary btn-sm', href: `#/present/${x.id}` }, icon('play', 20), ' ', t('teacher.project'))))));
   }
 
   function drawResults() {
     clear(results);
-    const topics = topicRows();
-    const rounds = roundRows().filter((r) => r.total >= 1).sort((a, b) => a.rate - b.rate || b.total - a.total).slice(0, 5);
-    const doneTasks = Object.values(st().tasks).filter((t) => t.done).length;
+    const rows = topicRows();
+    const hardest = roundRows().sort((a, b) => a.rate - b.rate || b.total - a.total).slice(0, 5);
+    const doneTasks = Object.values(st().tasks).filter((x) => x.done).length;
+    const confirmBox = h('div', { class: 'banner banner-warn', hidden: true, role: 'alert' }, icon('warning', 22),
+      h('div', null, h('p', null, t('teacher.erase_confirm')),
+        h('div', { class: 'row-gap' },
+          h('button', { type: 'button', class: 'btn btn-danger', onclick: () => { store.resetAll(); drawResults(); drawPrep(); } }, icon('trash', 20), ' ', t('common.yes_erase')),
+          h('button', { type: 'button', class: 'btn btn-secondary', onclick: () => { confirmBox.hidden = true; } }, t('common.cancel')))));
     const demoBox = showDemo ? h('div', { class: 'demo' },
-      h('p', { class: 'banner banner-warn' }, icon('warning', 22), h('span', null, h('strong', null, 'Ilustračné hodnoty. '), 'Takto bude vyzerať prehľad triedy po pripojení servera. Nie sú to skutočné výsledky.')),
+      h('p', { class: 'banner banner-warn' }, icon('warning', 22), h('span', null, h('strong', null, t('teacher.demo_strong')), t('teacher.demo_text'))),
       h('table', { class: 'table' },
-        h('thead', null, h('tr', null, h('th', { scope: 'col' }, 'Ukazovateľ'), h('th', { scope: 'col' }, 'Hodnota'))),
+        h('thead', null, h('tr', null, h('th', { scope: 'col' }, t('teacher.col_metric')), h('th', { scope: 'col' }, t('teacher.col_value')))),
         h('tbody', null,
-          h('tr', null, h('td', null, 'Počet účastníkov'), h('td', null, String(DEMO.participants))),
-          h('tr', null, h('td', null, 'Dokončené aktivity'), h('td', null, String(DEMO.finished))),
-          DEMO.topics.map(([id, v]) => h('tr', null, h('td', null, `Úspešnosť témy: ${TOPICS[id]}`), h('td', null, v + ' %')))))) : null;
+          h('tr', null, h('td', null, t('teacher.participants')), h('td', null, String(DEMO.participants))),
+          h('tr', null, h('td', null, t('teacher.finished')), h('td', null, String(DEMO.finished))),
+          DEMO.topics.map(([id, v]) => h('tr', null, h('td', null, t('teacher.topic_rate', { topic: topicLabel(id) })), h('td', null, pctText(v))))))) : null;
 
-    results.append(
-      h('h2', null, icon('list', 28), ' Výsledky na tomto zariadení'),
-      h('p', { class: 'banner banner-info' }, icon('info', 22), h('span', null, 'Zobrazené sú len anonymné súhrny z tohto prehliadača. Výsledky z viacerých žiackych zariadení sa spoja až po pripojení servera (pozri docs/BACKEND.md).')),
+    append(results,
+      h('h2', null, icon('list', 28), ' ', t('teacher.results')),
+      h('p', { class: 'banner banner-info' }, icon('info', 22), h('span', null, t('teacher.results_note'))),
       h('div', { class: 'stats' },
-        h('div', { class: 'stat' }, h('strong', null, String(doneTasks)), h('span', null, 'dokončené misie na tomto zariadení')),
-        h('div', { class: 'stat' }, h('strong', null, String(topics.reduce((a, t) => a + t.total, 0))), h('span', null, 'zodpovedané úlohy (prvý pokus)'))),
-      topics.length
-        ? h('table', { class: 'table' },
-          h('caption', null, 'Úspešnosť podľa témy (správne na prvý pokus)'),
-          h('thead', null, h('tr', null, h('th', { scope: 'col' }, 'Téma'), h('th', { scope: 'col' }, 'Úspešnosť'), h('th', { scope: 'col' }, 'Odporúčanie'))),
-          h('tbody', null, topics.map((t) => h('tr', null, h('td', null, t.label), h('td', null, `${t.rate} % (${t.ok}/${t.total})`),
-            h('td', null, t.total >= 3 && t.rate < 75 ? h('span', { class: 'tag tag-warn' }, 'Zopakovať s triedou') : h('span', { class: 'tag' }, 'V poriadku'))))))
-        : h('p', { class: 'muted' }, 'Zatiaľ nie sú žiadne výsledky. Spusti misiu na tomto zariadení alebo si pozri ilustračné hodnoty.'),
-      rounds.length ? h('div', null, h('h3', null, 'Úlohy, ktoré robili najväčšie problémy'),
-        h('ol', { class: 'bullets' }, rounds.map((r) => h('li', null, `${r.task}: „${r.prompt}“ – ${r.rate} % (${r.ok}/${r.total})`)))) : null,
+        h('div', { class: 'stat' }, h('strong', null, String(doneTasks)), h('span', null, t('teacher.done_missions'))),
+        h('div', { class: 'stat' }, h('strong', null, String(rows.reduce((a, x) => a + x.total, 0))), h('span', null, t('teacher.answered')))),
+      rows.length
+        ? h('div', { class: 'table-wrap' }, h('table', { class: 'table' },
+          h('caption', null, t('teacher.by_topic')),
+          h('thead', null, h('tr', null, h('th', { scope: 'col' }, t('teacher.col_topic')), h('th', { scope: 'col' }, t('teacher.col_rate')), h('th', { scope: 'col' }, t('teacher.col_advice')))),
+          h('tbody', null, rows.map((x) => h('tr', null, h('td', null, x.label), h('td', null, `${pctText(x.rate)} (${x.ok}/${x.total})`),
+            h('td', null, x.total >= 3 && x.rate < 75 ? h('span', { class: 'tag tag-warn' }, t('teacher.review')) : h('span', { class: 'tag' }, t('teacher.ok'))))))))
+        : h('p', { class: 'muted' }, t('teacher.empty')),
+      hardest.length ? h('div', null, h('h3', null, t('teacher.hardest')),
+        h('ol', { class: 'bullets' }, hardest.map((r) => h('li', null, `${r.task}: „${r.prompt}“ – ${pctText(r.rate)} (${r.ok}/${r.total})`)))) : null,
       demoBox,
       h('div', { class: 'actions' },
-        h('button', { type: 'button', class: 'btn btn-secondary', onclick: () => { showDemo = !showDemo; drawResults(); } }, icon('eye', 22), showDemo ? ' Skryť ilustračné hodnoty' : ' Zobraziť ilustračné hodnoty'),
-        h('button', { type: 'button', class: 'btn btn-secondary', onclick: downloadCsv, disabled: topics.length === 0 }, icon('download', 22), ' Exportovať súhrn (CSV)'),
-        h('button', { type: 'button', class: 'btn btn-danger', onclick: () => {
-          if (window.confirm('Naozaj vymazať všetky údaje o postupe na tomto zariadení?')) { store.resetAll(); drawResults(); drawPrep(); }
-        } }, icon('trash', 22), ' Vymazať údaje na tomto zariadení')),
+        h('button', { type: 'button', class: 'btn btn-secondary', onclick: () => { showDemo = !showDemo; drawResults(); } }, icon('eye', 22), ' ', showDemo ? t('teacher.demo_hide') : t('teacher.demo_show')),
+        h('button', { type: 'button', class: 'btn btn-secondary', onclick: downloadCsv, disabled: rows.length === 0 }, icon('download', 22), ' ', t('teacher.export')),
+        h('button', { type: 'button', class: 'btn btn-danger', onclick: () => { confirmBox.hidden = false; } }, icon('trash', 22), ' ', t('teacher.erase'))),
+      confirmBox,
       resetActivity());
   }
 
   function resetActivity() {
     const level = getLevel(selLevel);
-    const sel = h('select', { id: 't-reset', class: 'select' }, level.tasks.map((t) => h('option', { value: t.id }, `Misia ${t.order}: ${t.title}`)));
-    const msg = h('span', { class: 'small', role: 'status' });
+    const sel = h('select', { id: 't-reset', class: 'select' }, level.tasks.map((x) => h('option', { value: x.id }, t('teacher.mission_item', { n: x.order, title: x.title }))));
+    const msg = h('span', { class: 'small', role: 'status' }, resetMsg);
+    resetMsg = '';
     return h('div', { class: 'field' },
-      h('label', { for: 't-reset' }, 'Opätovné spustenie aktivity na tomto zariadení'),
+      h('label', { for: 't-reset' }, t('teacher.reset_label')),
       h('div', { class: 'row-gap' }, sel, h('button', { type: 'button', class: 'btn btn-secondary btn-sm', onclick: () => {
         store.resetTask(sel.value);
-        msg.textContent = 'Postup v misii bol vynulovaný. Body a odznaky ostávajú.';
+        resetMsg = t('teacher.reset_done');
         drawResults();
-      } }, icon('repeat', 20), ' Spustiť znova'), msg));
+      } }, icon('repeat', 20), ' ', t('teacher.reset_btn')), msg));
   }
 
-  append(root, 
-    h('section', { class: 'page-head' }, h('h1', { tabindex: '-1' }, icon('users', 36), ' Učiteľský režim'),
-      h('p', { class: 'lead' }, 'Nástroje na hodinu: relácia triedy, premietanie úloh a prehľad tém, ktoré treba zopakovať.')),
-    h('p', { class: 'banner banner-warn' }, icon('warning', 22), h('span', null, h('strong', null, 'Verzia bez servera. '),
-      'Táto obrazovka nie je chránená prihlásením, lebo obsahuje iba anonymné súhrny z tohto zariadenia. Prihlásenie učiteľov a spoločný prehľad celej triedy vyžadujú server (docs/BACKEND.md).')),
+  append(root,
+    h('section', { class: 'page-head' }, h('h1', { tabindex: '-1' }, icon('users', 36), ' ', t('nav.teacher')),
+      h('p', { class: 'lead' }, t('teacher.lead'))),
+    h('p', { class: 'banner banner-warn' }, icon('warning', 22), h('span', null, h('strong', null, t('teacher.no_server_strong')), t('teacher.no_server'))),
     prep, present, results,
-    h('section', { class: 'card' }, h('h2', null, icon('lock', 28), ' Ochrana údajov'),
-      h('ul', { class: 'bullets' },
-        h('li', null, 'Aplikácia nevyžaduje mená ani e-maily žiakov.'),
-        h('li', null, 'Heslá ani ich odvodené podoby sa nikde neukladajú.'),
-        h('li', null, 'Ukladá sa iba herný postup: body, odznaky a počty správnych odpovedí.'),
-        h('li', null, 'Žiadny verejný rebríček a žiadne hodnotenie jednotlivcov podľa slabosti hesiel.'),
-        h('li', null, 'Export CSV obsahuje len súhrnné počty bez osobných údajov.'))));
+    h('section', { class: 'card' }, h('h2', null, icon('lock', 28), ' ', t('teacher.privacy')),
+      h('ul', { class: 'bullets' }, [1, 2, 3, 4, 5].map((n) => h('li', null, t(`teacher.priv${n}`))))));
   drawPrep();
   drawPresent();
   drawResults();
@@ -221,7 +212,10 @@ export function renderTeacher(root) {
 
 export function renderPresent(root, taskId) {
   const task = getTask(taskId);
-  if (!task) { append(root, h('p', null, 'Misia sa nenašla.'), h('a', { class: 'btn', href: '#/teacher' }, 'Späť')); return () => {}; }
+  if (!task) {
+    append(root, h('p', null, t('present.not_found')), h('a', { class: 'btn', href: '#/teacher' }, t('common.back')));
+    return () => {};
+  }
   let idx = 0;
   let reveal = false;
   const stage = h('section', { class: 'card present-card', 'aria-live': 'polite' });
@@ -231,28 +225,29 @@ export function renderPresent(root, taskId) {
     const round = task.rounds[idx];
     clear(stage);
     stage.append(
-      h('p', { class: 'eyebrow' }, `${task.title} · úloha ${idx + 1} z ${task.rounds.length}`),
+      h('p', { class: 'eyebrow' }, t('present.eyebrow', { title: task.title, n: idx + 1, total: task.rounds.length })),
       h('h1', { class: 'present-prompt', tabindex: '-1' }, round.prompt),
       renderPresentation(round, reveal));
     clear(bar);
-    bar.append(
-      h('a', { class: 'btn btn-ghost', href: '#/teacher' }, icon('back', 22), ' Zavrieť'),
-      h('button', { type: 'button', class: 'btn btn-secondary', onclick: () => go(-1), disabled: idx === 0 }, icon('back', 22), ' Predchádzajúca'),
-      h('button', { type: 'button', class: 'btn btn-primary', onclick: () => { reveal = !reveal; draw(); } }, icon('eye', 22), reveal ? ' Skryť riešenie' : ' Zobraziť riešenie'),
-      h('button', { type: 'button', class: 'btn btn-secondary', onclick: () => go(1), disabled: idx === task.rounds.length - 1 }, 'Ďalšia ', icon('forward', 22)),
-      document.fullscreenEnabled ? h('button', { type: 'button', class: 'btn btn-ghost', onclick: () => { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); } }, 'Celá obrazovka') : null);
+    append(bar,
+      h('a', { class: 'btn btn-ghost', href: '#/teacher' }, icon('back', 22), ' ', t('present.close')),
+      h('button', { type: 'button', class: 'btn btn-secondary', onclick: () => go(-1), disabled: idx === 0 }, icon('back', 22), ' ', t('present.prev')),
+      h('button', { type: 'button', class: 'btn btn-primary', onclick: () => { reveal = !reveal; draw(); } }, icon('eye', 22), ' ', reveal ? t('present.hide') : t('present.show')),
+      h('button', { type: 'button', class: 'btn btn-secondary', onclick: () => go(1), disabled: idx === task.rounds.length - 1 }, t('present.next'), ' ', icon('forward', 22)),
+      document.fullscreenEnabled ? h('button', { type: 'button', class: 'btn btn-ghost', onclick: () => {
+        const p = document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+        if (p && p.catch) p.catch(() => {});
+      } }, t('present.fullscreen')) : null);
   }
   function go(d) { idx = Math.max(0, Math.min(task.rounds.length - 1, idx + d)); reveal = false; draw(); }
   const onKey = (e) => {
-    if (e.target.closest && e.target.closest('input,select,textarea')) return;
+    if (e.target.closest && e.target.closest('input,select,textarea,button,a')) return;
     if (e.key === 'ArrowRight') go(1);
     else if (e.key === 'ArrowLeft') go(-1);
-    else if (e.key === 'Enter' && e.target === document.body) { reveal = !reveal; draw(); }
+    else if (e.key === 'Enter') { reveal = !reveal; draw(); }
   };
   document.addEventListener('keydown', onKey);
-  append(root, bar, stage, h('p', { class: 'muted small' }, 'Šípky vľavo a vpravo menia úlohu, klávesom Enter zobrazíš riešenie.'));
+  append(root, bar, stage, h('p', { class: 'muted small' }, t('present.keys')));
   draw();
   return () => document.removeEventListener('keydown', onKey);
 }
-
-void shuffle;
