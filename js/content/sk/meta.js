@@ -13,7 +13,7 @@ export const TOPICS = {
 };
 
 export const BADGES = {
-  secret_key: { name: 'Ochranca tajného kľúča', desc: 'Botov tajný kľúč je v bezpečí vďaka tebe.' },
+  secret_key: { name: 'Ochranca tajného hesla', desc: 'Botovo tajné heslo je v bezpečí vďaka tebe.' },
   weak_detector: { name: 'Detektor slabých hesiel', desc: 'Rozoznáš slabé a predvídateľné heslá.' },
   uniqueness: { name: 'Majster jedinečnosti', desc: 'Vieš, prečo má mať každý účet iné heslo.' },
   phishing_hunter: { name: 'Lovec phishingu', desc: 'Odhalíš podvodné správy a odkazy.' },

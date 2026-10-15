@@ -13,7 +13,7 @@ export const TOPICS = {
 };
 
 export const BADGES = {
-  secret_key: { name: 'Secret Key Protector', desc: 'Bot’s secret key is safe thanks to you.' },
+  secret_key: { name: 'Secret Password Protector', desc: 'Bot’s secret password is safe thanks to you.' },
   weak_detector: { name: 'Weak Password Detector', desc: 'You can spot weak and predictable passwords.' },
   uniqueness: { name: 'Master of Uniqueness', desc: 'You know why every account needs a different password.' },
   phishing_hunter: { name: 'Phishing Hunter', desc: 'You can spot scam messages and links.' },
