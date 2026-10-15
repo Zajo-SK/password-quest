@@ -9,6 +9,7 @@ import * as store from './store.js';
 import { t } from './i18n.js';
 import { levels, topicLabel, getLevel, getTask, findRound } from './content/index.js';
 import { renderPresentation } from './engine.js';
+import { difficultyName } from './views.js';
 
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 32 znakov, bez zameniteľných (0/O, 1/I)
 
@@ -92,7 +93,7 @@ export function renderTeacher(root) {
     if (session) showSession(out, session);
 
     const levelSel = h('select', { id: 't-level', class: 'select', onchange: (e) => { selLevel = Number(e.target.value); selMissions = new Set(); drawPrep(); drawPresent(); } },
-      levels().map((l) => h('option', { value: l.id, selected: l.id === selLevel }, `${l.id}. ${l.name} (${l.ages})`)));
+      levels().map((l) => h('option', { value: l.id, selected: l.id === selLevel }, `${l.id}. ${l.name} (${difficultyName(l)})`)));
     const checks = level.tasks.map((x) => {
       const input = h('input', { type: 'checkbox', checked: selMissions.has(x.id), onchange: (e) => { if (e.target.checked) selMissions.add(x.id); else selMissions.delete(x.id); } });
       return h('label', { class: 'check' }, input, h('span', null, t('teacher.mission_item', { n: x.order, title: x.title })));

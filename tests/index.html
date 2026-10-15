@@ -137,7 +137,7 @@
         eq(e.id, l.id); eq(e.badge, l.badge); eq(e.color, l.color); eq(e.tasks.length, l.tasks.length, `úroveň ${l.id}`);
         l.tasks.forEach((x, ti) => {
           const y = e.tasks[ti];
-          eq(y.id, x.id); eq(y.badge, x.badge); eq(y.topic, x.topic); eq(!!y.timer, !!x.timer); eq(!!y.planTitle, !!x.planTitle); eq(y.rounds.length, x.rounds.length, x.id);
+          eq(y.id, x.id); eq(y.badge, x.badge); eq(y.topic, x.topic); eq(!!y.planTitle, !!x.planTitle); eq(y.rounds.length, x.rounds.length, x.id);
           x.rounds.forEach((r, ri) => eq(shape(y.rounds[ri]), shape(r), r.id));
         });
       });

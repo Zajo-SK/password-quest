@@ -1,6 +1,6 @@
 import { choice, multi, rows, hotspot } from '../helpers.js';
 
-// Úroveň 2: Strážcovia účtov (9 – 11 rokov). Triedenie, porovnávanie, simulácia úniku a krátke scenáre.
+// Úroveň 2: Strážcovia účtov (obtiažnosť: stredná). Triedenie, porovnávanie, simulácia úniku a krátke scenáre.
 
 const CATS = [
   { id: 'easy', label: 'Ľahko uhádnuteľné' },
@@ -25,7 +25,6 @@ const phishEmail = (flagged) => {
 export const level2 = {
   id: 2,
   name: 'Strážcovia účtov',
-  ages: '9–11 rokov',
   tagline: 'Triedenie hesiel, simulácia úniku a odhaľovanie podvodov.',
   story: 'Účty v digitálnom svete treba strážiť. Staň sa strážcom, ktorý rozozná slabé heslo aj podvodnú správu.',
   color: 'blue',
@@ -37,7 +36,6 @@ export const level2 = {
       title: 'Detektor slabých hesiel',
       icon: 'search',
       topic: 'safe-passwords',
-      minutes: 7,
       badge: 'weak_detector',
       intro: ['Nie každé heslo, ktoré vyzerá zložito, je bezpečné.', 'Rozdeľ vymyslené ukážky podľa toho, ako ľahko sa dajú uhádnuť.'],
       rounds: [
@@ -81,7 +79,6 @@ export const level2 = {
       title: 'Jeden kľúč na všetky dvere',
       icon: 'key',
       topic: 'unique',
-      minutes: 7,
       badge: 'uniqueness',
       intro: ['Čo sa stane, keď použiješ rovnaké heslo vo viacerých službách?', 'Vyskúšaj si to v simulácii. Všetky účty a heslá sú vymyslené.'],
       rounds: [
@@ -132,7 +129,6 @@ export const level2 = {
       title: 'Odhaľ podvodnú správu',
       icon: 'hook',
       topic: 'phishing',
-      minutes: 8,
       badge: 'phishing_hunter',
       intro: ['Podvodné správy sa snažia vylákať heslo. Naučíš sa ich rozpoznať.', 'Všetky správy a adresy sú vymyslené.'],
       rounds: [
@@ -179,7 +175,6 @@ export const level2 = {
       title: 'Bezpečnostný kvíz',
       icon: 'star',
       topic: 'safe-passwords',
-      minutes: 6,
       intro: ['Záverečný kvíz strážcov účtov. Po každej odpovedi dostaneš vysvetlenie.'],
       rounds: [
         choice('Čo robí heslo bezpečnejším?',

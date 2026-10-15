@@ -1,12 +1,11 @@
 import { choice, multi, rows } from '../helpers.js';
 
-// Úroveň 1: Digitálni objavitelia (6 – 8 rokov). Krátke vety, veľké tlačidlá, obrázkové odpovede.
+// Úroveň 1: Digitálni objavitelia (obtiažnosť: ľahká). Krátke vety, veľké tlačidlá, obrázkové odpovede.
 // Všetky heslá v obsahu sú vymyslené ukážky.
 
 export const level1 = {
   id: 1,
   name: 'Digitálni objavitelia',
-  ages: '6–8 rokov',
   tagline: 'Pomôž robotovi Botovi ochrániť tajné heslo.',
   story: 'Robot Bot žije v digitálnom zámku. Jeho tajné heslo chráni všetky dvere. Pomôž mu, aby ho nikto nezískal!',
   color: 'green',
@@ -18,7 +17,6 @@ export const level1 = {
       title: 'Vyber bezpečnejšie heslo',
       icon: 'key',
       topic: 'safe-passwords',
-      minutes: 4,
       intro: ['Bot si vyberá nové tajné heslo.', 'Pozor: všetky heslá v hre sú len ukážky!'],
       rounds: [
         choice('Ktoré heslo je bezpečnejšie?',
@@ -57,7 +55,6 @@ export const level1 = {
       title: 'Tajomstvo alebo nie?',
       icon: 'lock',
       topic: 'sharing',
-      minutes: 4,
       intro: ['Heslo je tajomstvo. Poznáš ho len ty.', 'Čo urobíš v týchto situáciách?'],
       rounds: [
         choice('Kamarát ťa poprosí: „Povedz mi svoje heslo.“ Čo urobíš?',
@@ -92,7 +89,6 @@ export const level1 = {
       title: 'Ochráň digitálny zámok',
       icon: 'shield',
       topic: 'account-care',
-      minutes: 4,
       intro: ['Bot musí dobre chrániť svoj zámok.', 'Vyber, čo má urobiť.'],
       rounds: [
         choice('Kam má Bot schovať tajné heslo?',
@@ -127,7 +123,6 @@ export const level1 = {
       title: 'Botov kvíz',
       icon: 'star',
       topic: 'account-care',
-      minutes: 5,
       intro: ['Posledná misia! Ukáž, čo už vieš.', 'Rozhodni, ktoré pravidlá sú dobré a ktoré zlé.'],
       rounds: [
         rows('Je to dobré, alebo zlé pravidlo?',

@@ -1,6 +1,6 @@
 import { choice, multi, rows, order } from '../helpers.js';
 
-// Úroveň 3: Cyber detektívi (12 – 14 rokov). Vyšetrovanie, analýza vzorov, MFA a reakcia na incident.
+// Úroveň 3: Cyber detektívi (obtiažnosť: náročná). Vyšetrovanie, analýza vzorov, MFA a reakcia na incident.
 // Všetky služby, adresy a údaje sú vymyslené.
 
 const LEAK_STORY = 'Vymyslená stránka HerniaZona.example oznámila únik používateľských údajov. Niektorí žiaci používajú rovnaké heslo vo viacerých službách.';
@@ -8,7 +8,6 @@ const LEAK_STORY = 'Vymyslená stránka HerniaZona.example oznámila únik použ
 export const level3 = {
   id: 3,
   name: 'Cyber detektívi',
-  ages: '12–14 rokov',
   tagline: 'Vyšetruj incidenty, analyzuj vzory a rozhoduj sa.',
   story: 'Staneš sa detektívom digitálnych stôp. Pri vyšetrovaní potrebuješ logiku, opatrnosť a správny postup.',
   color: 'purple',
@@ -20,7 +19,6 @@ export const level3 = {
       title: 'Vyšetrovanie úniku',
       icon: 'search',
       topic: 'incident',
-      minutes: 8,
       intro: [LEAK_STORY, 'Postupuj ako detektív: urči riziko, vyber účty, ktoré treba zabezpečiť, zmeň heslo, nahlás to a zvoľ ďalšie opatrenia.'],
       rounds: [
         choice('Krok 1: Aké hlavné riziko hrozí žiakovi, ktorý má rovnaké heslo aj v iných službách?',
@@ -58,7 +56,6 @@ export const level3 = {
       title: 'Laboratórium hesiel',
       icon: 'bulb',
       topic: 'safe-passwords',
-      minutes: 9,
       intro: ['Použiješ vlastný nástroj na analýzu hesiel. Skúšaj iba vymyslené ukážky, nikdy nie svoje skutočné heslo.', 'Analýza prebieha len v tomto prehliadači a nič sa neukladá.'],
       rounds: [
         {
@@ -98,7 +95,6 @@ export const level3 = {
       title: 'MFA – druhý faktor',
       icon: 'phone',
       topic: 'mfa',
-      minutes: 7,
       badge: 'mfa_expert',
       intro: ['Viacfaktorové overovanie (MFA) pridáva po hesle ďalší krok.', 'Naučíš sa aj to, ako reagovať na nečakané žiadosti o potvrdenie.'],
       rounds: [
@@ -140,7 +136,6 @@ export const level3 = {
       title: 'Reakcia na incident',
       icon: 'flag',
       topic: 'incident',
-      minutes: 8,
       intro: ['Prišla ti správa, že tvoj školský účet mohol byť napadnutý.', 'Zostav správny postup a rozhodni sa v ďalších situáciách.'],
       rounds: [
         order('Zostav postup. Klikaj na kroky v poradí od najdôležitejšieho.',

@@ -1,6 +1,6 @@
 import { choice, multi, rows, order } from '../helpers.js';
 
-// Level 3: Cyber Detectives (ages 12–14). Investigations, pattern analysis, MFA and incident response.
+// Level 3: Cyber Detectives (difficulty: hard). Investigations, pattern analysis, MFA and incident response.
 // All services, addresses and data are made up. Structure must match js/content/sk/level3.js.
 
 const LEAK_STORY = 'The made-up website GameZone.example announced a leak of user data. Some students use the same password on several services.';
@@ -8,7 +8,6 @@ const LEAK_STORY = 'The made-up website GameZone.example announced a leak of use
 export const level3 = {
   id: 3,
   name: 'Cyber Detectives',
-  ages: 'Ages 12–14',
   tagline: 'Investigate incidents, analyze patterns and make decisions.',
   story: 'You become a detective of digital traces. An investigation takes logic, care and the right steps.',
   color: 'purple',
@@ -20,7 +19,6 @@ export const level3 = {
       title: 'Leak investigation',
       icon: 'search',
       topic: 'incident',
-      minutes: 8,
       intro: [LEAK_STORY, 'Work like a detective: identify the risk, choose which accounts to secure, change the password, report it and pick further measures.'],
       rounds: [
         choice('Step 1: What is the main risk for a student who uses the same password on other services too?',
@@ -58,7 +56,6 @@ export const level3 = {
       title: 'Password lab',
       icon: 'bulb',
       topic: 'safe-passwords',
-      minutes: 9,
       intro: ['You will use a tool for analyzing passwords. Only try made-up examples, never your real password.', 'The analysis runs only in this browser and nothing is saved.'],
       rounds: [
         {
@@ -98,7 +95,6 @@ export const level3 = {
       title: 'MFA: the second factor',
       icon: 'phone',
       topic: 'mfa',
-      minutes: 7,
       badge: 'mfa_expert',
       intro: ['Multi-factor authentication (MFA) adds another step after the password.', 'You will also learn how to react to unexpected confirmation requests.'],
       rounds: [
@@ -140,7 +136,6 @@ export const level3 = {
       title: 'Incident response',
       icon: 'flag',
       topic: 'incident',
-      minutes: 8,
       intro: ['You get a message saying your school account may have been compromised.', 'Put together the right steps and make decisions in further situations.'],
       rounds: [
         order('Build your response. Click the steps in order, starting with the most important.',

@@ -2,7 +2,7 @@
 
 *Chráň svoj digitálny svet.* Interaktívna vzdelávacia hra o bezpečných heslách a základoch kybernetickej bezpečnosti pre školy. Rozhranie aj obsah sú v slovenčine a angličtine, jazyk sa prepína v hornej lište (SK / EN).
 
-- 4 úrovne podľa veku (6–8, 9–11, 12–14, 15–18 rokov), 16 misií a 83 interaktívnych úloh v oboch jazykoch
+- 4 úrovne obtiažnosti (ľahká, stredná, náročná, expertná), 16 misií a 83 interaktívnych úloh v oboch jazykoch
 - Password Lab: lokálna, vysvetliteľná kontrola ukážkových hesiel a generátor ukážkových fráz
 - Body (XP), 8 odznakov, záverečné hodnotenie úrovne a certifikát za preukázané zvládnutie
 - Opakovanie nesprávne zodpovedaných úloh, rozpracovanú misiu možno dokončiť aj po obnovení stránky

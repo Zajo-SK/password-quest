@@ -1,7 +1,6 @@
 import { choice, multi, rows, rowsPer, hotspot, order } from '../helpers.js';
 
-// Level 4: Cyber Experts (ages 15–18). Realistic but entirely made-up scenarios.
-// Time is never penalized – the timer is for information only. Structure must match js/content/sk/level4.js.
+// Level 4: Cyber Experts (difficulty: expert). Realistic but entirely made-up scenarios. Structure must match js/content/sk/level4.js.
 
 const TIMELINE = {
   kind: 'timeline',
@@ -24,9 +23,8 @@ const E = (o) => ({ kind: 'email', ...o });
 export const level4 = {
   id: 4,
   name: 'Cyber Experts',
-  ages: 'Ages 15–18',
   tagline: 'Realistic scenarios, incident analysis and a security plan.',
-  story: 'As an expert, you make decisions during an incident and design protection for the whole school. Taking your time is never penalized. Quality is what counts.',
+  story: 'As an expert, you make decisions during an incident and design protection for the whole school.',
   color: 'cyan',
   icon: 'terminal',
   badge: 'cyber_expert',
@@ -36,8 +34,6 @@ export const level4 = {
       title: 'Incident Response',
       icon: 'flag',
       topic: 'incident',
-      minutes: 10,
-      timer: true,
       intro: ['A made-up student’s school email has been compromised. You have a timeline, facts about the account and a list of possible steps.', 'Goal: set the right priorities and build a response plan.'],
       rounds: [
         order('Build a response plan. Click the steps in order of priority.',
@@ -88,7 +84,6 @@ export const level4 = {
       title: 'Password managers',
       icon: 'lock',
       topic: 'tools',
-      minutes: 7,
       intro: ['How do you manage dozens of unique passwords? A password manager helps, but it needs to be used correctly.'],
       rounds: [
         choice('Why do unique passwords matter, and how does a password manager help with them?',
@@ -124,7 +119,6 @@ export const level4 = {
       title: 'Phishing analysis',
       icon: 'hook',
       topic: 'phishing',
-      minutes: 10,
       badge: 'phishing_hunter',
       intro: ['The messages are made up but realistic. Look for suspicious requests, an urgent tone, unusual links and requests for login details.', 'Careful: do not rely only on a logo or the sender’s name. Scam messages can look trustworthy.'],
       rounds: [
@@ -195,7 +189,6 @@ export const level4 = {
       title: 'Security audit',
       icon: 'shield-check',
       topic: 'policy',
-      minutes: 10,
       planTitle: 'Security plan for a made-up school',
       intro: ['Design a security plan for a made-up school. For each area, choose the best rule.', 'At the end, your correct answers are put together into your plan.'],
       rounds: [

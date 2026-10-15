@@ -1,12 +1,11 @@
 import { choice, multi, rows } from '../helpers.js';
 
-// Level 1: Digital Explorers (ages 6–8). Short sentences, big buttons, picture answers.
+// Level 1: Digital Explorers (difficulty: easy). Short sentences, big buttons, picture answers.
 // Every password in the content is a made-up example. Structure must match js/content/sk/level1.js.
 
 export const level1 = {
   id: 1,
   name: 'Digital Explorers',
-  ages: 'Ages 6–8',
   tagline: 'Help Bot the robot keep the secret password safe.',
   story: 'Bot the robot lives in a digital castle. A secret password protects all of its doors. Help Bot make sure nobody gets the password!',
   color: 'green',
@@ -18,7 +17,6 @@ export const level1 = {
       title: 'Pick the safer password',
       icon: 'key',
       topic: 'safe-passwords',
-      minutes: 4,
       intro: ['Bot is choosing a new secret password.', 'Careful: all the passwords in this game are just examples!'],
       rounds: [
         choice('Which password is safer?',
@@ -57,7 +55,6 @@ export const level1 = {
       title: 'Secret or not?',
       icon: 'lock',
       topic: 'sharing',
-      minutes: 4,
       intro: ['A password is a secret. Only you know it.', 'What would you do in these situations?'],
       rounds: [
         choice('A friend asks you: “Tell me your password.” What do you do?',
@@ -92,7 +89,6 @@ export const level1 = {
       title: 'Protect the digital castle',
       icon: 'shield',
       topic: 'account-care',
-      minutes: 4,
       intro: ['Bot has to protect the castle well.', 'Choose what Bot should do.'],
       rounds: [
         choice('Where should Bot keep the secret password?',
@@ -127,7 +123,6 @@ export const level1 = {
       title: 'Bot’s quiz',
       icon: 'star',
       topic: 'account-care',
-      minutes: 5,
       intro: ['The last mission! Show what you know.', 'Decide which rules are good and which are bad.'],
       rounds: [
         rows('Is this a good rule or a bad rule?',

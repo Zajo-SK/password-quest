@@ -56,7 +56,7 @@ Ukážky (`mock`): `email`, `sms`, `push` (prihlasovacie upozornenie), `timeline
 
 **Nová úloha:** pridaj kolo do `rounds` existujúcej misie. Identifikátory (`l2t1r3`) a téma sa doplnia automaticky v `content/index.js`.
 
-**Nová misia:** pridaj objekt do `tasks` úrovne: `id`, `title`, `icon`, `topic`, `minutes`, `intro`, `rounds` a voliteľne `badge`, `timer`, `planTitle`.
+**Nová misia:** pridaj objekt do `tasks` úrovne: `id`, `title`, `icon`, `topic`, `intro`, `rounds` a voliteľne `badge`, `planTitle`.
 
 **Nový modul (napr. Phishing Hunter):**
 

@@ -1,6 +1,6 @@
 import { choice, multi, rows, hotspot } from '../helpers.js';
 
-// Level 2: Account Guardians (ages 9–11). Sorting, comparing, a leak simulation and short scenarios.
+// Level 2: Account Guardians (difficulty: medium). Sorting, comparing, a leak simulation and short scenarios.
 // Structure must match js/content/sk/level2.js.
 
 const CATS = [
@@ -26,7 +26,6 @@ const phishEmail = (flagged) => {
 export const level2 = {
   id: 2,
   name: 'Account Guardians',
-  ages: 'Ages 9–11',
   tagline: 'Sort passwords, simulate a leak and spot scams.',
   story: 'Accounts in the digital world need guarding. Become a guardian who can spot a weak password and a scam message.',
   color: 'blue',
@@ -38,7 +37,6 @@ export const level2 = {
       title: 'Weak password detector',
       icon: 'search',
       topic: 'safe-passwords',
-      minutes: 7,
       badge: 'weak_detector',
       intro: ['Not every password that looks complicated is safe.', 'Sort the made-up examples by how easy they are to guess.'],
       rounds: [
@@ -82,7 +80,6 @@ export const level2 = {
       title: 'One key for every door',
       icon: 'key',
       topic: 'unique',
-      minutes: 7,
       badge: 'uniqueness',
       intro: ['What happens when you use the same password on several services?', 'Try it in the simulation. All accounts and passwords are made up.'],
       rounds: [
@@ -133,7 +130,6 @@ export const level2 = {
       title: 'Spot the scam message',
       icon: 'hook',
       topic: 'phishing',
-      minutes: 8,
       badge: 'phishing_hunter',
       intro: ['Scam messages try to trick you into giving away your password. You will learn to recognize them.', 'All messages and addresses are made up.'],
       rounds: [
@@ -180,7 +176,6 @@ export const level2 = {
       title: 'Safety quiz',
       icon: 'star',
       topic: 'safe-passwords',
-      minutes: 6,
       intro: ['The final quiz for account guardians. You get an explanation after every answer.'],
       rounds: [
         choice('What makes a password safer?',

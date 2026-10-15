@@ -405,7 +405,6 @@ export function mountTask(root, taskId) {
   const level = getLevel(task.level);
   let run = null;
   let cleanups = [];
-  let timerId = null;
   const shell = h('div', { class: 'task-shell', dataset: { level: String(task.level) } });
   root.append(shell);
 
@@ -420,28 +419,7 @@ export function mountTask(root, taskId) {
       head.append(h('div', { class: 'progress', role: 'progressbar', 'aria-label': t('task.progress_bar'), 'aria-valuemin': '0', 'aria-valuemax': String(total), 'aria-valuenow': String(run.pos) },
         h('span', { class: 'progress-fill', style: `width:${pct(run.pos, total)}%` })));
     }
-    if (task.timer && !store.getState().settings.hideTimer) head.append(timerChip());
     return head;
-  }
-
-  function timerChip() {
-    const txt = h('span', { class: 'timer-text' }, '00:00');
-    const tick = () => {
-      const s = Math.floor((Date.now() - (run ? run.started : Date.now())) / 1000);
-      txt.textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-    };
-    tick();
-    if (timerId) clearInterval(timerId);
-    timerId = setInterval(tick, 1000);
-    const chip = h('div', { class: 'chip timer-chip' }, icon('clock', 18), txt,
-      h('span', { class: 'small' }, t('timer.note')),
-      h('button', { type: 'button', class: 'btn btn-ghost btn-sm', onclick: () => {
-        store.setSetting('hideTimer', true);
-        clearInterval(timerId);
-        timerId = null;
-        chip.remove();
-      } }, t('timer.hide')));
-    return chip;
   }
 
   function focusHeading(sel) {
@@ -480,7 +458,6 @@ export function mountTask(root, taskId) {
         task.intro.map((p) => h('p', { class: 'lead' }, rich(p))),
         h('div', { class: 'chips' },
           h('span', { class: 'chip' }, icon('list', 18), ' ', t('task.n_tasks', { n: task.rounds.length })),
-          h('span', { class: 'chip' }, icon('clock', 18), ' ', t('task.minutes', { n: task.minutes })),
           h('span', { class: 'chip' }, icon('book', 18), ' ', topicLabel(task.topic)),
           b ? h('span', { class: 'chip chip-badge' }, icon(b.icon, 18), ' ', t('task.badge', { name: b.name })) : null),
         h('p', { class: 'muted' }, t('task.no_penalty')),
@@ -491,7 +468,7 @@ export function mountTask(root, taskId) {
   function startRun(mode) {
     const saved = store.getTask(taskId);
     const idxs = task.rounds.map((_, i) => i).filter((i) => mode === 'all' || !saved.mastered[i]);
-    run = { taskId, mode, phase: 'main', queue: idxs, mainCount: idxs.length, pos: 0, wrong: [], firstTry: {}, streak: 0, earned: 0, started: Date.now() };
+    run = { taskId, mode, phase: 'main', queue: idxs, mainCount: idxs.length, pos: 0, wrong: [], firstTry: {}, streak: 0, earned: 0 };
     store.setResume(run);
     showRound();
   }
@@ -623,7 +600,6 @@ export function mountTask(root, taskId) {
   function showSummary(allMastered, newBadges, levelDone) {
     runCleanup();
     clear(shell);
-    if (timerId) { clearInterval(timerId); timerId = null; }
     const saved = store.getTask(taskId);
     const left = task.rounds.map((_, i) => i).filter((i) => !saved.mastered[i]);
     const firstOk = Object.values(run.firstTry).filter(Boolean).length;
@@ -665,7 +641,7 @@ export function mountTask(root, taskId) {
   }
 
   showIntro();
-  return () => { runCleanup(); if (timerId) clearInterval(timerId); };
+  return () => { runCleanup(); };
 }
 
 /* ---------- Režim pre premietanie (učiteľ) ---------- */

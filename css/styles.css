@@ -152,7 +152,10 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: 
 .level-card::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 6px; background: var(--accent); }
 .level-card h3 { margin: 6px 0 0; font-size: 1.3rem; }
 .level-card p { margin: 0; color: #d6e2ff; }
-.lc-age { color: var(--accent) !important; font-weight: 700; }
+.lc-diff { display: flex; align-items: center; gap: 8px; color: var(--accent) !important; font-weight: 700; }
+.diff-pips { display: inline-flex; gap: 4px; }
+.pip { width: 10px; height: 10px; border-radius: 999px; background: rgba(255, 255, 255, 0.18); }
+.pip.on { background: var(--accent); }
 .lc-num { position: absolute; right: 16px; top: 14px; font-size: 3rem; font-weight: 800; color: rgba(255, 255, 255, 0.1); }
 .lc-icon { color: var(--accent); }
 .lc-foot { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; color: var(--muted); }
@@ -205,9 +208,6 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: 
 .task-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-bottom: 8px; }
 .task-title { display: flex; align-items: center; gap: 8px; font-weight: 700; flex: 1 1 200px; }
 .task-head .progress { flex: 1 1 100%; margin: 4px 0 0; height: 14px; }
-.timer-chip { gap: 8px; flex: 1 1 100%; }
-.timer-text { font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 800; }
-.timer-chip .btn { white-space: nowrap; margin-left: auto; }
 .intro-card, .summary-card { display: flex; flex-wrap: wrap; gap: 24px; align-items: center; }
 .intro-card .bot, .summary-card .bot { flex: 0 0 auto; margin: 0 auto; }
 .intro-body { flex: 1 1 320px; }
@@ -395,8 +395,6 @@ ol.present-options { list-style: decimal inside; }
   .topbar-end { gap: 6px; }
   .lang-btn { min-width: 40px; padding: 0 8px; }
   .topbar nav a[aria-current='page'] .nav-label { display: inline; }
-  .timer-chip { flex-wrap: wrap; border-radius: var(--radius-sm); }
-  .timer-chip .small { flex: 1 1 100%; }
   .card { padding: 16px; }
 }
 

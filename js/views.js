@@ -30,13 +30,24 @@ function bar(value, total, label) {
     h('span', { class: 'progress-fill', style: `width:${p}%` }));
 }
 
+// Obtiažnosť úrovne: štyri body (vyplnené podľa čísla úrovne) a názov stupňa.
+export const difficultyName = (level) => t('difficulty.' + level.id);
+
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+function difficulty(level) {
+  return h('p', { class: 'lc-diff' },
+    h('span', { class: 'diff-pips', 'aria-hidden': 'true' }, [1, 2, 3, 4].map((i) => h('span', { class: 'pip' + (i <= level.id ? ' on' : '') }))),
+    h('span', { class: 'diff-name' }, cap(difficultyName(level))));
+}
+
 function levelCard(level, cta) {
   const p = levelProgress(level);
-  return h('a', { class: `level-card lc-${level.color}`, href: `#/level/${level.id}`, 'aria-label': t('level.card_aria', { id: level.id, name: level.name, ages: level.ages, done: p.doneTasks, total: p.totalTasks }) },
+  return h('a', { class: `level-card lc-${level.color}`, href: `#/level/${level.id}`, 'aria-label': t('level.card_aria', { id: level.id, name: level.name, difficulty: difficultyName(level), done: p.doneTasks, total: p.totalTasks }) },
     h('span', { class: 'lc-num' }, String(level.id)),
     h('span', { class: 'lc-icon' }, icon(level.icon, 44)),
     h('h3', null, level.name),
-    h('p', { class: 'lc-age' }, level.ages),
+    difficulty(level),
     h('p', null, level.tagline),
     bar(p.doneTasks, p.totalTasks, t('level.progress_aria', { name: level.name })),
     h('span', { class: 'lc-foot' }, t('level.missions_count', { done: p.doneTasks, total: p.totalTasks }), h('span', { class: 'lc-cta' }, cta || t('common.open'), ' ', icon('forward', 20))));
@@ -85,7 +96,7 @@ function taskCard(task) {
     h('div', { class: 'tc-body' },
       h('p', { class: 'eyebrow' }, t('task.eyebrow', { n: task.order, topic: topicLabel(task.topic) })),
       h('h3', null, task.title),
-      h('p', { class: 'muted' }, t('task.meta', { n: task.rounds.length, min: task.minutes })),
+      h('p', { class: 'muted' }, t('task.meta', { n: task.rounds.length })),
       bar(s.mastered, s.total, t('task.progress_aria', { title: task.title })),
       h('p', { class: 'small' }, t('task.status', { state, m: s.mastered, total: s.total })),
       b ? h('p', { class: 'small' }, icon(b.icon, 16), ' ', t('task.badge', { name: b.name })) : null),
@@ -104,7 +115,7 @@ export function level(root, id, showAll) {
     h('section', { class: `level-head lc-${lv.color}` },
       h('div', { class: 'lc-icon big' }, icon(lv.icon, 64)),
       h('div', null,
-        h('p', { class: 'eyebrow' }, t('level.eyebrow', { id: lv.id, ages: lv.ages })),
+        h('p', { class: 'eyebrow' }, t('level.eyebrow', { id: lv.id, difficulty: difficultyName(lv) })),
         h('h1', { tabindex: '-1' }, lv.name),
         h('p', { class: 'lead' }, lv.story),
         bar(p.doneTasks, p.totalTasks, t('level.progress_simple')),
@@ -190,7 +201,7 @@ export function certificate(root, id) {
       h('p', { class: 'eyebrow' }, 'Password Quest · ' + t('home.eyebrow')),
       h('h1', { tabindex: '-1' }, t('cert.title')),
       h('p', { class: 'lead' }, t('cert.lead')),
-      h('h2', null, `${lv.name} (${lv.ages})`),
+      h('h2', null, `${lv.name} (${t('difficulty.full', { name: difficultyName(lv) })})`),
       h('p', null, t('cert.topics', { list: topicNames.join(', ') })),
       h('p', null, t('cert.badge_score', { badge: b.name, xp: xpForLevel(lv) })),
       h('p', { class: 'cert-name' }, t('cert.name')),
