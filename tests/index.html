@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <title>Password Quest – testy</title>
+  <style>
+    body { font: 16px system-ui, sans-serif; margin: 24px; background: #0a1230; color: #eaf1ff; }
+    li.ok { color: #3ddc97; } li.fail { color: #ff7f90; font-weight: 700; }
+    #summary { font-size: 1.3rem; margin: 12px 0; }
+  </style>
+</head>
+<body>
+  <h1>Password Quest – testy v prehliadači</h1>
+  <p>Otvor túto stránku cez lokálny server (napr. <code>python3 -m http.server</code> v koreňovom priečinku a potom <code>/tests/</code>).</p>
+  <p id="summary">Beží…</p>
+  <ul id="out"></ul>
+  <script type="module">
+    import { analyze, checkGoal } from '../js/analyzer.js';
+    import { ALL_TASKS, LEVELS, BADGES, TOPICS } from '../js/content/index.js';
+    import { generatePhrase } from '../js/lab.js';
+    import { newClassCode, buildCsv } from '../js/teacher.js';
+
+    const out = document.getElementById('out');
+    let pass = 0, fail = 0;
+    function test(name, fn) {
+      let ok = true, msg = '';
+      try { fn(); } catch (e) { ok = false; msg = e.message; }
+      ok ? pass++ : fail++;
+      const li = document.createElement('li');
+      li.className = ok ? 'ok' : 'fail';
+      li.textContent = (ok ? '✓ ' : '✗ ') + name + (msg ? ' – ' + msg : '');
+      out.append(li);
+    }
+    const eq = (a, b, m) => { if (a !== b) throw new Error(`${m || ''} očakávané ${b}, dostali sme ${a}`); };
+    const truthy = (v, m) => { if (!v) throw new Error(m || 'nepravda'); };
+
+    // --- Analyzátor hesiel ---
+    test('bežné heslo je veľmi predvídateľné', () => eq(analyze('123456').verdict.key, 'very-weak'));
+    test('qwerty rad klávesnice', () => truthy(analyze('qwertyuiop').findings.some((f) => f.id === 'keyboard')));
+    test('slovo + rok sa označí', () => truthy(analyze('Futbal2026').findings.some((f) => f.id === 'word-year')));
+    test('slovo + číslice + symbol sa označí', () => truthy(analyze('Macko123!').findings.some((f) => ['word-digits', 'common-part', 'common'].includes(f.id))));
+    test('zámena znakov p@ssw0rd', () => eq(analyze('P@ssw0rd').findings.some((f) => f.id === 'common'), true));
+    test('dlhá fráza prejde kontrolami', () => eq(analyze('Vlak-Mrak-Les-72').verdict.key, 'passed'));
+    test('opakovaný znak nie je „prešlo“', () => truthy(analyze('aaaaaaaaaaaa').verdict.key !== 'passed'));
+    test('osobný údaj z profilu', () => truthy(analyze('Rex-Lampa-Skala-Lipa', ['Rex']).findings.some((f) => f.id === 'personal')));
+    test('verdikt nikdy netvrdí zaručenú bezpečnosť', () => {
+      const v = analyze('Dazd-Skala-Kocka-Lipa-47').verdict.text.toLowerCase();
+      truthy(v.includes('nie je záruka'), v);
+    });
+    test('prázdny vstup', () => eq(analyze('').verdict.key, 'empty'));
+    test('checkGoal minLen', () => eq(checkGoal(analyze('abc'), { minLen: 14 }, 'abc').ok, false));
+    test('checkGoal splnený', () => { const pw = 'Dazd-Skala-Kocka-Lipa-47'; eq(checkGoal(analyze(pw), { minLen: 14, noIssues: true }, pw).ok, true); });
+
+    // --- Generátor a kód triedy ---
+    test('generátor vyrobí frázu s číslom', () => truthy(/^([A-Z][a-z]+-){4}\d{2}$/.test(generatePhrase(4))));
+    test('generátor nevracia stále rovnaké', () => truthy(new Set(Array.from({ length: 20 }, () => generatePhrase(4))).size > 15));
+    test('kód triedy má správny formát', () => truthy(/^[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/.test(newClassCode())));
+    test('kódy tried sú rôzne', () => truthy(new Set(Array.from({ length: 50 }, newClassCode)).size === 50));
+    test('CSV obsahuje hlavičku', () => truthy(buildCsv().includes('typ;id;nazov')));
+
+    // --- Integrita obsahu ---
+    test('4 úrovne, každá s aspoň 4 misiami', () => { eq(LEVELS.length, 4); LEVELS.forEach((l) => truthy(l.tasks.length >= 4, 'úroveň ' + l.id)); });
+    test('id úloh a kôl sú jedinečné', () => {
+      const ids = ALL_TASKS.flatMap((t) => [t.id, ...t.rounds.map((r) => r.id)]);
+      eq(new Set(ids).size, ids.length);
+    });
+    test('každá misia má aspoň 4 kolá a známu tému', () => ALL_TASKS.forEach((t) => { truthy(t.rounds.length >= 4, t.id); truthy(TOPICS[t.topic], t.id); }));
+    test('choice má práve jednu správnu odpoveď', () => ALL_TASKS.forEach((t) => t.rounds.filter((r) => r.type === 'choice').forEach((r) => eq(r.options.filter((o) => o.correct).length, 1, r.id))));
+    test('každá odpoveď má vysvetlenie', () => ALL_TASKS.forEach((t) => t.rounds.filter((r) => r.options).forEach((r) => r.options.forEach((o) => truthy(o.why, r.id)))));
+    test('rows: správna kategória existuje', () => ALL_TASKS.forEach((t) => t.rounds.filter((r) => r.type === 'rows').forEach((r) => r.rows.forEach((row) => {
+      if (row.options) eq(row.options.filter((o) => o.correct).length, 1, r.id); else truthy(r.categories.some((c) => c.id === row.answer), r.id);
+    }))));
+    test('odznaky úloh a úrovní existujú', () => {
+      ALL_TASKS.forEach((t) => t.badge && truthy(BADGES[t.badge], t.id));
+      LEVELS.forEach((l) => truthy(BADGES[l.badge], 'level ' + l.id));
+      truthy(Object.keys(BADGES).length >= 8);
+    });
+    test('každý odznak je niekde udeľovaný', () => {
+      const given = new Set([...ALL_TASKS.map((t) => t.badge), ...LEVELS.map((l) => l.badge)].filter(Boolean));
+      Object.keys(BADGES).forEach((b) => truthy(given.has(b), b));
+    });
+    test('obsah neobsahuje reálne hodnoty (len .example/.test domény)', () => {
+      const text = JSON.stringify(ALL_TASKS);
+      const hosts = [...text.matchAll(/https?:\/\/([^\/"\s]+)/g)].map((m) => m[1]);
+      hosts.forEach((h) => truthy(/\.(example|test)$/.test(h) || /\.(example|test)\//.test(h + '/'), h));
+    });
+
+    // --- Úložisko: nikdy nie heslá ---
+    test('localStorage neobsahuje zadané testovacie heslá', () => {
+      const raw = JSON.stringify(Object.fromEntries(Object.keys(localStorage).map((k) => [k, localStorage.getItem(k)])));
+      truthy(!raw.includes('Dazd-Skala-Kocka-Lipa-47'));
+    });
+
+    document.getElementById('summary').textContent = `Hotovo: ${pass} úspešných, ${fail} neúspešných`;
+    document.getElementById('summary').style.color = fail ? '#ff7f90' : '#3ddc97';
+    document.title = fail ? 'TESTY ZLYHALI' : 'TESTY OK';
+  </script>
+</body>
+</html>
