@@ -34,6 +34,7 @@ store.subscribe(() => {
 });
 
 function render() {
+  if (location.hash === '#app') { app.focus(); return; } // odkaz „Preskočiť na obsah“
   if (cleanup) { try { cleanup(); } catch (e) { /* ignoruj */ } cleanup = null; }
   clear(app);
   const parts = (location.hash.replace(/^#/, '') || '/').split('/').filter(Boolean);
@@ -76,6 +77,6 @@ try {
 }
 
 // Offline režim (len cez https alebo localhost).
-if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+if (!window.PQ_EMBEDDED && 'serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
   navigator.serviceWorker.register('sw.js').catch(() => { /* offline režim je voliteľný */ });
 }

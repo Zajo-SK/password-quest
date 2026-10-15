@@ -3,7 +3,7 @@
 // žiadne citlivé údaje (iba anonymné súhrny). Zdieľanie výsledkov medzi zariadeniami a prihlásenie učiteľov
 // vyžaduje server, pozri docs/BACKEND.md.
 
-import { h, clear, pct, shuffle, append } from './util.js';
+import { h, clear, pct, shuffle, append, embedded } from './util.js';
 import { icon } from './icons.js';
 import * as store from './store.js';
 import { LEVELS, TOPICS, getLevel, getTask, findRound } from './content/index.js';
@@ -127,9 +127,11 @@ export function renderTeacher(root) {
     out.append(
       h('div', { class: 'session-box' },
         h('p', null, 'Kód relácie: ', h('code', { class: 'phrase' }, s.code)),
-        h('p', null, 'Odkaz pre žiakov: ', h('a', { href: link }, link)),
+        embedded()
+          ? h('p', { class: 'muted' }, 'Odkaz pre žiakov sa vytvorí až po nasadení na vlastný web školy. V tejto verzii vloženej do Claude ho nie je možné vygenerovať.')
+          : h('p', null, 'Odkaz pre žiakov: ', h('a', { href: link }, link)),
         h('div', { class: 'row-gap' },
-          h('button', { type: 'button', class: 'btn btn-secondary btn-sm', onclick: async () => {
+          embedded() ? null : h('button', { type: 'button', class: 'btn btn-secondary btn-sm', onclick: async () => {
             try { await navigator.clipboard.writeText(link); copyMsg.textContent = 'Odkaz je skopírovaný.'; } catch (e) { copyMsg.textContent = 'Kopírovanie sa nepodarilo, označ odkaz ručne.'; }
           } }, icon('copy', 20), ' Kopírovať odkaz'),
           h('a', { class: 'btn btn-secondary btn-sm', href: `#/level/${s.level}` }, 'Otvoriť na tomto zariadení'),

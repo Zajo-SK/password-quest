@@ -1,7 +1,7 @@
 // Engine úloh: vykresľuje jednotlivé typy úloh, vyhodnocuje odpovede, počíta body a odznaky.
 // Obsah úloh je v js/content/*. Engine pozná len typy úloh, nie konkrétne otázky.
 
-import { h, clear, rich, shuffle, announce, pct } from './util.js';
+import { h, clear, rich, shuffle, announce, pct, embedded } from './util.js';
 import { icon, bot } from './icons.js';
 import * as store from './store.js';
 import { getTask, getLevel, BADGES, TOPICS } from './content/index.js';
@@ -664,7 +664,7 @@ export function mountTask(root, taskId) {
         window.addEventListener('afterprint', () => document.body.classList.remove('print-mode'), { once: true });
         window.print();
       } }, icon('print', 22), ' Vytlačiť plán');
-      shell.append(h('section', { class: 'card printable' }, h('h2', null, task.planTitle), h('ol', { class: 'plan-final' }, planLines.map((l) => h('li', null, l))), printBtn));
+      shell.append(h('section', { class: 'card printable' }, h('h2', null, task.planTitle), h('ol', { class: 'plan-final' }, planLines.map((l) => h('li', null, l))), embedded() ? null : printBtn));
     }
     focusHeading('#sum-h1');
     window.scrollTo({ top: 0 });

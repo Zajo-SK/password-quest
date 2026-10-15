@@ -1,5 +1,5 @@
 // Obrazovky aplikácie (okrem misií, Password Lab a učiteľského režimu).
-import { h, clear, rich, append } from './util.js';
+import { h, clear, rich, append, embedded } from './util.js';
 import { icon, bot } from './icons.js';
 import * as store from './store.js';
 import { LEVELS, MODULES, PLANNED_MODULES, TOPICS, BADGES, getLevel, getTask } from './content/index.js';
@@ -184,7 +184,9 @@ export function certificate(root, id) {
       h('p', null, `Odznak: ${BADGES[lv.badge].name} · Skóre: ${xpForLevel(lv)} XP`),
       h('p', { class: 'cert-name' }, 'Meno žiaka (dopíše učiteľ alebo žiak rukou): ____________________'),
       h('p', { class: 'muted' }, `Dátum: ${date}`)),
-    h('div', { class: 'actions' }, printBtn));
+    embedded()
+      ? h('p', { class: 'muted' }, 'Tlač nie je v tejto verzii dostupná. Certifikát si môžeš odfotiť alebo urobiť snímku obrazovky.')
+      : h('div', { class: 'actions' }, printBtn));
 }
 
 export function howto(root) {

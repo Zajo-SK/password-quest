@@ -51,6 +51,9 @@ export function announce(msg) {
   setTimeout(() => { live.textContent = msg; }, 30);
 }
 
+// Verzia vložená do iného prostredia (napr. Claude Artifact): bez tlače a bez odkazov s #/trasou.
+export const embedded = () => !!window.PQ_EMBEDDED;
+
 export function pct(a, b) {
   return b ? Math.round((a / b) * 100) : 0;
 }
