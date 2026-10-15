@@ -1,4 +1,5 @@
 // Ikony (stroke, 24x24) a maskot Bot. Všetko je inline SVG – žiadne externé súbory.
+import { t } from './i18n.js';
 
 const SHIELD = '<path d="M12 3l7 3v5c0 5-3 8.500-7 10-4-1.500-7-5-7-10V6z"/>';
 
@@ -67,7 +68,7 @@ export function bot(mood = 'happy', size = 96) {
   const wrap = document.createElement('span');
   wrap.className = 'bot bot-' + mood;
   wrap.setAttribute('role', 'img');
-  wrap.setAttribute('aria-label', 'Robot Bot');
+  wrap.setAttribute('aria-label', t('bot.aria'));
   wrap.innerHTML = `<svg viewBox="0 0 120 120" width="${size}" height="${size}" focusable="false" aria-hidden="true">
     <line x1="60" y1="14" x2="60" y2="30" stroke="#8fa6e8" stroke-width="4" stroke-linecap="round"/>
     <circle class="bot-led" cx="60" cy="11" r="6" fill="#3ddc97"/>

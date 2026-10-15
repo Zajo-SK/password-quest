@@ -54,6 +54,15 @@ export function announce(msg) {
 // Verzia vložená do iného prostredia (napr. Claude Artifact): bez tlače a bez odkazov s #/trasou.
 export const embedded = () => !!window.PQ_EMBEDDED;
 
+// Slovenské množné číslo: 1 úloha, 2 – 4 úlohy, 0 a 5+ úloh.
+export function skPlural(n, one, few, many) {
+  if (n === 1) return one;
+  if (n >= 2 && n <= 4) return few;
+  return many;
+}
+
+export const enPlural = (n, one, many) => (n === 1 ? one : many);
+
 export function pct(a, b) {
   return b ? Math.round((a / b) * 100) : 0;
 }

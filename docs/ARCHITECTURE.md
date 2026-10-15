@@ -2,9 +2,21 @@
 
 ## Princípy
 
-1. **Obsah je oddelený od vykresľovania.** Úlohy sú čisté objekty v `js/content/`. Engine (`js/engine.js`) pozná iba typy úloh.
+1. **Obsah je oddelený od vykresľovania.** Úlohy sú čisté objekty v `js/content/<jazyk>/`. Engine (`js/engine.js`) pozná iba typy úloh.
 2. **Bez buildu a závislostí.** ES moduly, žiadny npm balík. Dá sa hostovať na akomkoľvek statickom serveri.
 3. **Súkromie najprv.** Do úložiska ide len neosobný postup. Heslá zadané v Password Lab nikdy neopustia pole formulára.
+
+## Jazyky
+
+- `js/i18n.js` drží zvolený jazyk a poskytuje `t('kľúč', {premenné})`. Hodnota v slovníku je text s `{premennými}` alebo funkcia (napríklad pre slovenské množné číslo `skPlural`).
+- `js/i18n/sk.js` a `js/i18n/en.js` obsahujú všetky texty rozhrania vrátane analyzátora hesiel a učiteľského režimu.
+- `js/content/index.js` načíta obsah oboch jazykov a cez funkcie `levels()`, `getTask()`, `topicLabel()`, `badge()` vracia obsah aktuálneho jazyka.
+- Obsah v rôznych jazykoch musí mať rovnakú štruktúru (identifikátory, poradie možností, správne odpovede, kategórie, poradie krokov). Postup a štatistiky sú uložené podľa identifikátorov, preto platia v každom jazyku. Zhodu kontroluje test v `tests/index.html`.
+- Po prepnutí jazyka sa aktuálna obrazovka vykreslí znova. Rozpracovaná misia pokračuje od posledného uloženého kola.
+
+## Prepínače funkcií
+
+`js/config.js` obsahuje `FEATURES`. Učiteľský režim (`FEATURES.teacher`) je zatiaľ vypnutý: nezobrazuje sa v navigácii ani na úvode a jeho adresy vracajú obrazovku „Stránka sa nenašla“.
 
 ## Tok údajov
 
@@ -23,7 +35,7 @@ Router (`main.js`) je založený na `location.hash`. Dá sa preto obnoviť strá
 | `#/levels`, `#/level/N`, `#/level/N/summary`, `#/certificate/N` | úrovne, hodnotenie, certifikát |
 | `#/task/ID` | misia |
 | `#/lab` | Password Lab |
-| `#/teacher`, `#/present/ID`, `#/join/KOD/N/misie` | učiteľský režim |
+| `#/teacher`, `#/present/ID`, `#/join/KOD/N/misie` | učiteľský režim (len ak je `FEATURES.teacher` zapnutý) |
 | `#/howto`, `#/learn`, `#/progress` | návody, obsah, postup |
 
 ## Typy úloh
@@ -48,10 +60,10 @@ Ukážky (`mock`): `email`, `sms`, `push` (prihlasovacie upozornenie), `timeline
 
 **Nový modul (napr. Phishing Hunter):**
 
-1. Vytvor `js/content/phishing-hunter.js` s exportom úrovní, rovnakého tvaru ako `level1.js`.
-2. Pridaj ho do `MODULES` v `js/content/index.js` a odstráň z `PLANNED_MODULES`.
-3. Doplň nové odznaky do `BADGES` a témy do `TOPICS`.
-4. Ak je potrebný nový typ úlohy, pridaj renderer do `RENDERERS` v `engine.js` a popis v `renderPresentation()`.
+1. Vytvor súbory s úrovňami v `js/content/sk/` aj `js/content/en/`, rovnakého tvaru ako `level1.js`.
+2. Pridaj ich do `CONTENT` a `modules()` v `js/content/index.js` a odstráň modul zo zoznamu pripravovaných (`PLANNED_ICONS` a `PLANNED` v `meta.js`).
+3. Doplň nové odznaky (`BADGE_STYLE` v `index.js`, názvy v `meta.js`) a témy (`TOPICS` v `meta.js` a popisy `learn.topic.*` v slovníkoch).
+4. Ak je potrebný nový typ úlohy, pridaj renderer do `RENDERERS` v `engine.js`, popis do `renderPresentation()` a jeho texty do oboch slovníkov.
 5. Pridaj súbory do `sw.js` (zoznam offline súborov) a spusti `/tests/`.
 
 Tak isto sa dá obsah neskôr načítavať aj zo servera (JSON v rovnakom tvare), bez zásahu do enginu.

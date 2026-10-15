@@ -16,7 +16,9 @@
   <ul id="out"></ul>
   <script type="module">
     import { analyze, checkGoal } from '../js/analyzer.js';
-    import { ALL_TASKS, LEVELS, BADGES, TOPICS } from '../js/content/index.js';
+    import { CONTENT } from '../js/content/index.js';
+    import { DICTS, setLang, getLang, t } from '../js/i18n.js';
+    import { WORDS, COMMON } from '../js/wordlists.js';
     import { generatePhrase } from '../js/lab.js';
     import { newClassCode, buildCsv } from '../js/teacher.js';
 
@@ -33,56 +35,118 @@
     }
     const eq = (a, b, m) => { if (a !== b) throw new Error(`${m || ''} očakávané ${b}, dostali sme ${a}`); };
     const truthy = (v, m) => { if (!v) throw new Error(m || 'nepravda'); };
+    const originalLang = getLang();
+    const LANG_IDS = Object.keys(CONTENT);
 
-    // --- Analyzátor hesiel ---
-    test('bežné heslo je veľmi predvídateľné', () => eq(analyze('123456').verdict.key, 'very-weak'));
-    test('qwerty rad klávesnice', () => truthy(analyze('qwertyuiop').findings.some((f) => f.id === 'keyboard')));
-    test('slovo + rok sa označí', () => truthy(analyze('Futbal2026').findings.some((f) => f.id === 'word-year')));
-    test('slovo + číslice + symbol sa označí', () => truthy(analyze('Macko123!').findings.some((f) => ['word-digits', 'common-part', 'common'].includes(f.id))));
-    test('zámena znakov p@ssw0rd', () => eq(analyze('P@ssw0rd').findings.some((f) => f.id === 'common'), true));
-    test('dlhá fráza prejde kontrolami', () => eq(analyze('Vlak-Mrak-Les-72').verdict.key, 'passed'));
-    test('opakovaný znak nie je „prešlo“', () => truthy(analyze('aaaaaaaaaaaa').verdict.key !== 'passed'));
-    test('osobný údaj z profilu', () => truthy(analyze('Rex-Lampa-Skala-Lipa', ['Rex']).findings.some((f) => f.id === 'personal')));
-    test('verdikt nikdy netvrdí zaručenú bezpečnosť', () => {
-      const v = analyze('Dazd-Skala-Kocka-Lipa-47').verdict.text.toLowerCase();
-      truthy(v.includes('nie je záruka'), v);
+    // --- Analyzátor hesiel (v oboch jazykoch) ---
+    for (const lang of LANG_IDS) {
+      setLang(lang);
+      test(`[${lang}] bežné heslo je veľmi predvídateľné`, () => eq(analyze('123456').verdict.key, 'very-weak'));
+      test(`[${lang}] rad klávesnice`, () => truthy(analyze('qwertyuiop').findings.some((f) => f.id === 'keyboard')));
+      test(`[${lang}] slovo + rok`, () => truthy(analyze('Futbal2026').findings.some((f) => f.id === 'word-year')));
+      test(`[${lang}] slovo + čísla + symbol`, () => truthy(analyze('Macko123!').findings.some((f) => ['word-digits', 'common-part', 'common'].includes(f.id))));
+      test(`[${lang}] zámena znakov p@ssw0rd`, () => eq(analyze('P@ssw0rd').findings.some((f) => f.id === 'common'), true));
+      test(`[${lang}] dlhá fráza prejde kontrolami`, () => eq(analyze('Vlak-Mrak-Les-72').verdict.key, 'passed'));
+      test(`[${lang}] opakovaný znak nie je „prešlo“`, () => truthy(analyze('aaaaaaaaaaaa').verdict.key !== 'passed'));
+      test(`[${lang}] osobný údaj z profilu`, () => truthy(analyze('Rex-Lampa-Skala-Lipa', ['Rex']).findings.some((f) => f.id === 'personal')));
+      test(`[${lang}] texty nálezov sú preložené`, () => analyze('Futbal2026!').findings.forEach((f) => { truthy(!f.title.startsWith('an.'), f.title); truthy(!f.detail.startsWith('an.'), f.detail); }));
+      test(`[${lang}] prázdny vstup`, () => eq(analyze('').verdict.key, 'empty'));
+      test(`[${lang}] checkGoal minLen`, () => eq(checkGoal(analyze('abc'), { minLen: 14 }, 'abc').ok, false));
+      test(`[${lang}] checkGoal splnený`, () => { const pw = 'Dazd-Skala-Kocka-Lipa-47'; eq(checkGoal(analyze(pw), { minLen: 14, noIssues: true }, pw).ok, true); });
+    }
+    test('verdikt „prešlo“ v oboch jazykoch upozorňuje, že nejde o záruku', () => {
+      truthy(DICTS.sk['an.v.passed.d'].includes('záruka'));
+      truthy(DICTS.en['an.v.passed.d'].includes('guarantee'));
     });
-    test('prázdny vstup', () => eq(analyze('').verdict.key, 'empty'));
-    test('checkGoal minLen', () => eq(checkGoal(analyze('abc'), { minLen: 14 }, 'abc').ok, false));
-    test('checkGoal splnený', () => { const pw = 'Dazd-Skala-Kocka-Lipa-47'; eq(checkGoal(analyze(pw), { minLen: 14, noIssues: true }, pw).ok, true); });
 
-    // --- Generátor a kód triedy ---
-    test('generátor vyrobí frázu s číslom', () => truthy(/^([A-Z][a-z]+-){4}\d{2}$/.test(generatePhrase(4))));
-    test('generátor nevracia stále rovnaké', () => truthy(new Set(Array.from({ length: 20 }, () => generatePhrase(4))).size > 15));
+    // --- Generátor, zoznamy slov, kód triedy ---
+    for (const lang of LANG_IDS) {
+      test(`[${lang}] generátor vyrobí frázu s číslom`, () => truthy(/^([A-Z][a-z]+-){4}\d{2}$/.test(generatePhrase(4, lang))));
+      test(`[${lang}] generátor nevracia stále rovnaké`, () => truthy(new Set(Array.from({ length: 20 }, () => generatePhrase(4, lang))).size > 15));
+      test(`[${lang}] slová generátora neobsahujú bežné heslá`, () => WORDS[lang].forEach((w) => [...COMMON].forEach((c) => truthy(!(c.length >= 4 && w.includes(c)), `${w} obsahuje ${c}`))));
+    }
     test('kód triedy má správny formát', () => truthy(/^[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/.test(newClassCode())));
     test('kódy tried sú rôzne', () => truthy(new Set(Array.from({ length: 50 }, newClassCode)).size === 50));
-    test('CSV obsahuje hlavičku', () => truthy(buildCsv().includes('typ;id;nazov')));
+    test('CSV obsahuje hlavičku', () => { setLang('sk'); truthy(buildCsv().includes('typ;id;nazov')); });
 
-    // --- Integrita obsahu ---
-    test('4 úrovne, každá s aspoň 4 misiami', () => { eq(LEVELS.length, 4); LEVELS.forEach((l) => truthy(l.tasks.length >= 4, 'úroveň ' + l.id)); });
-    test('id úloh a kôl sú jedinečné', () => {
-      const ids = ALL_TASKS.flatMap((t) => [t.id, ...t.rounds.map((r) => r.id)]);
-      eq(new Set(ids).size, ids.length);
+    // --- Slovníky rozhrania ---
+    test('slovníky SK a EN majú rovnaké kľúče', () => {
+      const sk = Object.keys(DICTS.sk), en = Object.keys(DICTS.en);
+      const missingEn = sk.filter((k) => !(k in DICTS.en)), missingSk = en.filter((k) => !(k in DICTS.sk));
+      truthy(!missingEn.length && !missingSk.length, `chýba v EN: ${missingEn.join(', ')} | chýba v SK: ${missingSk.join(', ')}`);
     });
-    test('každá misia má aspoň 4 kolá a známu tému', () => ALL_TASKS.forEach((t) => { truthy(t.rounds.length >= 4, t.id); truthy(TOPICS[t.topic], t.id); }));
-    test('choice má práve jednu správnu odpoveď', () => ALL_TASKS.forEach((t) => t.rounds.filter((r) => r.type === 'choice').forEach((r) => eq(r.options.filter((o) => o.correct).length, 1, r.id))));
-    test('každá odpoveď má vysvetlenie', () => ALL_TASKS.forEach((t) => t.rounds.filter((r) => r.options).forEach((r) => r.options.forEach((o) => truthy(o.why, r.id)))));
-    test('rows: správna kategória existuje', () => ALL_TASKS.forEach((t) => t.rounds.filter((r) => r.type === 'rows').forEach((r) => r.rows.forEach((row) => {
-      if (row.options) eq(row.options.filter((o) => o.correct).length, 1, r.id); else truthy(r.categories.some((c) => c.id === row.answer), r.id);
-    }))));
-    test('odznaky úloh a úrovní existujú', () => {
-      ALL_TASKS.forEach((t) => t.badge && truthy(BADGES[t.badge], t.id));
-      LEVELS.forEach((l) => truthy(BADGES[l.badge], 'level ' + l.id));
-      truthy(Object.keys(BADGES).length >= 8);
+    const files = ['main.js', 'views.js', 'engine.js', 'lab.js', 'analyzer.js', 'teacher.js', 'icons.js'];
+    const sources = await Promise.all(files.map((f) => fetch('../js/' + f, { cache: 'no-store' }).then((r) => r.text())));
+    test('všetky statické kľúče t(…) v kóde existujú v slovníkoch', () => {
+      const keys = new Set(sources.flatMap((s) => [...s.matchAll(/\bt\('([^']+)'\s*[,)]/g)].map((m) => m[1])));
+      const missing = [...keys].filter((k) => !(k in DICTS.sk) || !(k in DICTS.en));
+      truthy(!missing.length, missing.join(', '));
     });
-    test('každý odznak je niekde udeľovaný', () => {
-      const given = new Set([...ALL_TASKS.map((t) => t.badge), ...LEVELS.map((l) => l.badge)].filter(Boolean));
-      Object.keys(BADGES).forEach((b) => truthy(given.has(b), b));
+    test('dynamické kľúče existujú', () => {
+      const dyn = [
+        ...[1, 2, 3, 4, 5, 6].flatMap((n) => [`howto.s${n}.t`, `howto.s${n}.d`]),
+        ...Object.keys(CONTENT.sk.meta.TOPICS).map((id) => `learn.topic.${id}`),
+        ...['pet', 'hobby', 'city', 'year'].map((k) => `lab.field.${k}`),
+        ...['empty', 'very-weak', 'weak', 'improve', 'passed'].flatMap((k) => [`an.v.${k}`, `an.v.${k}.d`]),
+        ...['common', 'common-part', 'sequence', 'keyboard', 'repeat-char', 'repeat-block', 'low-variety', 'word-year', 'word-digits', 'personal', 'phrase-common', 'phrase', 'variety', 'len.vshort', 'len.short', 'len.good', 'len.long'].flatMap((k) => [`an.${k}`, `an.${k}.d`]),
+        ...[1, 2, 3, 4, 5].map((n) => `teacher.priv${n}`),
+        'rank.novice', 'rank.guardian', 'rank.detective', 'rank.expert',
+      ];
+      const missing = dyn.filter((k) => !(k in DICTS.sk) || !(k in DICTS.en));
+      truthy(!missing.length, missing.join(', '));
     });
-    test('obsah neobsahuje reálne hodnoty (len .example/.test domény)', () => {
-      const text = JSON.stringify(ALL_TASKS);
-      const hosts = [...text.matchAll(/https?:\/\/([^\/"\s]+)/g)].map((m) => m[1]);
-      hosts.forEach((h) => truthy(/\.(example|test)$/.test(h) || /\.(example|test)\//.test(h + '/'), h));
+    test('funkčné texty (množné číslo) fungujú', () => {
+      setLang('sk');
+      eq(t('task.n_tasks', { n: 1 }), '1 úloha'); eq(t('task.n_tasks', { n: 3 }), '3 úlohy'); eq(t('task.n_tasks', { n: 5 }), '5 úloh');
+      setLang('en');
+      eq(t('task.n_tasks', { n: 1 }), '1 task'); eq(t('task.n_tasks', { n: 6 }), '6 tasks');
+    });
+
+    // --- Integrita obsahu v každom jazyku ---
+    for (const lang of LANG_IDS) {
+      const { levels, meta } = CONTENT[lang];
+      const tasks = levels.flatMap((l) => l.tasks);
+      test(`[${lang}] 4 úrovne, každá s aspoň 4 misiami`, () => { eq(levels.length, 4); levels.forEach((l) => truthy(l.tasks.length >= 4, 'úroveň ' + l.id)); });
+      test(`[${lang}] id úloh a kôl sú jedinečné`, () => { const ids = tasks.flatMap((x) => [x.id, ...x.rounds.map((r) => r.id)]); eq(new Set(ids).size, ids.length); });
+      test(`[${lang}] každá misia má aspoň 4 kolá a známu tému`, () => tasks.forEach((x) => { truthy(x.rounds.length >= 4, x.id); truthy(meta.TOPICS[x.topic], x.id); x.rounds.forEach((r) => truthy(meta.TOPICS[r.topic], r.id)); }));
+      test(`[${lang}] choice má práve jednu správnu odpoveď`, () => tasks.forEach((x) => x.rounds.filter((r) => r.type === 'choice').forEach((r) => eq(r.options.filter((o) => o.correct).length, 1, r.id))));
+      test(`[${lang}] každá odpoveď má vysvetlenie a každé kolo zhrnutie`, () => tasks.forEach((x) => x.rounds.forEach((r) => { truthy(r.summary, r.id); (r.options || []).forEach((o) => truthy(o.why, r.id)); })));
+      test(`[${lang}] rows: správna kategória existuje`, () => tasks.forEach((x) => x.rounds.filter((r) => r.type === 'rows').forEach((r) => r.rows.forEach((row) => {
+        if (row.options) eq(row.options.filter((o) => o.correct).length, 1, r.id); else truthy(r.categories.some((c) => c.id === row.answer), r.id);
+      }))));
+      test(`[${lang}] odznaky majú názov a popis`, () => Object.values(meta.BADGES).forEach((b) => { truthy(b.name); truthy(b.desc); }));
+      test(`[${lang}] obsah používa len vymyslené domény (.example, .test)`, () => {
+        const text = JSON.stringify(tasks);
+        [...text.matchAll(/https?:\/\/([^\/"\s]+)/g)].map((m) => m[1]).forEach((host) => truthy(/\.(example|test)$/.test(host), host));
+      });
+    }
+
+    // --- Zhoda štruktúry SK a EN (rovnaké odpovede, poradie a id) ---
+    const shape = (r) => JSON.stringify({
+      id: r.id, type: r.type, topic: r.topic, mock: !!r.mock, scenario: !!r.scenario,
+      options: (r.options || []).map((o) => !!o.correct + (o.icon || '')),
+      cats: (r.categories || []).map((c) => c.id),
+      rows: (r.rows || []).map((x) => x.answer || (x.options || []).map((o) => !!o.correct).join()),
+      items: (r.items || []).map((i) => i.tier),
+      flags: r.type === 'hotspot' ? [r.mock.from, r.mock.subject, ...r.mock.paragraphs.flat()].map((p) => (typeof p === 'object' ? `${!!p.pick}${!!p.flag}${!!p.link}` : 's')) : [],
+      goal: r.goal || null, accounts: (r.accounts || []).map((a) => a.id), leakFrom: r.leakFrom || null,
+    });
+    test('SK a EN majú rovnakú štruktúru úrovní, misií a kôl', () => {
+      CONTENT.sk.levels.forEach((l, li) => {
+        const e = CONTENT.en.levels[li];
+        eq(e.id, l.id); eq(e.badge, l.badge); eq(e.color, l.color); eq(e.tasks.length, l.tasks.length, `úroveň ${l.id}`);
+        l.tasks.forEach((x, ti) => {
+          const y = e.tasks[ti];
+          eq(y.id, x.id); eq(y.badge, x.badge); eq(y.topic, x.topic); eq(!!y.timer, !!x.timer); eq(!!y.planTitle, !!x.planTitle); eq(y.rounds.length, x.rounds.length, x.id);
+          x.rounds.forEach((r, ri) => eq(shape(y.rounds[ri]), shape(r), r.id));
+        });
+      });
+    });
+
+    // --- Jazyková kontrola: známe chyby sa nevrátili ---
+    test('slovenský obsah neobsahuje opravené chyby', () => {
+      const text = JSON.stringify(CONTENT.sk) + JSON.stringify(DICTS.sk, (k, v) => (typeof v === 'function' ? String(v) : v));
+      ['vykričník', 'Rozdeľ hesla', 'hesla sa zmenia', 'má pes ', 'Pri problému', 'nebojí trestu', 'vydierajú', 'a mená.'].forEach((bad) => truthy(!text.includes(bad), bad));
     });
 
     // --- Úložisko: nikdy nie heslá ---
@@ -91,6 +155,7 @@
       truthy(!raw.includes('Dazd-Skala-Kocka-Lipa-47'));
     });
 
+    setLang(originalLang);
     document.getElementById('summary').textContent = `Hotovo: ${pass} úspešných, ${fail} neúspešných`;
     document.getElementById('summary').style.color = fail ? '#ff7f90' : '#3ddc97';
     document.title = fail ? 'TESTY ZLYHALI' : 'TESTY OK';

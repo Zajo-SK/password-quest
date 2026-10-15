@@ -1,27 +1,31 @@
 // Výpočty nad uloženým postupom (bez zásahu do DOM).
 import { getState, getTask as storedTask } from './store.js';
-import { LEVELS, TOPICS } from './content/index.js';
+import { levels, allTasks, topicLabel } from './content/index.js';
 
 export function taskStatus(task) {
-  const t = storedTask(task.id);
-  const mastered = Object.keys(t.mastered || {}).filter((k) => t.mastered[k]).length;
+  const saved = storedTask(task.id);
+  const mastered = Object.keys(saved.mastered || {}).filter((k) => saved.mastered[k]).length;
   const st = getState();
-  const inProgress = st.resume && st.resume.taskId === task.id;
+  const inProgress = !!(st.resume && st.resume.taskId === task.id);
   return {
     mastered,
     total: task.rounds.length,
-    done: !!t.done,
-    started: mastered > 0 || inProgress || (t.plays || 0) > 0,
-    inProgress: !!inProgress,
+    done: !!saved.done,
+    started: mastered > 0 || inProgress || (saved.plays || 0) > 0,
+    inProgress,
   };
 }
 
 export function levelProgress(level) {
   const statuses = level.tasks.map(taskStatus);
   const doneTasks = statuses.filter((s) => s.done).length;
-  const masteredRounds = statuses.reduce((a, s) => a + s.mastered, 0);
-  const totalRounds = statuses.reduce((a, s) => a + s.total, 0);
-  return { doneTasks, totalTasks: level.tasks.length, masteredRounds, totalRounds, complete: doneTasks === level.tasks.length };
+  return {
+    doneTasks,
+    totalTasks: level.tasks.length,
+    masteredRounds: statuses.reduce((a, s) => a + s.mastered, 0),
+    totalRounds: statuses.reduce((a, s) => a + s.total, 0),
+    complete: doneTasks === level.tasks.length,
+  };
 }
 
 // Úspešnosť v témach pre jednu úroveň (podľa prvých pokusov uložených pre kolá tejto úrovne).
@@ -38,7 +42,7 @@ export function levelTopicStats(level) {
       by[r.topic] = b;
     }
   }
-  return Object.entries(by).map(([topic, s]) => ({ topic, label: TOPICS[topic] || topic, ...s, rate: s.total ? Math.round((s.ok / s.total) * 100) : 0 }));
+  return Object.entries(by).map(([topic, s]) => ({ topic, label: topicLabel(topic), ...s, rate: s.total ? Math.round((s.ok / s.total) * 100) : 0 }));
 }
 
 export function xpForLevel(level) {
@@ -52,7 +56,6 @@ export function xpForLevel(level) {
 
 export function overall() {
   const st = getState();
-  const done = LEVELS.flatMap((l) => l.tasks).filter((t) => storedTask(t.id).done).length;
-  const total = LEVELS.flatMap((l) => l.tasks).length;
-  return { xp: st.xp, done, total, badges: Object.keys(st.badges).length };
+  const tasks = allTasks();
+  return { xp: st.xp, done: tasks.filter((x) => storedTask(x.id).done).length, total: tasks.length, badges: Object.keys(st.badges).length, levels: levels().length };
 }
