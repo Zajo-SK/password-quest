@@ -2,9 +2,12 @@
 
 *Chráň svoj digitálny svet.* Interaktívna vzdelávacia hra o bezpečných heslách a základoch kybernetickej bezpečnosti pre školy. Rozhranie aj obsah sú v slovenčine a angličtine, jazyk sa prepína v hornej lište (SK / EN).
 
-- 4 úrovne obtiažnosti (ľahká, stredná, náročná, expertná), 16 misií a 83 interaktívnych úloh v oboch jazykoch
+- 2 moduly, každý so 4 úrovňami obtiažnosti (ľahká, stredná, náročná, expertná):
+  - **Password Quest** – bezpečné heslá, MFA a reakcia na únik (16 misií, 83 úloh)
+  - **Detektív e-mailov** – odhaľovanie podvodných e-mailov: návnady, falošné odkazy, prílohy, triedenie schránky a nahlasovanie (8 misií, 40 úloh)
+- Všetko v slovenčine aj angličtine
 - Dielňa hesiel: žiak si z kartičiek alebo vlastných slov postaví heslo z troch náhodných slov a hneď vidí jeho silu a jednoduché pravidlá
-- Body (XP), 8 odznakov, záverečné hodnotenie úrovne a certifikát za preukázané zvládnutie
+- Body (XP), 12 odznakov, záverečné hodnotenie úrovne a certifikát za preukázané zvládnutie
 - Opakovanie nesprávne zodpovedaných úloh, rozpracovanú misiu možno dokončiť aj po obnovení stránky
 - Učiteľský režim (relácia triedy, premietanie úloh, súhrn tém, export CSV) je pripravený, ale zatiaľ skrytý
 - Bez registrácie, bez mien, e-mailov a bez skutočných hesiel
@@ -68,7 +71,7 @@ js/wordlists.js        kartičky so slovami pre Dielňu hesiel a zoznam bežnýc
 js/teacher.js          učiteľský režim, relácia triedy, premietanie, CSV
 js/store.js            ukladanie neosobného postupu do localStorage
 js/progress.js         výpočty nad postupom
-js/content/            OBSAH: úrovne, misie, otázky, vysvetlenia, odznaky, témy (sk/, en/)
+js/content/            OBSAH: moduly, úrovne, misie, otázky, vysvetlenia, odznaky, témy (sk/, en/; email.js = Detektív e-mailov)
 docs/                  architektúra a návrh servera
 tests/index.html       testy v prehliadači
 sw.js                  offline režim (network-first)

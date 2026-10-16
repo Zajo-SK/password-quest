@@ -49,8 +49,9 @@ Router (`main.js`) je založený na `location.hash`. Dá sa preto obnoviť strá
 | `order` | `order()` | zostavenie plánu v poradí priority, zavádzajúce kroky sú `tier: null` |
 | `reuse` | ručne | simulácia úniku pri opakovanom hesle |
 | `lab` | ručne | úloha v Dielni hesiel; splnená, keď kontrola ukáže „Silné“ (voliteľný vymyslený `profile`) |
+| `inbox` | `inbox()`, `mail()` | simulovaná schránka: žiak otvorí každý e-mail a označí ho „v poriadku“ alebo „podvod“ |
 
-Ukážky (`mock`): `email`, `sms`, `push` (prihlasovacie upozornenie), `timeline` (časová os incidentu).
+Ukážky (`mock`): `email` (voliteľne s prílohou `attachment`), `sms`, `push` (prihlasovacie upozornenie), `timeline` (časová os incidentu).
 
 ## Pridanie obsahu
 
@@ -58,10 +59,12 @@ Ukážky (`mock`): `email`, `sms`, `push` (prihlasovacie upozornenie), `timeline
 
 **Nová misia:** pridaj objekt do `tasks` úrovne: `id`, `title`, `icon`, `topic`, `intro`, `rounds` a voliteľne `badge`, `planTitle`.
 
-**Nový modul (napr. Phishing Hunter):**
+**Moduly:** `password-quest` (úrovne s id 1–4) a `email-detective` (Detektív e-mailov, úrovne `e1`–`e4` v `content/<jazyk>/email.js`). Každý modul má 4 úrovne; poradie úrovne v module (`level.n`) je zároveň stupeň obtiažnosti. Výber úrovní, úvod a postup zobrazujú moduly samostatne.
 
-1. Vytvor súbory s úrovňami v `js/content/sk/` aj `js/content/en/`, rovnakého tvaru ako `level1.js`.
-2. Pridaj ich do `CONTENT` a `modules()` v `js/content/index.js` a odstráň modul zo zoznamu pripravovaných (`PLANNED_ICONS` a `PLANNED` v `meta.js`).
+**Nový modul (napr. Digital Footprint):**
+
+1. Vytvor súbor s úrovňami v `js/content/sk/` aj `js/content/en/` (vzor: `email.js`). Id úrovní a misií musia byť jedinečné naprieč modulmi.
+2. Pridaj ho do `MODULES` a `CONTENT` v `js/content/index.js`, názov a popis do `MODULES` v `meta.js` a odstráň ho zo zoznamu pripravovaných (`PLANNED_ICONS` a `PLANNED`).
 3. Doplň nové odznaky (`BADGE_STYLE` v `index.js`, názvy v `meta.js`) a témy (`TOPICS` v `meta.js` a popisy `learn.topic.*` v slovníkoch).
 4. Ak je potrebný nový typ úlohy, pridaj renderer do `RENDERERS` v `engine.js`, popis do `renderPresentation()` a jeho texty do oboch slovníkov.
 5. Pridaj súbory do `sw.js` (zoznam offline súborov) a spusti `/tests/`.

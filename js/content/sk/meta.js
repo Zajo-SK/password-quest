@@ -10,6 +10,9 @@ export const TOPICS = {
   tools: 'Správcovia hesiel a nástroje',
   'account-care': 'Ochrana účtu',
   policy: 'Bezpečnostné pravidlá',
+  links: 'Odkazy a adresy',
+  attachments: 'Prílohy a odosielatelia',
+  reporting: 'Nahlasovanie podvodov',
 };
 
 export const BADGES = {
@@ -21,10 +24,13 @@ export const BADGES = {
   mfa_expert: { name: 'Odborník na MFA', desc: 'Vieš správne reagovať na žiadosti o druhý faktor.' },
   cyber_detective: { name: 'Cyber detektív', desc: 'Zvládneš vyšetrovanie úniku aj reakciu na incident.' },
   cyber_expert: { name: 'Cyber expert', desc: 'Zvládaš realistické scenáre a navrhneš bezpečnostný plán.' },
+  bait_spotter: { name: 'Odhaľovač návnad', desc: 'Spoznáš správu, ktorá ťa chce nachytať na výhru alebo strach.' },
+  link_checker: { name: 'Kontrolór odkazov', desc: 'Vieš zistiť, kam odkaz naozaj vedie.' },
+  inbox_analyst: { name: 'Analytik schránky', desc: 'Roztriedíš schránku a odhalíš falošných odosielateľov aj nebezpečné prílohy.' },
+  email_detective: { name: 'Detektív e-mailov', desc: 'Odhalíš aj pokročilé triky a vieš, ako na phishing reagovať.' },
 };
 
 export const PLANNED = {
-  'phishing-hunter': 'Rozpoznávanie podvodných e-mailov a správ.',
   'digital-footprint': 'Digitálna stopa a ochrana súkromia.',
   'account-defender': 'Ochrana účtov, MFA a bezpečné prihlasovanie.',
   'ai-detective': 'Bezpečné používanie umelej inteligencie a rozpoznávanie podvodného obsahu.',
@@ -32,4 +38,7 @@ export const PLANNED = {
   'incident-response': 'Postup pri bezpečnostnom incidente.',
 };
 
-export const MODULE = { name: 'Password Quest', summary: 'Heslá, phishing, MFA a reakcia na incident.' };
+export const MODULES = {
+  'password-quest': { name: 'Password Quest', summary: 'Bezpečné heslá, viacfaktorové overovanie a reakcia na únik.' },
+  'email-detective': { name: 'Detektív e-mailov', summary: 'Odhaľ podvodné e-maily: návnady, falošné odkazy, nebezpečné prílohy.' },
+};

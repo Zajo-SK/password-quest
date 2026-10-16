@@ -4,7 +4,7 @@ import { icon, bot } from './icons.js';
 import * as store from './store.js';
 import { t, getLocale } from './i18n.js';
 import { FEATURES } from './config.js';
-import { levels as allLevels, plannedModules, topics, topicLabel, badges, badge, getLevel, getTask } from './content/index.js';
+import { modules, plannedModules, topics, topicLabel, badges, badge, getLevel, getTask, getModule, nextLevel as nextLevelOf } from './content/index.js';
 import { taskStatus, levelProgress, levelTopicStats, xpForLevel, overall } from './progress.js';
 
 export const RANKS = [
@@ -31,26 +31,35 @@ function bar(value, total, label) {
 }
 
 // Obtiažnosť úrovne: štyri body (vyplnené podľa čísla úrovne) a názov stupňa.
-export const difficultyName = (level) => t('difficulty.' + level.id);
+export const difficultyName = (level) => t('difficulty.' + level.n);
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 function difficulty(level) {
   return h('p', { class: 'lc-diff' },
-    h('span', { class: 'diff-pips', 'aria-hidden': 'true' }, [1, 2, 3, 4].map((i) => h('span', { class: 'pip' + (i <= level.id ? ' on' : '') }))),
+    h('span', { class: 'diff-pips', 'aria-hidden': 'true' }, [1, 2, 3, 4].map((i) => h('span', { class: 'pip' + (i <= level.n ? ' on' : '') }))),
     h('span', { class: 'diff-name' }, cap(difficultyName(level))));
 }
 
 function levelCard(level, cta) {
   const p = levelProgress(level);
-  return h('a', { class: `level-card lc-${level.color}`, href: `#/level/${level.id}`, 'aria-label': t('level.card_aria', { id: level.id, name: level.name, difficulty: difficultyName(level), done: p.doneTasks, total: p.totalTasks }) },
-    h('span', { class: 'lc-num' }, String(level.id)),
+  return h('a', { class: `level-card lc-${level.color}`, href: `#/level/${level.id}`, 'aria-label': t('level.card_aria', { id: level.n, name: level.name, difficulty: difficultyName(level), done: p.doneTasks, total: p.totalTasks }) },
+    h('span', { class: 'lc-num' }, String(level.n)),
     h('span', { class: 'lc-icon' }, icon(level.icon, 44)),
     h('h3', null, level.name),
     difficulty(level),
     h('p', null, level.tagline),
     bar(p.doneTasks, p.totalTasks, t('level.progress_aria', { name: level.name })),
     h('span', { class: 'lc-foot' }, t('level.missions_count', { done: p.doneTasks, total: p.totalTasks }), h('span', { class: 'lc-cta' }, cta || t('common.open'), ' ', icon('forward', 20))));
+}
+
+// Modul: nadpis s ikonou, krátky popis a jeho štyri úrovne.
+function moduleSection(m, cta) {
+  return h('section', { class: 'module', 'aria-labelledby': 'mod-' + m.id },
+    h('div', { class: 'module-head' },
+      h('span', { class: 'module-icon' }, icon(m.icon, 32)),
+      h('div', null, h('h3', { id: 'mod-' + m.id }, m.name), h('p', { class: 'muted' }, m.summary))),
+    h('div', { class: 'level-grid' }, m.levels.map((l) => levelCard(l, cta))));
 }
 
 export function home(root) {
@@ -76,14 +85,14 @@ export function home(root) {
     h('section', { 'aria-labelledby': 'levels-h' },
       h('h2', { id: 'levels-h' }, t('home.levels')),
       h('p', { class: 'muted' }, t('home.levels_hint')),
-      h('div', { class: 'level-grid' }, allLevels().map((l) => levelCard(l)))),
+      modules().map((m) => moduleSection(m))),
   );
 }
 
 export function levels(root) {
   append(root,
     pageHead(t('levels.title'), t('levels.lead'), 'shield'),
-    h('div', { class: 'level-grid' }, allLevels().map((l) => levelCard(l, t('levels.choose')))));
+    modules().map((m) => moduleSection(m, t('levels.choose'))));
 }
 
 function taskCard(task) {
@@ -108,19 +117,19 @@ export function level(root, id, showAll) {
   if (!lv) { notFound(root); return; }
   const p = levelProgress(lv);
   const session = FEATURES.teacher ? store.getState().session : null;
-  const inSession = session && session.level === lv.id && session.missions && session.missions.length && !showAll;
+  const inSession = session && String(session.level) === String(lv.id) && session.missions && session.missions.length && !showAll;
   const tasks = inSession ? lv.tasks.filter((x) => session.missions.includes(x.id)) : lv.tasks;
   append(root,
     h('a', { class: 'btn btn-ghost', href: '#/levels' }, icon('back', 22), ' ', t('level.back_all')),
     h('section', { class: `level-head lc-${lv.color}` },
       h('div', { class: 'lc-icon big' }, icon(lv.icon, 64)),
       h('div', null,
-        h('p', { class: 'eyebrow' }, t('level.eyebrow', { id: lv.id, difficulty: difficultyName(lv) })),
+        h('p', { class: 'eyebrow' }, t('level.eyebrow', { module: getModule(lv.module).name, id: lv.n, difficulty: difficultyName(lv) })),
         h('h1', { tabindex: '-1' }, lv.name),
         h('p', { class: 'lead' }, lv.story),
         bar(p.doneTasks, p.totalTasks, t('level.progress_simple')),
         h('p', { class: 'small' }, t('level.summary_line', { done: p.doneTasks, total: p.totalTasks, xp: xpForLevel(lv) })))),
-    session && session.level === lv.id ? h('p', { class: 'banner banner-info' }, icon('users', 22),
+    session && String(session.level) === String(lv.id) ? h('p', { class: 'banner banner-info' }, icon('users', 22),
       h('span', null, t('session.code', { code: session.code }), inSession ? t('session.filtered') : t('session.all'), inSession
         ? h('a', { href: `#/level/${lv.id}/all` }, t('session.show_all'))
         : h('a', { href: `#/level/${lv.id}` }, t('session.show_filtered'))))
@@ -143,7 +152,7 @@ export function levelSummary(root, id) {
   const stats = levelTopicStats(lv);
   const strong = stats.filter((s) => s.rate >= 75);
   const weak = stats.filter((s) => s.rate < 75);
-  const nextLevel = getLevel(lv.id + 1);
+  const nextLevel = nextLevelOf(lv);
   const totalOk = stats.reduce((a, s) => a + s.ok, 0);
   const totalAll = stats.reduce((a, s) => a + s.total, 0);
   const tasksFor = (topic) => lv.tasks.filter((x) => x.rounds.some((r) => r.topic === topic));
@@ -225,7 +234,7 @@ export function learn(root) {
     pageHead(t('learn.title'), t('learn.lead'), 'book'),
     h('div', { class: 'topic-grid' }, Object.keys(topics()).map((id) => h('article', { class: 'card' }, h('h3', null, topicLabel(id)), h('p', null, t('learn.topic.' + id))))),
     h('h2', null, t('learn.levels')),
-    h('div', { class: 'level-grid' }, allLevels().map((l) => levelCard(l))),
+    modules().map((m) => moduleSection(m)),
     h('h2', null, t('learn.planned')),
     h('p', { class: 'muted' }, t('learn.planned_hint')),
     h('div', { class: 'planned-grid' }, plannedModules().map((m) => h('div', { class: 'card planned' }, icon(m.icon, 30),
@@ -265,10 +274,10 @@ export function progress(root) {
           h('div', null, h('strong', null, b.name), h('span', null, b.desc), h('span', { class: 'small' }, got ? t('badge.earned') : t('badge.locked'))));
       }))),
     h('section', { class: 'card' }, h('h2', null, t('progress.levels')),
-      allLevels().map((l) => {
+      modules().map((m) => [h('h3', { class: 'lvl-module' }, icon(m.icon, 22), ' ', m.name), m.levels.map((l) => {
         const p = levelProgress(l);
-        return h('div', { class: 'lvl-row' }, h('a', { href: `#/level/${l.id}` }, `${l.id}. ${l.name}`), bar(p.doneTasks, p.totalTasks, t('level.progress_aria', { name: l.name })), h('span', { class: 'small' }, t('level.missions_count', { done: p.doneTasks, total: p.totalTasks })));
-      })),
+        return h('div', { class: 'lvl-row' }, h('a', { href: `#/level/${l.id}` }, `${l.n}. ${l.name}`), bar(p.doneTasks, p.totalTasks, t('level.progress_aria', { name: l.name })), h('span', { class: 'small' }, t('level.missions_count', { done: p.doneTasks, total: p.totalTasks })));
+      })])),
     h('section', { class: 'card' }, h('h2', null, t('progress.review')),
       weak.length
         ? h('ul', { class: 'bullets' }, weak.map((w) => h('li', null, t('progress.review_item', { topic: topicLabel(w.id), rate: pctText(w.rate) }))))
