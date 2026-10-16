@@ -74,6 +74,7 @@ export function home(root) {
         h('p', { class: 'lead' }, t('home.lead')),
         h('div', { class: 'actions' },
           h('a', { class: 'btn btn-primary btn-lg', href: '#/levels' }, icon('play', 24), ' ', t('home.start')),
+          h('a', { class: 'btn btn-primary btn-lg', href: '#/email' }, icon('mail', 24), ' ', t('home.email')),
           h('a', { class: 'btn btn-secondary btn-lg', href: '#/howto' }, icon('info', 24), ' ', t('home.howto')),
           h('a', { class: 'btn btn-secondary btn-lg', href: '#/learn' }, icon('book', 24), ' ', t('home.learn')),
           FEATURES.teacher ? h('a', { class: 'btn btn-secondary btn-lg', href: '#/teacher' }, icon('users', 24), ' ', t('nav.teacher')) : null),
@@ -89,10 +90,24 @@ export function home(root) {
   );
 }
 
+// Každý modul je samostatný tréning s vlastnou položkou v menu (#/levels pre heslá, #/email pre e-maily).
+const MODULE_ROUTES = { 'password-quest': 'levels', 'email-detective': 'email' };
+export const moduleRoute = (moduleId) => MODULE_ROUTES[moduleId] || 'levels';
+
 export function levels(root) {
   append(root,
     pageHead(t('levels.title'), t('levels.lead'), 'shield'),
-    modules().map((m) => moduleSection(m, t('levels.choose'))));
+    h('div', { class: 'level-grid' }, getModule('password-quest').levels.map((l) => levelCard(l, t('levels.choose')))));
+}
+
+export function emailTraining(root) {
+  const m = getModule('email-detective');
+  append(root,
+    pageHead(m.name, t('email.lead'), m.icon),
+    h('div', { class: 'level-grid' }, m.levels.map((l) => levelCard(l, t('levels.choose')))),
+    h('section', { class: 'card' },
+      h('h2', null, t('email.how')),
+      h('ul', { class: 'bullets' }, [1, 2, 3, 4].map((n) => h('li', null, t('email.how' + n))))));
 }
 
 function taskCard(task) {
@@ -120,7 +135,7 @@ export function level(root, id, showAll) {
   const inSession = session && String(session.level) === String(lv.id) && session.missions && session.missions.length && !showAll;
   const tasks = inSession ? lv.tasks.filter((x) => session.missions.includes(x.id)) : lv.tasks;
   append(root,
-    h('a', { class: 'btn btn-ghost', href: '#/levels' }, icon('back', 22), ' ', t('level.back_all')),
+    h('a', { class: 'btn btn-ghost', href: '#/' + moduleRoute(lv.module) }, icon('back', 22), ' ', t('level.back_all')),
     h('section', { class: `level-head lc-${lv.color}` },
       h('div', { class: 'lc-icon big' }, icon(lv.icon, 64)),
       h('div', null,

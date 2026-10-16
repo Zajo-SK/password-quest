@@ -32,7 +32,9 @@ Router (`main.js`) je založený na `location.hash`. Dá sa preto obnoviť strá
 | Hash | Obrazovka |
 | --- | --- |
 | `#/` | úvod |
-| `#/levels`, `#/level/N`, `#/level/N/summary`, `#/certificate/N` | úrovne, hodnotenie, certifikát |
+| `#/levels` | tréning hesiel (úrovne modulu Password Quest), položka „Heslá“ v menu |
+| `#/email` | Detektív e-mailov (úrovne modulu `email-detective`), samostatná položka v menu |
+| `#/level/ID`, `#/level/ID/summary`, `#/certificate/ID` | úroveň, hodnotenie, certifikát (v menu svieti tréning, ku ktorému úroveň patrí) |
 | `#/task/ID` | misia |
 | `#/lab` | Dielňa hesiel |
 | `#/teacher`, `#/present/ID`, `#/join/KOD/N/misie` | učiteľský režim (len ak je `FEATURES.teacher` zapnutý) |

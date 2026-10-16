@@ -4,6 +4,7 @@ import { icon } from './icons.js';
 import * as store from './store.js';
 import { t, getLang, setLang, LANGS } from './i18n.js';
 import { FEATURES } from './config.js';
+import { getLevel, getTask } from './content/index.js';
 import * as views from './views.js';
 import { mountTask } from './engine.js';
 import { renderLabPage } from './lab.js';
@@ -17,6 +18,7 @@ let cleanup = null;
 
 const NAV = [
   ['levels', 'nav.missions', 'shield'],
+  ['email', 'nav.email', 'mail'],
   ['lab', 'nav.lab', 'key'],
   ['progress', 'nav.progress', 'star'],
   ...(FEATURES.teacher ? [['teacher', 'nav.teacher', 'users']] : []),
@@ -60,6 +62,14 @@ store.subscribe(() => {
   if (chip) chip.replaceWith(xpChip());
 });
 
+// Ktorá položka menu svieti: úroveň, misia a certifikát patria k tréningu svojho modulu.
+function activeNav(a, b) {
+  let level = null;
+  if (a === 'level' || a === 'certificate') level = getLevel(b);
+  else if (a === 'task') { const task = getTask(b); level = task ? getLevel(task.level) : null; }
+  return level ? views.moduleRoute(level.module) : a;
+}
+
 function render() {
   if (location.hash === '#app') { app.focus(); return; } // odkaz „Preskočiť na obsah“
   if (cleanup) { try { cleanup(); } catch (e) { /* ignoruj */ } cleanup = null; }
@@ -74,6 +84,7 @@ function render() {
     switch (a) {
       case undefined: result = views.home(app); break;
       case 'levels': result = views.levels(app); break;
+      case 'email': result = views.emailTraining(app); break;
       case 'level': result = c === 'summary' ? views.levelSummary(app, b) : views.level(app, b, c === 'all'); break;
       case 'task': result = mountTask(app, b); break;
       case 'lab': result = renderLabPage(app); break;
@@ -88,7 +99,7 @@ function render() {
     }
   }
   cleanup = typeof result === 'function' ? result : null;
-  drawChrome(a);
+  drawChrome(activeNav(a, b));
   if (!app.contains(document.activeElement) || document.activeElement === document.body) {
     const heading = app.querySelector('h1');
     if (heading) { heading.setAttribute('tabindex', '-1'); heading.focus({ preventScroll: true }); }
