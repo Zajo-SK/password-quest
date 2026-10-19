@@ -3,15 +3,27 @@
 *Chráň svoj digitálny svet.* Interaktívna vzdelávacia hra o bezpečných heslách a základoch kybernetickej bezpečnosti pre školy. Rozhranie aj obsah sú v slovenčine a angličtine, jazyk sa prepína v hornej lište (SK / EN).
 
 - 2 moduly, každý so 4 úrovňami obtiažnosti (ľahká, stredná, náročná, expertná):
-  - **Password Quest** – bezpečné heslá, MFA a reakcia na únik (16 misií, 83 úloh)
+  - **Password Quest** – bezpečné heslá, MFA a reakcia na únik (17 misií, 95 úloh)
   - **Detektív e-mailov** – odhaľovanie podvodných e-mailov: návnady, falošné odkazy, prílohy, triedenie schránky a nahlasovanie (8 misií, 40 úloh)
 - Všetko v slovenčine aj angličtine
-- Dielňa hesiel: žiak si z kartičiek alebo vlastných slov postaví heslo z troch náhodných slov a hneď vidí jeho silu a jednoduché pravidlá
-- **Pre učiteľov:** dve vzorové 45-minútové hodiny na stiahnutie (PDF, SK aj EN) – *Silné heslo z troch slov* a *Detektív e-mailov* – s metodikou, pracovným listom a riešeniami
+- Dielňa hesiel: žiak si z vylosovaných kartičiek (3 až 5 slov z približne 240) postaví heslo a hneď vidí, ako ťažko sa dá uhádnuť: dĺžka aspoň 15 znakov, bežné a známe heslá, vzory a osobné údaje. Rozpozná aj náhodné heslo zo správcu hesiel
+- **Pre učiteľov:** dve vzorové 45-minútové hodiny na stiahnutie (PDF, SK aj EN) – *Silné heslo z náhodných slov* a *Detektív e-mailov* – s metodikou, pracovným listom a riešeniami
 - Body (XP), 12 odznakov, záverečné hodnotenie úrovne a certifikát za preukázané zvládnutie
 - Opakovanie nesprávne zodpovedaných úloh, rozpracovanú misiu možno dokončiť aj po obnovení stránky
 - Učiteľský režim (relácia triedy, premietanie úloh, súhrn tém, export CSV) je pripravený, ale zatiaľ skrytý
 - Bez registrácie, bez mien, e-mailov a bez skutočných hesiel
+
+## Odborný základ
+
+Obsah o heslách vychádza z aktuálnych odporúčaní (overené v októbri 2026):
+
+- **NIST SP 800-63B-4** (USA, 2025): heslo, ktoré chráni účet samo, má mať aspoň 15 znakov; žiadne povinné kombinácie znakov ani pravidelné zmeny bez dôvodu; kontrola proti bežným a uniknutým heslám; povolené správcovia hesiel a vkladanie; žiadne nápovedy ani bezpečnostné otázky. Heslá ani jednorazové kódy nie sú odolné voči phishingu, prístupové kľúče áno.
+- **NCSC** (Spojené kráľovstvo): tri náhodné slová ako zapamätateľné heslo, správca hesiel na ostatné heslá.
+- **FIDO Alliance** (2026): prístupové kľúče (passkeys) sa rýchlo rozširujú, ale nie každá služba ich podporuje.
+- **CSIRT.SK**: dlhé frázy namiesto citátov a osobných údajov, rôzne heslo pre každý účet, MFA.
+- Výskum o vzdelávaní detí (Renaud a Prior): mladším žiakom dávať jednoduché a zapamätateľné pravidlá, starších viesť k správcom hesiel.
+
+Aplikácia preto učí poradie: **prístupový kľúč**, kde sa dá → **náhodné heslo zo správcu hesiel** → **heslo z náhodne vylosovaných slov** len pre pár hesiel, ktoré treba vedieť naspamäť (zariadenie, správca hesiel). Slová musí vybrať náhoda, nie človek. Kartičiek je približne 240, preto pri dôležitom hesle odporúčame aspoň štyri slová.
 
 ## Spustenie
 
@@ -65,7 +77,7 @@ Otvor `/tests/` na lokálnom serveri. Stránka v oboch jazykoch skontroluje:
 
 Výsledok je v nadpise stránky (`TESTY OK`).
 
-Celá hra bola overená aj automatickým prechodom v prehliadači: všetkých 24 misií oboch modulov sa v slovenčine aj angličtine dá dokončiť, udelí sa všetkých 12 odznakov a otvoria sa všetky hodnotenia a certifikáty bez chýb v konzole. Overené bolo aj opakovanie po nesprávnej odpovedi a rozloženie na šírke 390 px bez horizontálneho posúvania.
+Celá hra bola overená aj automatickým prechodom v prehliadači: všetkých 25 misií oboch modulov sa v slovenčine aj angličtine dá dokončiť, udelí sa všetkých 12 odznakov a otvoria sa všetky hodnotenia a certifikáty bez chýb v konzole. Overené bolo aj opakovanie po nesprávnej odpovedi a rozloženie na šírke 390 px bez horizontálneho posúvania.
 
 ## Materiály pre učiteľov
 
@@ -73,9 +85,9 @@ Záložka **Pre učiteľov** (`#/materials`) ponúka na stiahnutie dve vzorové 
 
 | Súbor | Hodina |
 | --- | --- |
-| `materials/sk/hodina-1-bezpecne-hesla.pdf` | Silné heslo z troch slov (3. – 9. ročník) |
+| `materials/sk/hodina-1-bezpecne-hesla.pdf` | Silné heslo z náhodných slov (3. – 9. ročník) |
 | `materials/sk/hodina-2-podvodne-emaily.pdf` | Detektív e-mailov: odhaľ podvod (4. – 9. ročník) |
-| `materials/en/lesson-1-safe-passwords.pdf` | A strong password from three words |
+| `materials/en/lesson-1-safe-passwords.pdf` | A strong password from random words |
 | `materials/en/lesson-2-scam-emails.pdf` | Email Detective: spot the scam |
 
 Zdrojom sú HTML súbory vedľa PDF (dajú sa upraviť a vytlačiť priamo z prehliadača). PDF sa po úprave vygenerujú príkazom `node tools/build-materials.mjs` (vyžaduje balík `playwright`).
