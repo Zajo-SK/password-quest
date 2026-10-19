@@ -1,0 +1,44 @@
+/* Štýl materiálov pre učiteľov (A4, tlač aj PDF). Svetlý, úsporný na toner. */
+@page { size: A4; margin: 13mm 15mm 14mm; }
+:root { --ink: #14213d; --muted: #4a5675; --line: #c9d2e6; --accent: #1f6feb; --soft: #eef3fd; --ok: #1a7f4b; --warn: #a15c00; }
+* { box-sizing: border-box; }
+html { font-size: 10pt; }
+body { margin: 0; font-family: 'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif; color: var(--ink); line-height: 1.45; background: #fff; }
+h1 { font-size: 21pt; margin: 0 0 2mm; line-height: 1.15; }
+h2 { font-size: 13pt; margin: 5mm 0 2mm; padding-bottom: 1mm; border-bottom: 1.5px solid var(--accent); color: var(--accent); }
+h3 { font-size: 11pt; margin: 4mm 0 1.5mm; }
+p { margin: 0 0 2.2mm; }
+ul, ol { margin: 0 0 2.5mm; padding-left: 5.5mm; }
+li { margin-bottom: 1mm; }
+code { font-family: Consolas, 'Courier New', monospace; font-size: 9.5pt; background: var(--soft); padding: 0 1.2mm; border-radius: 1mm; }
+.eyebrow { text-transform: uppercase; letter-spacing: .08em; font-size: 8.5pt; font-weight: 700; color: var(--accent); margin: 0 0 1mm; }
+.lead { font-size: 11.5pt; color: var(--muted); }
+.meta { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2.5mm; margin: 3mm 0; }
+.meta div { background: var(--soft); border-radius: 2mm; padding: 2mm 3mm; }
+.meta strong { display: block; font-size: 8.5pt; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+table { width: 100%; border-collapse: collapse; margin: 2mm 0 3mm; }
+th, td { border: 1px solid var(--line); padding: 1.3mm 2mm; text-align: left; vertical-align: top; }
+th { background: var(--soft); font-size: 9pt; }
+td.min { width: 15mm; white-space: nowrap; font-weight: 700; color: var(--accent); }
+.box { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 2mm; padding: 2.5mm 3.5mm; margin: 3mm 0; background: #fbfcff; }
+.box.warn { border-left-color: var(--warn); }
+.box.ok { border-left-color: var(--ok); }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+.page { page-break-before: always; break-before: page; }
+.sheet-head { display: flex; justify-content: space-between; gap: 6mm; border-bottom: 1.5px solid var(--ink); padding-bottom: 2mm; margin-bottom: 4mm; }
+.sheet-head .name { flex: 0 0 75mm; border-bottom: 1px solid var(--ink); align-self: flex-end; font-size: 9pt; color: var(--muted); padding-bottom: .5mm; }
+.task { margin: 0 0 3.5mm; break-inside: avoid; }
+.task h3 { margin-top: 0; }
+.lines div { border-bottom: 1px solid var(--line); height: 6.5mm; }
+.check { display: inline-block; width: 4mm; height: 4mm; border: 1px solid var(--ink); border-radius: .8mm; vertical-align: -0.6mm; margin-right: 1.5mm; }
+.mail { border: 1px solid var(--ink); border-radius: 2mm; padding: 2.5mm 3.5mm; font-size: 9.5pt; }
+.mail p { margin-bottom: 1.5mm; }
+.mail .hd { border-bottom: 1px dashed var(--line); padding-bottom: 1.5mm; margin-bottom: 2mm; }
+.mail .lnk { color: var(--accent); text-decoration: underline; }
+.muted { color: var(--muted); }
+.small { font-size: 9pt; }
+.answer { color: var(--ok); font-weight: 600; }
+.cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2.5mm; margin-top: 2mm; }
+.cards span { border: 1.5px dashed var(--muted); border-radius: 2mm; padding: 2mm 1mm; text-align: center; font-weight: 700; font-size: 11pt; }
+footer { margin-top: 4mm; padding-top: 2mm; border-top: 1px solid var(--line); font-size: 8.5pt; color: var(--muted); }
+@media screen { body { max-width: 190mm; margin: 10mm auto; padding: 0 6mm; } .page { margin-top: 14mm; padding-top: 8mm; border-top: 2px dashed var(--line); } }

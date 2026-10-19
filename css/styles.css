@@ -144,6 +144,13 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: 
 .module-icon { display: inline-grid; place-items: center; width: 56px; height: 56px; border-radius: 16px; background: rgba(45, 226, 230, 0.14); color: var(--cyan); flex: 0 0 auto; }
 .lvl-module { display: flex; align-items: center; gap: 8px; margin: 16px 0 6px; font-size: 1.05rem; color: var(--muted); }
 
+/* Materiály pre učiteľov */
+.lesson-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+.lesson { display: flex; flex-direction: column; margin: 0; }
+.lesson-head { display: flex; gap: 14px; align-items: center; margin-bottom: 8px; }
+.lesson-head h2 { margin: 0; }
+.lesson .actions { margin-top: auto; padding-top: 8px; }
+
 /* Úvodná obrazovka */
 .hero { display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 24px; align-items: center; padding: 24px 0; }
 .hero-title { font-size: clamp(2.2rem, 7vw, 4rem); letter-spacing: 0.05em; margin: 0; background: linear-gradient(90deg, var(--cyan), var(--blue) 50%, var(--purple)); -webkit-background-clip: text; background-clip: text; color: transparent; }
@@ -421,6 +428,7 @@ ol.present-options { list-style: decimal inside; }
   .lvl-row { grid-template-columns: 1fr; }
   .inbox { grid-template-columns: 1fr; }
   .inbox-view { order: -1; }
+  .lesson-grid { grid-template-columns: 1fr; }
   .topbar { position: static; padding: 6px 12px; gap: 4px 8px; }
   .topbar nav { flex: 0 1 auto; }
   .topbar nav .nav-label { display: none; }

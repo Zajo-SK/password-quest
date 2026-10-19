@@ -21,6 +21,7 @@ const NAV = [
   ['email', 'nav.email', 'mail'],
   ['lab', 'nav.lab', 'key'],
   ['progress', 'nav.progress', 'star'],
+  ['materials', 'nav.materials', 'book'],
   ...(FEATURES.teacher ? [['teacher', 'nav.teacher', 'users']] : []),
 ];
 
@@ -85,6 +86,7 @@ function render() {
       case undefined: result = views.home(app); break;
       case 'levels': result = views.levels(app); break;
       case 'email': result = views.emailTraining(app); break;
+      case 'materials': result = views.teachers(app); break;
       case 'level': result = c === 'summary' ? views.levelSummary(app, b) : views.level(app, b, c === 'all'); break;
       case 'task': result = mountTask(app, b); break;
       case 'lab': result = renderLabPage(app); break;

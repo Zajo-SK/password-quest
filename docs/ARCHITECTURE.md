@@ -37,6 +37,7 @@ Router (`main.js`) je založený na `location.hash`. Dá sa preto obnoviť strá
 | `#/level/ID`, `#/level/ID/summary`, `#/certificate/ID` | úroveň, hodnotenie, certifikát (v menu svieti tréning, ku ktorému úroveň patrí) |
 | `#/task/ID` | misia |
 | `#/lab` | Dielňa hesiel |
+| `#/materials` | materiály pre učiteľov (vzorové hodiny na stiahnutie z `materials/`) |
 | `#/teacher`, `#/present/ID`, `#/join/KOD/N/misie` | učiteľský režim (len ak je `FEATURES.teacher` zapnutý) |
 | `#/howto`, `#/learn`, `#/progress` | návody, obsah, postup |
 

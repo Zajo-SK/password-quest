@@ -89,6 +89,8 @@
         ...[1, 2, 3].flatMap((n) => [`ws.why${n}`, `ws.limit${n}`]),
         ...[1, 2, 3, 4].map((n) => `difficulty.${n}`),
         ...[1, 2, 3, 4].map((n) => `email.how${n}`),
+        ...[1, 2].flatMap((l) => ['title', 'lead', 'grade', 'goal1', 'goal2', 'goal3'].map((k) => `mat.l${l}.${k}`)),
+        ...[1, 2, 3, 4].map((n) => `mat.tip${n}`),
         ...[1, 2, 3, 4, 5].map((n) => `teacher.priv${n}`),
         'rank.novice', 'rank.guardian', 'rank.detective', 'rank.expert',
       ];
@@ -152,6 +154,12 @@
         });
       }));
     });
+
+    // --- Materiály pre učiteľov: všetky súbory na stiahnutie existujú ---
+    const materialFiles = ['sk/hodina-1-bezpecne-hesla', 'sk/hodina-2-podvodne-emaily', 'en/lesson-1-safe-passwords', 'en/lesson-2-scam-emails']
+      .flatMap((f) => [`../materials/${f}.pdf`, `../materials/${f}.html`]).concat('../materials/print.css');
+    const materialStatus = await Promise.all(materialFiles.map((f) => fetch(f, { method: 'HEAD', cache: 'no-store' }).then((r) => [f, r.ok]).catch(() => [f, false])));
+    test('materiály pre učiteľov sú dostupné', () => { const missing = materialStatus.filter(([, ok]) => !ok).map(([f]) => f); truthy(!missing.length, missing.join(', ')); });
 
     // --- Jazyková kontrola: známe chyby sa nevrátili ---
     test('slovenský obsah neobsahuje opravené chyby', () => {

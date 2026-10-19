@@ -235,6 +235,42 @@ export function certificate(root, id) {
       : h('div', { class: 'actions' }, printBtn));
 }
 
+// Materiály pre učiteľov: vzorové hodiny na stiahnutie (PDF) v oboch jazykoch.
+const LESSONS = [
+  { id: 1, icon: 'key', files: { sk: 'materials/sk/hodina-1-bezpecne-hesla', en: 'materials/en/lesson-1-safe-passwords' } },
+  { id: 2, icon: 'mail', files: { sk: 'materials/sk/hodina-2-podvodne-emaily', en: 'materials/en/lesson-2-scam-emails' } },
+];
+
+export function teachers(root) {
+  const lang = getLocale().startsWith('sk') ? 'sk' : 'en';
+  const other = lang === 'sk' ? 'en' : 'sk';
+  const lessonCard = (l) => h('article', { class: 'card lesson' },
+    h('div', { class: 'lesson-head' },
+      h('span', { class: 'module-icon' }, icon(l.icon, 30)),
+      h('div', null,
+        h('p', { class: 'eyebrow' }, t('mat.lesson_n', { n: l.id })),
+        h('h2', null, t(`mat.l${l.id}.title`)))),
+    h('p', null, t(`mat.l${l.id}.lead`)),
+    h('div', { class: 'chips' },
+      h('span', { class: 'chip' }, icon('users', 18), ' ', t(`mat.l${l.id}.grade`)),
+      h('span', { class: 'chip' }, icon('clock', 18), ' ', t('mat.length')),
+      h('span', { class: 'chip' }, icon('book', 18), ' ', t('mat.pages'))),
+    h('h3', null, t('mat.goals')),
+    h('ul', { class: 'bullets' }, [1, 2, 3].map((n) => h('li', null, t(`mat.l${l.id}.goal${n}`)))),
+    h('div', { class: 'actions' },
+      h('a', { class: 'btn btn-primary', href: l.files[lang] + '.pdf', download: '', target: '_blank', rel: 'noopener' }, icon('download', 22), ' ', t('mat.download')),
+      h('a', { class: 'btn btn-secondary', href: l.files[lang] + '.html', target: '_blank', rel: 'noopener' }, icon('print', 22), ' ', t('mat.open')),
+      h('a', { class: 'btn btn-ghost', href: l.files[other] + '.pdf', download: '', target: '_blank', rel: 'noopener', lang: other }, t('mat.other_lang'))));
+
+  append(root,
+    pageHead(t('mat.title'), t('mat.lead'), 'book'),
+    embedded() ? h('p', { class: 'banner banner-info' }, icon('info', 22), h('span', null, t('mat.embedded'))) : null,
+    h('div', { class: 'lesson-grid' }, LESSONS.map(lessonCard)),
+    h('section', { class: 'card' },
+      h('h2', null, t('mat.tips')),
+      h('ul', { class: 'bullets' }, [1, 2, 3, 4].map((n) => h('li', null, t('mat.tip' + n))))));
+}
+
 export function howto(root) {
   const step = (n, ic) => h('article', { class: 'card step' }, h('span', { class: 'step-num' }, String(n)), icon(ic, 34),
     h('div', null, h('h3', null, t(`howto.s${n}.t`)), h('p', null, t(`howto.s${n}.d`))));
