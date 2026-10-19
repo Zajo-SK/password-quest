@@ -268,6 +268,7 @@ export function renderLabPage(root) {
       h('section', { class: 'card' },
         h('h2', null, t('ws.limits')),
         h('ul', { class: 'bullets' }, [1, 2, 3, 4].map((n) => h('li', null, t('ws.limit' + n)))))),
+    h('p', null, h('a', { href: '#/basis' }, icon('shield-check', 20), ' ', t('basis.lab_link'))),
   );
   return () => { ws.destroy(); };
 }

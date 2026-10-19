@@ -268,7 +268,8 @@ export function teachers(root) {
     h('div', { class: 'lesson-grid' }, LESSONS.map(lessonCard)),
     h('section', { class: 'card' },
       h('h2', null, t('mat.tips')),
-      h('ul', { class: 'bullets' }, [1, 2, 3, 4].map((n) => h('li', null, t('mat.tip' + n))))));
+      h('ul', { class: 'bullets' }, [1, 2, 3, 4].map((n) => h('li', null, t('mat.tip' + n)))),
+      h('p', null, h('a', { href: '#/basis' }, icon('shield-check', 20), ' ', t('basis.lab_link')))));
 }
 
 export function howto(root) {
@@ -290,6 +291,45 @@ export function learn(root) {
     h('p', { class: 'muted' }, t('learn.planned_hint')),
     h('div', { class: 'planned-grid' }, plannedModules().map((m) => h('div', { class: 'card planned' }, icon(m.icon, 30),
       h('div', null, h('strong', null, m.name), h('span', { class: 'tag' }, t('learn.soon')), h('p', { class: 'small' }, m.summary))))));
+}
+
+// Odborný základ: z akých odporúčaní vychádza obsah o heslách a ako ich aplikácia učí.
+const BASIS_SOURCES = [
+  'https://pages.nist.gov/800-63-4/sp800-63b.html',
+  'https://www.ncsc.gov.uk/collection/top-tips-for-staying-secure-online/three-random-words',
+  'https://fidoalliance.org/fido-alliance-reports-accelerating-global-passkey-adoption-on-world-passkey-day-2026/',
+  'https://www.csirt.gov.sk/wp-content/uploads/2024/03/Preco-neukladat-hesla.pdf',
+  'https://www.eff.org/dice',
+  'https://theconversation.com/password-education-should-be-age-appropriate-heres-how-145943',
+];
+
+export function basis(root) {
+  const order = (n, ic) => h('article', { class: 'card step' }, h('span', { class: 'step-num' }, String(n)), icon(ic, 34),
+    h('div', null, h('h3', null, t(`basis.o${n}.t`)), h('p', null, t(`basis.o${n}.d`))));
+  const principle = (n) => h('article', { class: 'card basis-item' },
+    h('h3', null, t(`basis.p${n}.t`)),
+    h('p', null, h('strong', null, t('basis.says')), ' ', t(`basis.p${n}.s`)),
+    h('p', null, h('strong', null, t('basis.app')), ' ', t(`basis.p${n}.a`)));
+  append(root,
+    pageHead(t('basis.title'), t('basis.lead'), 'shield-check'),
+    h('p', { class: 'muted small' }, t('basis.checked')),
+    h('h2', null, t('basis.order')),
+    h('p', null, t('basis.order_lead')),
+    h('div', { class: 'steps-grid' }, order(1, 'key'), order(2, 'lock'), order(3, 'dice'), order(4, 'phone')),
+    h('h2', null, t('basis.principles')),
+    h('div', { class: 'topic-grid' }, [1, 2, 3, 4, 5, 6, 7, 8].map(principle)),
+    h('div', { class: 'two-col' },
+      h('section', { class: 'card' },
+        h('h2', null, t('basis.limits')),
+        h('ul', { class: 'bullets' }, [1, 2, 3].map((n) => h('li', null, t('basis.limit' + n))))),
+      h('section', { class: 'card' },
+        h('h2', null, t('basis.sources')),
+        h('ul', { class: 'bullets' }, BASIS_SOURCES.map((url, i) => h('li', null,
+          h('a', { href: url, target: '_blank', rel: 'noopener noreferrer' }, t('basis.s' + (i + 1))))))),
+    ),
+    h('div', { class: 'actions' },
+      h('a', { class: 'btn btn-primary', href: '#/lab' }, icon('key', 22), ' ', t('nav.lab')),
+      h('a', { class: 'btn btn-secondary', href: '#/levels' }, icon('play', 22), ' ', t('home.start'))));
 }
 
 export function progress(root) {

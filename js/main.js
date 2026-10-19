@@ -52,7 +52,7 @@ function drawChrome(active) {
     h('nav', { 'aria-label': t('nav.aria') }, h('ul', null, NAV.map(([id, key, ic]) => h('li', null,
       h('a', { href: `#/${id}`, 'aria-label': t(key), 'aria-current': active === id ? 'page' : null }, icon(ic, 20), h('span', { class: 'nav-label' }, t(key))))))),
     h('div', { class: 'topbar-end' }, xpChip(), langSwitch()));
-  if (footer) { clear(footer); footer.append(h('p', null, t('footer.text'))); }
+  if (footer) { clear(footer); footer.append(h('p', null, t('footer.text'), ' · ', h('a', { href: '#/basis' }, t('basis.footer_link')))); }
   if (skip) skip.textContent = t('skip');
   document.documentElement.lang = getLang();
   document.title = t('doc.title');
@@ -91,6 +91,7 @@ function render() {
       case 'task': result = mountTask(app, b); break;
       case 'lab': result = renderLabPage(app); break;
       case 'howto': result = views.howto(app); break;
+      case 'basis': result = views.basis(app); break;
       case 'learn': result = views.learn(app); break;
       case 'progress': result = views.progress(app); break;
       case 'certificate': result = views.certificate(app, b); break;
