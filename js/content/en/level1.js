@@ -48,6 +48,11 @@ export const level1 = {
           [['Yes, the exclamation mark makes it unbreakable.', 'A symbol at the end is a well-known trick that can be guessed.'],
            ['Yes, I just need to add one more number.', 'A number at the end is a common trick too. It matters more that the password is long and unexpected.']],
           'An exclamation mark or a number alone will not save a password.'),
+        choice('Bot wants three words that nobody can guess. How should Bot choose them?',
+          ['Draw them blindly from cards or roll dice.', 'When chance picks the words, nobody expects them. Not even Bot.', { icon: 'dice' }],
+          [['Pick things Bot can see right now.', 'Table, chair, lamp... An attacker would try that too.', { icon: 'eye' }],
+           ['Pick Bot’s favourite things.', 'Friends and other people know your favourite things.', { icon: 'star' }]],
+          'Let chance pick the words: cards or dice.'),
       ],
     },
     {

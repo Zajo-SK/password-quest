@@ -450,3 +450,5 @@ ol.present-options { list-style: decimal inside; }
   body.print-mode .printable { position: absolute; left: 0; top: 0; width: 100%; background: #fff; border-color: #000; box-shadow: none; }
   .btn, .topbar, .footer { display: none !important; }
 }
+.basis-item h3 { margin-top: 0; }
+.basis-item p { margin: 0 0 8px; }
