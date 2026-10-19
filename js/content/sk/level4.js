@@ -1,7 +1,6 @@
 import { choice, multi, rows, rowsPer, hotspot, order } from '../helpers.js';
 
-// Úroveň 4: Cyber experti (15 – 18 rokov). Realistické, ale úplne vymyslené scenáre.
-// Čas sa nikdy nepenalizuje – stopky slúžia len na informáciu.
+// Úroveň 4: Cyber experti (obtiažnosť: expertná). Realistické, ale úplne vymyslené scenáre.
 
 const TIMELINE = {
   kind: 'timeline',
@@ -24,9 +23,8 @@ const E = (o) => ({ kind: 'email', ...o });
 export const level4 = {
   id: 4,
   name: 'Cyber experti',
-  ages: '15–18 rokov',
   tagline: 'Realistické scenáre, analýza incidentov a bezpečnostný plán.',
-  story: 'Ako expert rozhoduješ pri incidente a navrhuješ ochranu pre celú školu. Pomalšie rozhodovanie sa netrestá, dôležitá je kvalita.',
+  story: 'Ako expert rozhoduješ pri incidente a navrhuješ ochranu pre celú školu.',
   color: 'cyan',
   icon: 'terminal',
   badge: 'cyber_expert',
@@ -36,8 +34,6 @@ export const level4 = {
       title: 'Incident Response',
       icon: 'flag',
       topic: 'incident',
-      minutes: 10,
-      timer: true,
       intro: ['Vymyslený žiak má napadnutý školský e-mail. Máš k dispozícii časovú os, fakty o stave účtu a zoznam možných krokov.', 'Cieľ: správne určiť priority a zostaviť plán reakcie.'],
       rounds: [
         order('Zostav plán reakcie. Klikaj na kroky v poradí podľa priority.',
@@ -88,7 +84,6 @@ export const level4 = {
       title: 'Správca hesiel',
       icon: 'lock',
       topic: 'tools',
-      minutes: 7,
       intro: ['Ako zvládnuť desiatky jedinečných hesiel? Pomôže správca hesiel, ale treba ho používať správne.'],
       rounds: [
         choice('Prečo sú jedinečné heslá dôležité a ako pri nich pomáha správca hesiel?',
@@ -97,7 +92,7 @@ export const level4 = {
            ['Pri silných heslách je správca hesiel zbytočný.', 'Bez nástroja sa desiatky hesiel spravujú len ťažko.']],
           'Vďaka správcovi hesiel môžeš používať veľa jedinečných hesiel.'),
         choice('Aké má byť hlavné heslo do správcu hesiel?',
-          ['Dlhá fráza, ktorú nepoužívam nikde inde, a k tomu zapnuté MFA.', 'Hlavné heslo chráni všetky ostatné, preto musí byť výnimočne silné.'],
+          ['Dlhé heslo z náhodných slov, ktoré nepoužívam nikde inde, a k tomu zapnuté MFA.', 'Hlavné heslo chráni všetky ostatné, preto musí byť výnimočne silné.'],
           [['Heslo, ktoré už používam inde. Ľahko sa pamätá.', 'Hlavné heslo sa nesmie opakovať v iných službách.'],
            ['Krátke slovo so symbolom.', 'Krátke heslá s predvídateľnými vzormi sú slabé.']],
           'Hlavné heslo je kľúč ku všetkému. Musí byť silné a jedinečné.'),
@@ -124,7 +119,6 @@ export const level4 = {
       title: 'Analýza phishingu',
       icon: 'hook',
       topic: 'phishing',
-      minutes: 10,
       badge: 'phishing_hunter',
       intro: ['Správy sú vymyslené, ale realistické. Hľadaj podozrivé požiadavky, naliehavý tón, nezvyčajné odkazy a žiadosti o prihlasovacie údaje.', 'Pozor: nespoliehaj sa iba na logo alebo meno odosielateľa. Podvodné správy môžu vyzerať dôveryhodne.'],
       rounds: [
@@ -195,13 +189,12 @@ export const level4 = {
       title: 'Bezpečnostný audit',
       icon: 'shield-check',
       topic: 'policy',
-      minutes: 10,
       planTitle: 'Bezpečnostný plán vymyslenej školy',
       intro: ['Navrhni bezpečnostný plán pre vymyslenú školu. Pri každej oblasti vyber najlepšie pravidlo.', 'Zo správnych odpovedí sa na konci zostaví tvoj plán.'],
       rounds: [
         rowsPer('Navrhni pravidlá pre prvé štyri oblasti.', [
-          { label: 'Pravidlá pre heslá', plan: 'Heslá: aspoň 14 znakov, najlepšie fráza z viacerých nesúvisiacich slov; kontrola proti bežným a uniknutým heslám.',
-            good: ['Heslá sú dlhé a nepredvídateľné (napríklad fráza z viacerých slov) a kontrolujú sa proti zoznamom uniknutých hesiel.', 'Dĺžka a nepredvídateľnosť sú dôležitejšie ako mechanické pravidlá.'],
+          { label: 'Pravidlá pre heslá', plan: 'Heslá: aspoň 14 znakov, napríklad tri alebo viac náhodných slov; kontrola proti bežným a uniknutým heslám.',
+            good: ['Heslá sú dlhé a nepredvídateľné (napríklad tri alebo viac náhodných slov) a kontrolujú sa proti zoznamom uniknutých hesiel.', 'Dĺžka a nepredvídateľnosť sú dôležitejšie ako mechanické pravidlá.'],
             bad: [['Heslo má aspoň 8 znakov a jeden symbol.', 'Krátke heslá s povinným symbolom vedú k predvídateľným vzorom.'], ['Heslá sa menia každý týždeň.', 'Časté nútené zmeny vedú k predvídateľným úpravám hesiel.']] },
           { label: 'Jedinečnosť prihlasovacích údajov', plan: 'Jedinečnosť: každá služba má iné heslo; používa sa schválený správca hesiel.',
             good: ['Každý účet má vlastné jedinečné heslo a používa sa schválený správca hesiel.', 'Únik jedného hesla neohrozí ostatné účty.'],

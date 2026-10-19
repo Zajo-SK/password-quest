@@ -1,6 +1,6 @@
 import { choice, multi, rows, order } from '../helpers.js';
 
-// Level 3: Cyber Detectives (ages 12–14). Investigations, pattern analysis, MFA and incident response.
+// Level 3: Cyber Detectives (difficulty: hard). Investigations, pattern analysis, MFA and incident response.
 // All services, addresses and data are made up. Structure must match js/content/sk/level3.js.
 
 const LEAK_STORY = 'The made-up website GameZone.example announced a leak of user data. Some students use the same password on several services.';
@@ -8,7 +8,6 @@ const LEAK_STORY = 'The made-up website GameZone.example announced a leak of use
 export const level3 = {
   id: 3,
   name: 'Cyber Detectives',
-  ages: 'Ages 12–14',
   tagline: 'Investigate incidents, analyze patterns and make decisions.',
   story: 'You become a detective of digital traces. An investigation takes logic, care and the right steps.',
   color: 'purple',
@@ -20,7 +19,6 @@ export const level3 = {
       title: 'Leak investigation',
       icon: 'search',
       topic: 'incident',
-      minutes: 8,
       intro: [LEAK_STORY, 'Work like a detective: identify the risk, choose which accounts to secure, change the password, report it and pick further measures.'],
       rounds: [
         choice('Step 1: What is the main risk for a student who uses the same password on other services too?',
@@ -55,33 +53,32 @@ export const level3 = {
     },
     {
       id: 'l3t2',
-      title: 'Password lab',
-      icon: 'bulb',
+      title: 'Password workshop',
+      icon: 'key',
       topic: 'safe-passwords',
-      minutes: 9,
-      intro: ['You will use a tool for analyzing passwords. Only try made-up examples, never your real password.', 'The analysis runs only in this browser and nothing is saved.'],
+      intro: ['You will build passwords in the Password Workshop. Only try made-up passwords, never your real one.', 'The check runs only in this browser and nothing is saved.'],
       rounds: [
         {
           type: 'lab',
-          prompt: 'Make up an example phrase at least 14 characters long in which the lab finds no problems.',
-          hint: 'Try four unrelated words separated by hyphens. Avoid common words and names.',
-          goal: { minLen: 14, noIssues: true },
-          summary: 'A long phrase of unrelated words passes the checks better than a short word with symbols.',
+          prompt: 'Build a password from three words that the workshop rates “Strong”.',
+          hint: 'Draw some cards or make up your own words. Start each word with a capital letter.',
+          goal: { strong: true },
+          summary: 'Three unrelated words pass the checks better than a short word with symbols.',
         },
         {
           type: 'lab',
-          prompt: 'The made-up student Jake has a dog called Rex, plays soccer, lives in Denver and was born in 2012. Make up an example phrase for him that does not contain these details.',
+          prompt: 'The made-up student Jake has a dog called Rex, plays soccer, lives in Denver and was born in 2012. Build him a password from three words that does not contain these details.',
           profile: { 'Dog’s name': 'Rex', Hobby: 'soccer', City: 'Denver', 'Year of birth': '2012' },
-          hint: 'Personal details in a password can be guessed. Use unrelated words.',
-          goal: { minLen: 14, noIssues: true },
+          hint: 'Personal details in a password can be guessed. Use words that have nothing to do with Jake.',
+          goal: { strong: true },
           summary: 'A pet’s name, hobbies, hometown and birth year are among the first things attackers try.',
         },
-        choice('The lab reports: “Common pattern: word + numbers (+ symbol).” How do you improve the password?',
-          ['I replace it with a longer phrase of four or more unrelated words.', 'That removes the predictable pattern and makes the password longer.'],
-          [['I add another exclamation mark.', 'The pattern stays the same.'],
-           ['I change the last number.', 'That change is predictable and the pattern stays.']],
-          'You get rid of a predictable pattern with a new, longer phrase.'),
-        choice('The tool found no problems. Is the password guaranteed to be safe?',
+        choice('A friend’s password is “Teddy123!”: a word, numbers and a symbol at the end. How can they improve it?',
+          ['Replace it with a new password made of three unrelated words.', 'That removes the predictable pattern and makes the password longer.'],
+          [['Add another exclamation mark.', 'The pattern stays the same.'],
+           ['Change the last number.', 'That change is predictable and the pattern stays.']],
+          'You get rid of a predictable pattern with a new password made of three unrelated words.'),
+        choice('The workshop says “Strong”. Is the password guaranteed to be safe?',
           ['No. For example, the tool cannot tell whether the password has already leaked. The result is not a guarantee.', 'A unique password for every account and multi-factor authentication matter too.'],
           [['Yes, the tool is reliable.', 'No simple check can guarantee that a password is safe.'],
            ['Yes, if the password is long.', 'Length helps, but it is not a guarantee.']],
@@ -98,7 +95,6 @@ export const level3 = {
       title: 'MFA: the second factor',
       icon: 'phone',
       topic: 'mfa',
-      minutes: 7,
       badge: 'mfa_expert',
       intro: ['Multi-factor authentication (MFA) adds another step after the password.', 'You will also learn how to react to unexpected confirmation requests.'],
       rounds: [
@@ -140,7 +136,6 @@ export const level3 = {
       title: 'Incident response',
       icon: 'flag',
       topic: 'incident',
-      minutes: 8,
       intro: ['You get a message saying your school account may have been compromised.', 'Put together the right steps and make decisions in further situations.'],
       rounds: [
         order('Build your response. Click the steps in order, starting with the most important.',

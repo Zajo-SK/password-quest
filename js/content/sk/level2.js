@@ -1,6 +1,6 @@
 import { choice, multi, rows, hotspot } from '../helpers.js';
 
-// Úroveň 2: Strážcovia účtov (9 – 11 rokov). Triedenie, porovnávanie, simulácia úniku a krátke scenáre.
+// Úroveň 2: Strážcovia účtov (obtiažnosť: stredná). Triedenie, porovnávanie, simulácia úniku a krátke scenáre.
 
 const CATS = [
   { id: 'easy', label: 'Ľahko uhádnuteľné' },
@@ -25,7 +25,6 @@ const phishEmail = (flagged) => {
 export const level2 = {
   id: 2,
   name: 'Strážcovia účtov',
-  ages: '9–11 rokov',
   tagline: 'Triedenie hesiel, simulácia úniku a odhaľovanie podvodov.',
   story: 'Účty v digitálnom svete treba strážiť. Staň sa strážcom, ktorý rozozná slabé heslo aj podvodnú správu.',
   color: 'blue',
@@ -37,7 +36,6 @@ export const level2 = {
       title: 'Detektor slabých hesiel',
       icon: 'search',
       topic: 'safe-passwords',
-      minutes: 7,
       badge: 'weak_detector',
       intro: ['Nie každé heslo, ktoré vyzerá zložito, je bezpečné.', 'Rozdeľ vymyslené ukážky podľa toho, ako ľahko sa dajú uhádnuť.'],
       rounds: [
@@ -45,13 +43,13 @@ export const level2 = {
           [['12345678', 'easy', 'Čísla po poradí patria medzi úplne prvé, ktoré sa skúšajú.'],
            ['Futbal2026', 'pred', 'Obľúbená téma a rok sú veľmi bežný vzor. Dá sa uhádnuť.'],
            ['Macko123!', 'pred', 'Slovo, čísla a symbol na konci sú známy vzor. Symbol ho nezachráni.'],
-           ['Vlak-Mrak-Les-72', 'less', 'Viac nesúvisiacich slov a dobrá dĺžka. Takéto heslo sa háda oveľa ťažšie.']],
+           ['VlakKaktusMetla', 'less', 'Tri nesúvisiace slová a dobrá dĺžka. Takéto heslo sa háda oveľa ťažšie.']],
           'Dĺžka a nepredvídateľnosť sú dôležitejšie než symbol pridaný na koniec bežného slova.'),
         rows('Ďalšia sada. Rozdeľ ich znova.', CATS,
           [['qwertyuiop', 'easy', 'Rad písmen na klávesnici po poradí. Veľmi ľahké.'],
            ['Jana2012', 'pred', 'Meno a rok narodenia. Ľudia ich skúšajú ako prvé.'],
            ['heslo123', 'easy', 'Bežné slovo a čísla po poradí.'],
-           ['Kamen-Luk-Zebra-Dazd-58', 'less', 'Päť nesúvisiacich slov. Dá sa zapamätať a ťažko sa háda.'],
+           ['KamenZebraDazdnik', 'less', 'Tri nesúvisiace slová. Dá sa zapamätať a ťažko sa háda.'],
            ['Ahoj1234', 'pred', 'Pozdrav a čísla po poradí. Veľmi bežné.']],
           'Mená, roky a čísla po poradí robia heslo predvídateľným.'),
         choice('Heslo „passwordpasswordpassword“ má 24 znakov. Je preto bezpečné?',
@@ -64,16 +62,16 @@ export const level2 = {
           [['Lebo symboly sú nebezpečné.', 'Symboly nie sú nebezpečné, len je tento postup príliš bežný.'],
            ['Lebo čísla sa nedajú zapamätať.', 'Čísla sa zapamätať dajú. Problém je, že sú predvídateľné.']],
           'Mechanicky pridané znaky na konci slova z neho dobré heslo neurobia.'),
-        choice('Heslo „Zimna-Noc-2024“ je dlhšie, ale objavilo sa v úniku údajov z jednej služby. Môžeš ho ďalej používať?',
-          ['Nie. Uniknuté heslo už iní poznajú, treba ho nahradiť novým.', 'Aj dlhé heslo prestane byť bezpečné, keď sa dostane na zoznamy uniknutých hesiel.'],
-          [['Áno, veď je dlhé.', 'Dĺžka nepomôže, ak heslo už poznajú iní.'],
+        choice('Heslo „ZimnaNocSanky“ je z troch slov, ale objavilo sa v úniku údajov z jednej služby. Môžeš ho ďalej používať?',
+          ['Nie. Uniknuté heslo už iní poznajú, treba ho nahradiť novým.', 'Aj dobré heslo prestane byť bezpečné, keď sa dostane na zoznamy uniknutých hesiel.'],
+          [['Áno, veď je z troch slov.', 'Ani tri slová nepomôžu, ak heslo už poznajú iní.'],
            ['Áno, ak v ňom zmením jedno písmeno.', 'Malá zmena sa dá ľahko uhádnuť. Treba vymyslieť úplne nové heslo.']],
-          'Uniknuté heslo treba nahradiť, aj keď je dlhé.'),
+          'Uniknuté heslo treba nahradiť, aj keď je inak dobré.'),
         choice('Ktoré heslo je lepšie?',
-          ['Dazd-Skala-Kocka-Lipa-4', 'Viac nesúvisiacich slov a dobrá dĺžka. Je menej predvídateľné.'],
+          ['SkalaKockaLipa', 'Tri nesúvisiace slová a dobrá dĺžka. Je menej predvídateľné.'],
           [['Futbal2026!', 'Téma, rok a symbol na konci. Typický vzor.'],
            ['Heslo2026', 'Veľmi bežné slovo a rok.']],
-          'Menej predvídateľné je dlhšie heslo z nesúvisiacich slov.'),
+          'Menej predvídateľné sú tri slová, ktoré spolu nesúvisia.'),
       ],
     },
     {
@@ -81,7 +79,6 @@ export const level2 = {
       title: 'Jeden kľúč na všetky dvere',
       icon: 'key',
       topic: 'unique',
-      minutes: 7,
       badge: 'uniqueness',
       intro: ['Čo sa stane, keď použiješ rovnaké heslo vo viacerých službách?', 'Vyskúšaj si to v simulácii. Všetky účty a heslá sú vymyslené.'],
       rounds: [
@@ -109,7 +106,7 @@ export const level2 = {
            ['Lebo je to príliš dlhé.', 'Tie heslá sú skôr krátke a predvídateľné.']],
           'Ak sa dá jedno heslo odvodiť od druhého, nie sú jedinečné.'),
         choice('Ako si zapamätať veľa rôznych hesiel?',
-          ['Použijem správcu hesiel, ktorého schváli škola alebo rodič, a na hlavné heslo dlhú vlastnú frázu.', 'Správca hesiel si jedinečné heslá pamätá za teba. Ty si pamätáš iba jednu silnú hlavnú frázu.'],
+          ['Použijem správcu hesiel, ktorého schváli škola alebo rodič, a hlavné heslo si poskladám z troch náhodných slov.', 'Správca hesiel si jedinečné heslá pamätá za teba. Ty si pamätáš iba jedno silné hlavné heslo.'],
           [['Všade použijem jedno heslo.', 'Potom by jeden únik ohrozil všetky účty.'],
            ['Zapíšem si ich do zošita, ktorý môže vidieť každý.', 'Zošit si môže prečítať ktokoľvek. Heslá nepatria tam, kam vidia iní.']],
           'Jedinečné heslá ti pomôže spravovať schválený správca hesiel.'),
@@ -132,7 +129,6 @@ export const level2 = {
       title: 'Odhaľ podvodnú správu',
       icon: 'hook',
       topic: 'phishing',
-      minutes: 8,
       badge: 'phishing_hunter',
       intro: ['Podvodné správy sa snažia vylákať heslo. Naučíš sa ich rozpoznať.', 'Všetky správy a adresy sú vymyslené.'],
       rounds: [
@@ -179,11 +175,10 @@ export const level2 = {
       title: 'Bezpečnostný kvíz',
       icon: 'star',
       topic: 'safe-passwords',
-      minutes: 6,
       intro: ['Záverečný kvíz strážcov účtov. Po každej odpovedi dostaneš vysvetlenie.'],
       rounds: [
         choice('Čo robí heslo bezpečnejším?',
-          ['Dĺžka a nepredvídateľnosť.', 'Dlhé heslo z nesúvisiacich slov sa ťažko háda.'],
+          ['Dĺžka a nepredvídateľnosť.', 'Tri slová, ktoré spolu nesúvisia, sa ťažko hádajú.'],
           [['Výkričník na konci.', 'Je to známy trik, ktorý heslo nezachráni.'],
            ['Moje meno a rok narodenia.', 'Meno a rok sa dajú ľahko uhádnuť.']],
           'Základom je dĺžka a nepredvídateľnosť.'),

@@ -6,8 +6,7 @@ import { icon, bot } from './icons.js';
 import * as store from './store.js';
 import { t } from './i18n.js';
 import { getTask, getLevel, badge, topicLabel } from './content/index.js';
-import { createLab } from './lab.js';
-import { checkGoal } from './analyzer.js';
+import { createWorkshop } from './lab.js';
 import { levelProgress } from './progress.js';
 
 /* ---------- Ukážky (e-mail, SMS, upozornenie, časová os) ---------- */
@@ -42,7 +41,8 @@ export function renderMock(mock, opts = {}) {
         h('div', null, h('span', { class: 'k' }, t('mock.subject')), h('strong', null, part(mock.subject)))),
       h('div', { class: 'mock-body' }, mock.paragraphs.map((para) => h('p', null,
         para.map(part),
-        para.filter((p) => typeof p !== 'string' && p.link).map((p) => h('span', { class: 'link-dest' }, icon('link', 18), t('mock.link_dest'), h('code', null, p.url)))))));
+        para.filter((p) => typeof p !== 'string' && p.link).map((p) => h('span', { class: 'link-dest' }, icon('link', 18), t('mock.link_dest'), h('code', null, p.url)))))),
+      mock.attachment ? h('div', { class: 'mock-attach' }, icon('clip', 20), h('span', null, t('mock.attachment')), h('code', null, mock.attachment)) : null);
   } else if (mock.kind === 'sms') {
     el = h('div', { class: 'mock mock-sms', role: 'group', 'aria-label': t('mock.sms_aria') },
       h('div', { class: 'k' }, t('mock.from') + mock.from), h('div', { class: 'bubble' }, mock.text));
@@ -352,36 +352,96 @@ function renderReuse(round, ctx) {
 }
 
 function renderLab(round, ctx) {
-  const goalList = h('ul', { class: 'goal-list' });
   const note = h('p', { class: 'muted', role: 'status' });
-  const lab = createLab({ profile: round.profile, onResult: (r, value) => updateGoals(r, value) });
-  ctx.onCleanup(() => lab.destroy());
+  const ws = createWorkshop({ profile: round.profile });
+  ctx.onCleanup(() => ws.destroy());
   const check = checkButton(t('btn.check_task'), evaluate);
 
-  function updateGoals(r, value) {
-    clear(goalList);
-    note.textContent = '';
-    const g = round.goal;
-    const res = checkGoal(r, g, value);
-    const item = (ok, text) => goalList.append(h('li', { class: ok ? 'ok' : '' }, icon(ok ? 'check' : 'flag', 20), ' ', text));
-    if (g.minLen) item(r.length >= g.minLen, t('lab.goal_len', { n: g.minLen }));
-    if (g.noIssues) item(!!value && !res.unmet.some((u) => u.id !== 'len'), t('lab.goal_clean'));
+  function evaluate() {
+    if (!ws.getValue()) { note.textContent = t('lab.enter_first'); return; }
+    const r = ws.getResult();
+    const ok = r.step >= 3;
+    check.hidden = true;
+    ws.lock();
+    const explain = ok
+      ? [{ ok: true, text: t('lab.goal_ok') }]
+      : [{ ok: false, text: t('lab.goal_todo') }, ...r.checks.filter((c) => !c.ok).map((c) => ({ ok: false, text: c.text })), ...r.tips.map((tip) => ({ ok: null, text: tip }))];
+    ctx.submit({ correct: ok, explain });
+  }
+  return { el: h('div', null, round.hint ? h('p', { class: 'hint' }, icon('bulb', 22), ' ', round.hint) : null, ws.el, note, h('div', { class: 'actions' }, check)) };
+}
+
+// Odosielateľ v zozname schránky: zobrazené meno, ak ho adresa má („Meno <adresa>“), inak adresa.
+const senderName = (from) => (from.match(/^(.+?)\s*</) || [null, from])[1];
+
+function renderInbox(round, ctx) {
+  const emails = round.emails;
+  const answers = emails.map(() => null);
+  let current = 0;
+  let locked = false;
+  const list = h('div', { class: 'inbox-list', role: 'group', 'aria-label': t('inbox.list_aria') });
+  const view = h('div', { class: 'inbox-view', 'aria-live': 'polite' });
+  const status = h('p', { class: 'muted small' });
+  const check = checkButton(t('btn.check'), evaluate);
+  check.disabled = true;
+  const verdictLabel = (a) => (a === 'scam' ? t('inbox.scam') : a === 'ok' ? t('inbox.ok') : t('inbox.unread'));
+
+  function drawList() {
+    clear(list);
+    emails.forEach((e, i) => {
+      const cls = ['inbox-item', i === current ? 'active' : '', answers[i] ? 'answered' : '',
+        locked ? (answers[i] === (e.scam ? 'scam' : 'ok') ? 'is-correct' : 'is-wrong') : ''].filter(Boolean).join(' ');
+      list.append(h('button', { type: 'button', class: cls, 'aria-current': i === current ? 'true' : null, onclick: () => { current = i; draw(); } },
+        h('span', { class: 'inbox-from' }, senderName(e.from)),
+        h('span', { class: 'inbox-subject' }, e.subject),
+        h('span', { class: 'inbox-tag tag-' + (answers[i] || 'none') }, answers[i] === 'scam' ? icon('warning', 16) : answers[i] === 'ok' ? icon('check', 16) : null, ' ', verdictLabel(answers[i]))));
+    });
+  }
+
+  function drawView() {
+    clear(view);
+    const e = emails[current];
+    const choose = (a) => {
+      if (locked) return;
+      answers[current] = a;
+      const next = answers.findIndex((x, i) => x == null && i !== current);
+      if (next >= 0) current = next;
+      check.disabled = answers.some((x) => x == null);
+      draw();
+    };
+    const pick = (a, cls, ic, label) => h('button', { type: 'button', class: `btn ${cls}`, 'aria-pressed': String(answers[current] === a), disabled: locked, onclick: () => choose(a) }, icon(ic, 20), ' ', label);
+    view.append(
+      h('p', { class: 'small muted' }, t('inbox.position', { n: current + 1, total: emails.length })),
+      renderMock({ kind: 'email', from: e.from, subject: e.subject, paragraphs: e.paragraphs, attachment: e.attachment }).el,
+      locked
+        ? h('p', { class: e.scam ? 'bad-text' : 'ok-text' }, icon(e.scam ? 'warning' : 'check', 22), ' ', h('span', null, h('strong', null, verdictLabel(e.scam ? 'scam' : 'ok') + ': '), e.why))
+        : h('div', { class: 'inbox-actions' },
+          pick('ok', 'btn-secondary', 'check', t('inbox.mark_ok')),
+          pick('scam', 'btn-danger', 'warning', t('inbox.mark_scam'))));
+  }
+
+  function draw() {
+    drawList();
+    drawView();
+    const done = answers.filter(Boolean).length;
+    status.textContent = locked ? '' : t('inbox.progress', { n: done, total: emails.length });
   }
 
   function evaluate() {
-    const value = lab.getValue();
-    if (!value) { note.textContent = t('lab.enter_first'); return; }
-    const res = checkGoal(lab.getAnalysis(), round.goal, value);
+    locked = true;
+    let correct = true;
+    const explain = emails.map((e, i) => {
+      const ok = answers[i] === (e.scam ? 'scam' : 'ok');
+      if (!ok) correct = false;
+      return { ok, text: t(ok ? 'inbox.explain_ok' : 'inbox.explain_wrong', { subject: e.subject, verdict: t(e.scam ? 'inbox.is_scam' : 'inbox.is_ok'), why: e.why }) };
+    });
     check.hidden = true;
-    const explain = res.ok
-      ? [{ ok: true, text: t('lab.goal_ok') }]
-      : [{ ok: false, text: t('lab.goal_todo') }, ...res.unmet.map((u) => ({ ok: false, text: u.text }))];
-    ctx.submit({ correct: res.ok, explain });
+    draw();
+    ctx.submit({ correct, explain });
   }
-  lab.goalBox.hidden = false;
-  lab.goalBox.append(h('strong', null, t('lab.goal_title')), goalList, note);
-  updateGoals(lab.getAnalysis(), '');
-  return { el: h('div', null, round.hint ? h('p', { class: 'hint' }, icon('bulb', 22), ' ', round.hint) : null, lab.el, h('div', { class: 'actions' }, check)) };
+
+  draw();
+  return { el: h('div', null, h('div', { class: 'inbox' }, list, view), status, h('div', { class: 'actions' }, check)) };
 }
 
 const RENDERERS = {
@@ -392,6 +452,7 @@ const RENDERERS = {
   order: renderOrder,
   reuse: renderReuse,
   lab: renderLab,
+  inbox: renderInbox,
 };
 
 /* ---------- Spúšťač misie ---------- */
@@ -405,8 +466,7 @@ export function mountTask(root, taskId) {
   const level = getLevel(task.level);
   let run = null;
   let cleanups = [];
-  let timerId = null;
-  const shell = h('div', { class: 'task-shell', dataset: { level: String(task.level) } });
+  const shell = h('div', { class: 'task-shell', dataset: { level: String(getLevel(task.level).n) } });
   root.append(shell);
 
   const runCleanup = () => { cleanups.forEach((fn) => { try { fn(); } catch (e) { /* ignoruj */ } }); cleanups = []; };
@@ -420,28 +480,7 @@ export function mountTask(root, taskId) {
       head.append(h('div', { class: 'progress', role: 'progressbar', 'aria-label': t('task.progress_bar'), 'aria-valuemin': '0', 'aria-valuemax': String(total), 'aria-valuenow': String(run.pos) },
         h('span', { class: 'progress-fill', style: `width:${pct(run.pos, total)}%` })));
     }
-    if (task.timer && !store.getState().settings.hideTimer) head.append(timerChip());
     return head;
-  }
-
-  function timerChip() {
-    const txt = h('span', { class: 'timer-text' }, '00:00');
-    const tick = () => {
-      const s = Math.floor((Date.now() - (run ? run.started : Date.now())) / 1000);
-      txt.textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-    };
-    tick();
-    if (timerId) clearInterval(timerId);
-    timerId = setInterval(tick, 1000);
-    const chip = h('div', { class: 'chip timer-chip' }, icon('clock', 18), txt,
-      h('span', { class: 'small' }, t('timer.note')),
-      h('button', { type: 'button', class: 'btn btn-ghost btn-sm', onclick: () => {
-        store.setSetting('hideTimer', true);
-        clearInterval(timerId);
-        timerId = null;
-        chip.remove();
-      } }, t('timer.hide')));
-    return chip;
   }
 
   function focusHeading(sel) {
@@ -475,12 +514,11 @@ export function mountTask(root, taskId) {
     shell.append(header(false), h('section', { class: 'card intro-card' },
       bot('happy', 120),
       h('div', { class: 'intro-body' },
-        h('p', { class: 'eyebrow' }, t('task.intro_eyebrow', { id: level.id, name: level.name, n: task.order })),
+        h('p', { class: 'eyebrow' }, t('task.intro_eyebrow', { id: level.n, name: level.name, n: task.order })),
         h('h1', { id: 'task-h1', tabindex: '-1' }, task.title),
         task.intro.map((p) => h('p', { class: 'lead' }, rich(p))),
         h('div', { class: 'chips' },
           h('span', { class: 'chip' }, icon('list', 18), ' ', t('task.n_tasks', { n: task.rounds.length })),
-          h('span', { class: 'chip' }, icon('clock', 18), ' ', t('task.minutes', { n: task.minutes })),
           h('span', { class: 'chip' }, icon('book', 18), ' ', topicLabel(task.topic)),
           b ? h('span', { class: 'chip chip-badge' }, icon(b.icon, 18), ' ', t('task.badge', { name: b.name })) : null),
         h('p', { class: 'muted' }, t('task.no_penalty')),
@@ -491,7 +529,7 @@ export function mountTask(root, taskId) {
   function startRun(mode) {
     const saved = store.getTask(taskId);
     const idxs = task.rounds.map((_, i) => i).filter((i) => mode === 'all' || !saved.mastered[i]);
-    run = { taskId, mode, phase: 'main', queue: idxs, mainCount: idxs.length, pos: 0, wrong: [], firstTry: {}, streak: 0, earned: 0, started: Date.now() };
+    run = { taskId, mode, phase: 'main', queue: idxs, mainCount: idxs.length, pos: 0, wrong: [], firstTry: {}, streak: 0, earned: 0 };
     store.setResume(run);
     showRound();
   }
@@ -623,7 +661,6 @@ export function mountTask(root, taskId) {
   function showSummary(allMastered, newBadges, levelDone) {
     runCleanup();
     clear(shell);
-    if (timerId) { clearInterval(timerId); timerId = null; }
     const saved = store.getTask(taskId);
     const left = task.rounds.map((_, i) => i).filter((i) => !saved.mastered[i]);
     const firstOk = Object.values(run.firstTry).filter(Boolean).length;
@@ -665,7 +702,7 @@ export function mountTask(root, taskId) {
   }
 
   showIntro();
-  return () => { runCleanup(); if (timerId) clearInterval(timerId); };
+  return () => { runCleanup(); };
 }
 
 /* ---------- Režim pre premietanie (učiteľ) ---------- */
@@ -707,6 +744,12 @@ export function renderPresentation(round, reveal) {
     const list = reveal ? round.items.filter((i) => i.tier != null).sort((a, b) => a.tier - b.tier) : round.items;
     wrap.append(h('ol', { class: 'present-options' }, list.map((i) => h('li', { class: reveal ? 'is-correct' : '' }, h('span', null, i.text), reveal ? h('span', { class: 'why' }, i.why) : null))));
     if (reveal) wrap.append(h('p', { class: 'muted' }, t('present.not_in_plan') + round.items.filter((i) => i.tier == null).map((i) => i.text).join(' | ')));
+  } else if (round.type === 'inbox') {
+    round.emails.forEach((e, i) => {
+      wrap.append(h('p', { class: 'eyebrow' }, t('inbox.position', { n: i + 1, total: round.emails.length })),
+        renderMock({ kind: 'email', from: e.from, subject: e.subject, paragraphs: e.paragraphs, attachment: e.attachment }).el);
+      if (reveal) wrap.append(h('p', { class: e.scam ? 'bad-text' : 'ok-text' }, icon(e.scam ? 'warning' : 'check', 22), ' ', h('span', null, h('strong', null, (e.scam ? t('inbox.scam') : t('inbox.ok')) + ': '), e.why)));
+    });
   } else if (round.type === 'lab') {
     wrap.append(h('p', { class: 'lead' }, round.hint || ''));
     if (round.profile) wrap.append(h('p', null, Object.entries(round.profile).map(([k, v]) => `${k}: ${v}`).join(' · ')));

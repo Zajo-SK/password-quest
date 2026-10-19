@@ -71,3 +71,15 @@ export function order(prompt, items, summary, extra = {}) {
     ...extra,
   };
 }
+
+// mail: jeden e-mail do schránky. paragraphs = text alebo pole odsekov; odsek je text alebo pole častí
+// (text, alebo odkaz { link: true, text, url }). scam = je to podvod; why = vysvetlenie. extra napr. { attachment }.
+export function mail(from, subject, paragraphs, scam, why, extra = {}) {
+  const paras = (Array.isArray(paragraphs) ? paragraphs : [paragraphs]).map((p) => (Array.isArray(p) ? p : [p]));
+  return { from, subject, paragraphs: paras, scam: !!scam, why, ...extra };
+}
+
+// inbox: simulovaná schránka. Žiak otvorí každý e-mail a rozhodne, či je v poriadku, alebo podvod.
+export function inbox(prompt, emails, summary, extra = {}) {
+  return { type: 'inbox', prompt, emails, summary, ...extra };
+}

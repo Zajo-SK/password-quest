@@ -1,5 +1,5 @@
 // Lokálne ukladanie NEOSOBNÉHO herného postupu (body, odznaky, štatistiky úloh).
-// Nikdy sa sem neukladá obsah Password Lab ani žiadne heslo.
+// Nikdy sa sem neukladá obsah Dielne hesiel ani žiadne heslo.
 
 const KEY = 'pq.progress.v1';
 
@@ -12,7 +12,7 @@ const defaults = () => ({
   stats: { topics: {}, rounds: {} }, // topic/round -> {ok, total} (prvý pokus)
   resume: null,         // rozpracovaná misia
   session: null,        // relácia triedy {code, level, missions}
-  settings: { hideTimer: false },
+  settings: {},
 });
 
 let state = load();
@@ -80,11 +80,6 @@ export function setResume(run) {
 
 export function setSession(session) {
   state.session = session;
-  save();
-}
-
-export function setSetting(k, v) {
-  state.settings[k] = v;
   save();
 }
 

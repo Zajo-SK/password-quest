@@ -1,6 +1,6 @@
 import { choice, multi, rows, order } from '../helpers.js';
 
-// Úroveň 3: Cyber detektívi (12 – 14 rokov). Vyšetrovanie, analýza vzorov, MFA a reakcia na incident.
+// Úroveň 3: Cyber detektívi (obtiažnosť: náročná). Vyšetrovanie, analýza vzorov, MFA a reakcia na incident.
 // Všetky služby, adresy a údaje sú vymyslené.
 
 const LEAK_STORY = 'Vymyslená stránka HerniaZona.example oznámila únik používateľských údajov. Niektorí žiaci používajú rovnaké heslo vo viacerých službách.';
@@ -8,7 +8,6 @@ const LEAK_STORY = 'Vymyslená stránka HerniaZona.example oznámila únik použ
 export const level3 = {
   id: 3,
   name: 'Cyber detektívi',
-  ages: '12–14 rokov',
   tagline: 'Vyšetruj incidenty, analyzuj vzory a rozhoduj sa.',
   story: 'Staneš sa detektívom digitálnych stôp. Pri vyšetrovaní potrebuješ logiku, opatrnosť a správny postup.',
   color: 'purple',
@@ -20,7 +19,6 @@ export const level3 = {
       title: 'Vyšetrovanie úniku',
       icon: 'search',
       topic: 'incident',
-      minutes: 8,
       intro: [LEAK_STORY, 'Postupuj ako detektív: urči riziko, vyber účty, ktoré treba zabezpečiť, zmeň heslo, nahlás to a zvoľ ďalšie opatrenia.'],
       rounds: [
         choice('Krok 1: Aké hlavné riziko hrozí žiakovi, ktorý má rovnaké heslo aj v iných službách?',
@@ -55,33 +53,32 @@ export const level3 = {
     },
     {
       id: 'l3t2',
-      title: 'Laboratórium hesiel',
-      icon: 'bulb',
+      title: 'Dielňa hesiel',
+      icon: 'key',
       topic: 'safe-passwords',
-      minutes: 9,
-      intro: ['Použiješ vlastný nástroj na analýzu hesiel. Skúšaj iba vymyslené ukážky, nikdy nie svoje skutočné heslo.', 'Analýza prebieha len v tomto prehliadači a nič sa neukladá.'],
+      intro: ['Postavíš si heslá v Dielni hesiel. Skúšaj iba vymyslené heslá, nikdy nie svoje skutočné.', 'Kontrola prebieha len v tomto prehliadači a nič sa neukladá.'],
       rounds: [
         {
           type: 'lab',
-          prompt: 'Vymysli ukážkovú frázu s dĺžkou aspoň 14 znakov, v ktorej laboratórium nenájde žiadny problém.',
-          hint: 'Skús štyri nesúvisiace slová oddelené pomlčkou. Vyhni sa bežným slovám a menám.',
-          goal: { minLen: 14, noIssues: true },
-          summary: 'Dlhá fráza z nesúvisiacich slov prejde kontrolami lepšie než krátke slovo so symbolmi.',
+          prompt: 'Postav heslo z troch slov, pri ktorom dielňa ukáže „Silné“.',
+          hint: 'Vytiahni si kartičky alebo vymysli vlastné slová. Každé slovo začni veľkým písmenom.',
+          goal: { strong: true },
+          summary: 'Tri nesúvisiace slová prejdú kontrolami lepšie než krátke slovo so symbolmi.',
         },
         {
           type: 'lab',
-          prompt: 'Vymyslený žiak Jakub má psa Rexa, hrá futbal, býva v Nitre a narodil sa v roku 2012. Vymysli preňho ukážkovú frázu, ktorá tieto údaje neobsahuje.',
+          prompt: 'Vymyslený žiak Jakub má psa Rexa, hrá futbal, býva v Nitre a narodil sa v roku 2012. Postav preňho heslo z troch slov, ktoré tieto údaje neobsahuje.',
           profile: { 'Meno psa': 'Rex', 'Záľuba': 'futbal', 'Mesto': 'Nitra', 'Rok narodenia': '2012' },
-          hint: 'Osobné údaje v hesle sa dajú uhádnuť. Použi nesúvisiace slová.',
-          goal: { minLen: 14, noIssues: true },
+          hint: 'Osobné údaje v hesle sa dajú uhádnuť. Použi slová, ktoré s Jakubom nesúvisia.',
+          goal: { strong: true },
           summary: 'Meno zvieratka, záľuby, mesto a rok narodenia patria medzi prvé veci, ktoré útočníci skúšajú.',
         },
-        choice('Laboratórium hlási: „Bežný vzor: slovo + čísla (+ symbol).“ Ako heslo vylepšíš?',
-          ['Nahradím ho dlhšou frázou zo štyroch alebo viacerých nesúvisiacich slov.', 'Tak zmizne predvídateľný vzor a heslo bude dlhšie.'],
-          [['Pridám ešte jeden výkričník.', 'Vzor zostane rovnaký.'],
-           ['Zmením posledné číslo.', 'Táto zmena je predvídateľná a vzor zostane.']],
-          'Predvídateľný vzor odstrániš novou, dlhšou frázou.'),
-        choice('Nástroj nenašiel žiadne problémy. Je heslo zaručene bezpečné?',
+        choice('Kamarát má heslo „Macko123!“: slovo, čísla a symbol na konci. Ako ho vylepší?',
+          ['Nahradí ho novým heslom z troch slov, ktoré spolu nesúvisia.', 'Tak zmizne predvídateľný vzor a heslo bude dlhšie.'],
+          [['Pridá ešte jeden výkričník.', 'Vzor zostane rovnaký.'],
+           ['Zmení posledné číslo.', 'Táto zmena je predvídateľná a vzor zostane.']],
+          'Predvídateľný vzor odstrániš novým heslom z troch nesúvisiacich slov.'),
+        choice('Dielňa ukazuje „Silné“. Je heslo zaručene bezpečné?',
           ['Nie. Nástroj napríklad nevie zistiť, či heslo už neuniklo. Výsledok nie je záruka.', 'Dôležité je aj jedinečné heslo pre každý účet a zapnuté viacfaktorové overovanie.'],
           [['Áno, nástroj je spoľahlivý.', 'Žiadna jednoduchá kontrola nezaručí, že je heslo bezpečné.'],
            ['Áno, ak je heslo dlhé.', 'Dĺžka pomáha, ale nie je zárukou.']],
@@ -98,7 +95,6 @@ export const level3 = {
       title: 'MFA – druhý faktor',
       icon: 'phone',
       topic: 'mfa',
-      minutes: 7,
       badge: 'mfa_expert',
       intro: ['Viacfaktorové overovanie (MFA) pridáva po hesle ďalší krok.', 'Naučíš sa aj to, ako reagovať na nečakané žiadosti o potvrdenie.'],
       rounds: [
@@ -140,7 +136,6 @@ export const level3 = {
       title: 'Reakcia na incident',
       icon: 'flag',
       topic: 'incident',
-      minutes: 8,
       intro: ['Prišla ti správa, že tvoj školský účet mohol byť napadnutý.', 'Zostav správny postup a rozhodni sa v ďalších situáciách.'],
       rounds: [
         order('Zostav postup. Klikaj na kroky v poradí od najdôležitejšieho.',

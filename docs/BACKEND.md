@@ -22,7 +22,7 @@ attempt   (id, class_id, anon_player_id, round_id, topic, first_try_correct, cre
 ```
 
 - `anon_player_id` je náhodný identifikátor generovaný v prehliadači pri vstupe do relácie. Nie je to meno ani e-mail a nedá sa z neho zistiť identita.
-- Neukladajú sa heslá, ich odvodeniny, ani obsah Password Lab. Server o ich existencii nevie.
+- Neukladajú sa heslá, ich odvodeniny, ani obsah Dielne hesiel. Server o ich existencii nevie.
 - `join_code_hash` je hash náhodného kódu (aspoň 40 bitov entropie, ako v `teacher.js`). Kód sa porovnáva v konštantnom čase a obmedzuje sa rýchlosť pokusov (rate limit na IP a na triedu).
 
 ## Oprávnenia
@@ -55,4 +55,4 @@ DELETE /api/classes/:id           (učiteľ)
 POST /api/join/:code/attempts     (žiak)     → { anon_player_id, round_id, topic, first_try_correct }
 ```
 
-Klient v `store.js` by po zapnutí servera dopĺňal odosielanie výsledkov kola (fronta s opakovaním pri výpadku siete). Heslá z laboratória sa do nej nikdy nedostanú.
+Klient v `store.js` by po zapnutí servera dopĺňal odosielanie výsledkov kola (fronta s opakovaním pri výpadku siete). Heslá z Dielne hesiel sa do nej nikdy nedostanú.
