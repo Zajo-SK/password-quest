@@ -402,6 +402,41 @@ ol.present-options { list-style: decimal inside; }
 .bot { display: inline-flex; }
 .bot-led { animation: blink 2s ease-in-out infinite; }
 
+/* Ukážky: chat a webová stránka */
+.mock-chat .chat-title { display: flex; align-items: center; gap: 6px; font-weight: 700; padding-bottom: 8px; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
+.chat-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.chat-msg { display: flex; flex-direction: column; align-items: flex-start; max-width: 85%; min-width: 0; }
+.chat-msg.me { margin-left: auto; align-items: flex-end; }
+.chat-who { font-size: 0.8rem; color: var(--muted); font-weight: 700; margin: 0 6px 2px; }
+.chat-bubble { background: var(--surface-2); border: 1px solid var(--border); border-radius: 18px 18px 18px 4px; padding: 8px 12px; min-width: 0; }
+.chat-msg.me .chat-bubble { background: rgba(76, 141, 255, 0.35); border-radius: 18px 18px 4px 18px; }
+.mock-page { padding: 0; overflow: hidden; }
+.page-bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: rgba(255, 255, 255, 0.1); border-bottom: 1px solid var(--border); font-family: ui-monospace, Menlo, monospace; font-size: 0.92rem; min-width: 0; }
+.page-url { min-width: 0; overflow-wrap: anywhere; }
+.page-body { padding: 14px 16px 4px; display: grid; gap: 8px; }
+.page-title { font-size: 1.15rem; }
+.page-fields { display: grid; gap: 8px; max-width: 320px; }
+.page-field { display: block; padding: 8px 12px; border: 1px solid var(--border); border-radius: 10px; color: var(--muted); background: rgba(0, 0, 0, 0.25); }
+.page-btn { justify-self: start; }
+.mock-page > .muted { padding: 0 16px 12px; margin: 0; }
+
+/* Šifry */
+.cipher-word { font-family: ui-monospace, Menlo, monospace; font-size: clamp(1.4rem, 5vw, 2rem); font-weight: 800; letter-spacing: 0.12em; padding: 12px 16px; border-radius: var(--radius-sm); background: rgba(0, 0, 0, 0.3); border: 1px dashed var(--cyan); overflow-wrap: anywhere; min-height: 1.8em; margin: 6px 0 10px; display: block; }
+.cipher-message { font-size: clamp(1.1rem, 4vw, 1.5rem); line-height: 1.6; }
+.cipher-label { font-weight: 700; margin: 0; }
+.cipher-box { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; margin: 10px 0; }
+.cipher-box summary { cursor: pointer; font-weight: 700; min-height: 40px; display: flex; align-items: center; }
+.cipher-table { display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 6px; margin: 8px 0; }
+.cipher-cell { display: flex; flex-direction: column; align-items: center; padding: 6px 4px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); }
+.cipher-plain { font-weight: 800; color: var(--cyan); }
+.cipher-code { font-family: ui-monospace, Menlo, monospace; font-size: 1.15rem; font-weight: 700; }
+.options-cipher { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+.option-cipher .option-text { font-family: ui-monospace, Menlo, monospace; font-size: 1.3rem; letter-spacing: 0.08em; }
+.cipher-input { font-family: ui-monospace, Menlo, monospace; font-size: 1.2rem; letter-spacing: 0.06em; flex: 1 1 200px; text-transform: uppercase; }
+.cipher-input.is-correct { border-color: var(--green); }
+.cipher-input.is-wrong { border-color: var(--coral); }
+.cipher-print h3 { margin-top: 12px; }
+
 /* Animácie */
 @keyframes pop { 0% { transform: scale(0.96); opacity: 0.5; } 100% { transform: scale(1); opacity: 1; } }
 @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
@@ -432,6 +467,9 @@ ol.present-options { list-style: decimal inside; }
   .topbar { position: static; padding: 6px 12px; gap: 4px 8px; }
   .topbar nav { flex: 0 1 auto; }
   .topbar nav .nav-label { display: none; }
+  .brand > span:last-child { display: none; }
+  .topbar-end { order: 1; }
+  .topbar nav { order: 2; flex: 1 1 100%; }
   .topbar nav a { padding: 0 10px; min-height: 44px; }
   .topbar-end { gap: 6px; }
   .lang-btn { min-width: 40px; padding: 0 8px; }

@@ -15,6 +15,8 @@ import { level3 as en3 } from './en/level3.js';
 import { level4 as en4 } from './en/level4.js';
 import { emailLevels as skEmail } from './sk/email.js';
 import { emailLevels as enEmail } from './en/email.js';
+import { extraTasks as skExtra } from './sk/extra.js';
+import { extraTasks as enExtra } from './en/extra.js';
 
 // Spoločné vlastnosti odznakov (texty sú v meta.js daného jazyka).
 const BADGE_STYLE = {
@@ -30,6 +32,10 @@ const BADGE_STYLE = {
   link_checker: { icon: 'link', color: 'blue' },
   inbox_analyst: { icon: 'mail', color: 'purple' },
   email_detective: { icon: 'eye', color: 'cyan' },
+  code_breaker: { icon: 'lock', color: 'purple' },
+  types_expert: { icon: 'key', color: 'green' },
+  chat_guard: { icon: 'users', color: 'blue' },
+  web_checker: { icon: 'globe', color: 'cyan' },
 };
 
 // Moduly v poradí, v akom sa zobrazujú. Názvy a popisy sú v meta.js daného jazyka.
@@ -63,9 +69,15 @@ function prepare(module, levels) {
   return levels;
 }
 
+// Pridá ďalšie misie (extra.js) na koniec zoznamu misií príslušnej úrovne.
+function withExtra(levels, extra) {
+  levels.forEach((level) => { if (extra[level.id]) level.tasks.push(...extra[level.id]); });
+  return levels;
+}
+
 export const CONTENT = {
-  sk: { meta: skMeta, modules: { 'password-quest': prepare('password-quest', [sk1, sk2, sk3, sk4]), 'email-detective': prepare('email-detective', skEmail) } },
-  en: { meta: enMeta, modules: { 'password-quest': prepare('password-quest', [en1, en2, en3, en4]), 'email-detective': prepare('email-detective', enEmail) } },
+  sk: { meta: skMeta, modules: { 'password-quest': prepare('password-quest', withExtra([sk1, sk2, sk3, sk4], skExtra)), 'email-detective': prepare('email-detective', withExtra(skEmail, skExtra)) } },
+  en: { meta: enMeta, modules: { 'password-quest': prepare('password-quest', withExtra([en1, en2, en3, en4], enExtra)), 'email-detective': prepare('email-detective', withExtra(enEmail, enExtra)) } },
 };
 
 const current = () => CONTENT[getLang()] || CONTENT.sk;

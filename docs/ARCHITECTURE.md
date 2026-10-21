@@ -53,14 +53,15 @@ Router (`main.js`) je založený na `location.hash`. Dá sa preto obnoviť strá
 | `reuse` | ručne | simulácia úniku pri opakovanom hesle |
 | `lab` | ručne | úloha v Dielni hesiel; splnená, keď kontrola ukáže „Silné“ (voliteľný vymyslený `profile`) |
 | `inbox` | `inbox()`, `mail()` | simulovaná schránka: žiak otvorí každý e-mail a označí ho „v poriadku“ alebo „podvod“ |
+| `cipher` | `cipher()` | šifra: rozlúštiť (`mode: 'decode'`) alebo zašifrovať (`'encode'`) slovo podľa abecedy (`bot`, `leet`, `caesarN`, `rot13` alebo vlastná tabuľka); s `choices` sa vyberá, bez nich sa odpoveď píše |
 
-Ukážky (`mock`): `email` (voliteľne s prílohou `attachment`), `sms`, `push` (prihlasovacie upozornenie), `timeline` (časová os incidentu).
+Ukážky (`mock`): `email` (voliteľne s prílohou `attachment`), `sms`, `push` (prihlasovacie upozornenie), `timeline` (časová os incidentu), `chat` (konverzácia: `messages` so `who`, `me` a `parts`) a `page` (webová stránka: `url`, `title`, `paragraphs`, `fields`, `button`). V `email`, `chat` a `page` môžu byť časti na označenie (`pick`, `flag`, `why`) pre úlohy `hotspot`; zoznam všetkých častí vráti `mockParts()`.
 
 ## Pridanie obsahu
 
 **Nová úloha:** pridaj kolo do `rounds` existujúcej misie. Identifikátory (`l2t1r3`) a téma sa doplnia automaticky v `content/index.js`.
 
-**Nová misia:** pridaj objekt do `tasks` úrovne: `id`, `title`, `icon`, `topic`, `intro`, `rounds` a voliteľne `badge`, `planTitle`.
+**Nová misia:** pridaj objekt do `tasks` úrovne: `id`, `title`, `icon`, `topic`, `intro`, `rounds` a voliteľne `badge`, `planTitle`. Ďalšie misie možno pridať aj do `content/<jazyk>/extra.js` pod id úrovne; zaradia sa na koniec jej zoznamu.
 
 **Moduly:** `password-quest` (úrovne s id 1–4) a `email-detective` (Detektív e-mailov, úrovne `e1`–`e4` v `content/<jazyk>/email.js`). Každý modul má 4 úrovne; poradie úrovne v module (`level.n`) je zároveň stupeň obtiažnosti. Výber úrovní, úvod a postup zobrazujú moduly samostatne.
 
