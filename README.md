@@ -3,12 +3,13 @@
 *Chráň svoj digitálny svet.* Interaktívna vzdelávacia hra o bezpečných heslách a základoch kybernetickej bezpečnosti pre školy. Rozhranie aj obsah sú v slovenčine a angličtine, jazyk sa prepína v hornej lište (SK / EN).
 
 - 2 moduly, každý so 4 úrovňami obtiažnosti (ľahká, stredná, náročná, expertná):
-  - **Password Quest** – bezpečné heslá, MFA a reakcia na únik (17 misií, 95 úloh)
-  - **Detektív e-mailov** – odhaľovanie podvodných e-mailov: návnady, falošné odkazy, prílohy, triedenie schránky a nahlasovanie (8 misií, 40 úloh)
+  - **Password Quest** – bezpečné heslá, druhy hesiel a zámkov, šifry, MFA a reakcia na únik (25 misií, 135 úloh)
+  - **Detektív e-mailov** – odhaľovanie podvodov v e-mailoch, chate, SMS a na sociálnych sieťach: návnady, falošné odkazy a stránky, prílohy, dvojníci domén, podvody s umelou inteligenciou, triedenie schránky a nahlasovanie (16 misií, 80 úloh)
 - Všetko v slovenčine aj angličtine
 - Dielňa hesiel: žiak si z vylosovaných kartičiek (3 až 5 slov z približne 240) postaví heslo a hneď vidí, ako ťažko sa dá uhádnuť: dĺžka aspoň 15 znakov, bežné a známe heslá, vzory a osobné údaje. Rozpozná aj náhodné heslo zo správcu hesiel
+- Šifrovacia abeceda (podstránka Šifry): Botova obrázková abeceda, Caesarova šifra, známa zámena znakov a vlastná náhodná abeceda, nástroj na šifrovanie aj rozšifrovanie, tajné správy na lúštenie a pravdivé vysvetlenie, prečo zašifrované slovo nie je dobré heslo
 - **Pre učiteľov:** dve vzorové 45-minútové hodiny na stiahnutie (PDF, SK aj EN) – *Silné heslo z náhodných slov* a *Detektív e-mailov* – s metodikou, pracovným listom a riešeniami
-- Body (XP), 12 odznakov, záverečné hodnotenie úrovne a certifikát za preukázané zvládnutie
+- Body (XP), 16 odznakov, záverečné hodnotenie úrovne a certifikát za preukázané zvládnutie
 - Opakovanie nesprávne zodpovedaných úloh, rozpracovanú misiu možno dokončiť aj po obnovení stránky
 - Učiteľský režim (relácia triedy, premietanie úloh, súhrn tém, export CSV) je pripravený, ale zatiaľ skrytý
 - Bez registrácie, bez mien, e-mailov a bez skutočných hesiel
@@ -77,7 +78,7 @@ Otvor `/tests/` na lokálnom serveri. Stránka v oboch jazykoch skontroluje:
 
 Výsledok je v nadpise stránky (`TESTY OK`).
 
-Celá hra bola overená aj automatickým prechodom v prehliadači: všetkých 25 misií oboch modulov sa v slovenčine aj angličtine dá dokončiť, udelí sa všetkých 12 odznakov a otvoria sa všetky hodnotenia a certifikáty bez chýb v konzole. Overené bolo aj opakovanie po nesprávnej odpovedi a rozloženie na šírke 390 px bez horizontálneho posúvania.
+Celá hra bola overená aj automatickým prechodom v prehliadači: pôvodných 25 misií pri ich vzniku a 16 nových misií (druhy hesiel, šifry, chat, falošné stránky, umelá inteligencia, dvojníci domén) pri ich pridaní. Všetky sa v slovenčine aj angličtine dajú dokončiť aj po nesprávnej prvej odpovedi a udelia sa nové odznaky. Overené bolo aj opakovanie po nesprávnej odpovedi a rozloženie na šírke 390 px bez horizontálneho posúvania.
 
 ## Materiály pre učiteľov
 
@@ -104,11 +105,13 @@ js/i18n/sk.js, en.js   texty rozhrania
 js/engine.js           vykresľovanie a vyhodnocovanie typov úloh, body, odznaky, premietanie
 js/views.js            úvod, úrovne, hodnotenie, certifikát, postup, návody
 js/lab.js              Dielňa hesiel: kontrola hesla, kartičky so slovami a obrazovka (len v prehliadači)
+js/cipher.js           šifrovacie abecedy: zašifrovanie, rozšifrovanie, náhodná abeceda (bez DOM)
+js/cipherPage.js       podstránka Šifrovacia abeceda
 js/wordlists.js        kartičky so slovami pre Dielňu hesiel a zoznam bežných hesiel
 js/teacher.js          učiteľský režim, relácia triedy, premietanie, CSV
 js/store.js            ukladanie neosobného postupu do localStorage
 js/progress.js         výpočty nad postupom
-js/content/            OBSAH: moduly, úrovne, misie, otázky, vysvetlenia, odznaky, témy (sk/, en/; email.js = Detektív e-mailov)
+js/content/            OBSAH: moduly, úrovne, misie, otázky, vysvetlenia, odznaky, témy (sk/, en/; email.js = Detektív e-mailov, extra.js = ďalšie misie oboch modulov)
 docs/                  architektúra a návrh servera
 tests/index.html       testy v prehliadači
 sw.js                  offline režim (network-first)

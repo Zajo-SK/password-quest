@@ -13,6 +13,10 @@ export const TOPICS = {
   links: 'Links and addresses',
   attachments: 'Attachments and senders',
   reporting: 'Reporting scams',
+  'password-types': 'Types of passwords',
+  ciphers: 'Ciphers',
+  chat: 'Chats and social media',
+  websites: 'Fake websites',
 };
 
 export const BADGES = {
@@ -28,6 +32,10 @@ export const BADGES = {
   link_checker: { name: 'Link Checker', desc: 'You know how to find out where a link really goes.' },
   inbox_analyst: { name: 'Inbox Analyst', desc: 'You can sort an inbox and catch fake senders and dangerous attachments.' },
   email_detective: { name: 'Email Detective', desc: 'You catch even advanced tricks and know how to respond to phishing.' },
+  code_breaker: { name: 'Code Breaker', desc: 'You can encode and crack secret writing, and you know why a cipher will not save a password.' },
+  types_expert: { name: 'Password Expert', desc: 'You know the different kinds of passwords and locks and when to use each one.' },
+  chat_guard: { name: 'Chat Guard', desc: 'You can spot a scam in chats, games, text messages and social media.' },
+  web_checker: { name: 'Website Checker', desc: 'You can recognize a fake login page and know how to reach the real one.' },
 };
 
 export const PLANNED = {

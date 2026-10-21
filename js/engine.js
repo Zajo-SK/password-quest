@@ -7,6 +7,8 @@ import * as store from './store.js';
 import { t } from './i18n.js';
 import { getTask, getLevel, badge, topicLabel } from './content/index.js';
 import { createWorkshop } from './lab.js';
+import { mockParts } from './content/helpers.js';
+import { LETTERS, alphabet, encode, plain, same } from './cipher.js';
 import { levelProgress } from './progress.js';
 
 /* ---------- Ukážky (e-mail, SMS, upozornenie, časová os) ---------- */
@@ -53,6 +55,22 @@ export function renderMock(mock, opts = {}) {
       h('ul', null, mock.lines.map((l) => h('li', null, l))),
       h('div', { class: 'fake-btns', 'aria-hidden': 'true' }, mock.buttons.map((b) => h('span', { class: 'fake-btn' }, b))),
       h('p', { class: 'muted small' }, t('mock.push_note')));
+  } else if (mock.kind === 'chat') {
+    el = h('div', { class: 'mock mock-chat', role: 'group', 'aria-label': t('mock.chat_aria') },
+      mock.title ? h('div', { class: 'chat-title' }, icon('users', 18), ' ', mock.title) : null,
+      h('ol', { class: 'chat-list' }, mock.messages.map((m) => h('li', { class: 'chat-msg' + (m.me ? ' me' : '') },
+        h('span', { class: 'chat-who' }, m.who),
+        h('div', { class: 'chat-bubble' }, m.parts.map(part),
+          m.parts.filter((p) => typeof p !== 'string' && p.link).map((p) => h('span', { class: 'link-dest' }, icon('link', 18), t('mock.link_dest'), h('code', null, p.url))))))));
+  } else if (mock.kind === 'page') {
+    el = h('div', { class: 'mock mock-page', role: 'group', 'aria-label': t('mock.page_aria') },
+      h('div', { class: 'page-bar' }, icon(mock.secure === false ? 'unlock' : 'lock', 18), h('span', { class: 'sr-only' }, t('mock.address')), h('span', { class: 'page-url' }, part(mock.url))),
+      h('div', { class: 'page-body' },
+        mock.title ? h('strong', { class: 'page-title' }, part(mock.title)) : null,
+        (mock.paragraphs || []).map((para) => h('p', null, para.map(part))),
+        mock.fields ? h('div', { class: 'page-fields', 'aria-hidden': 'true' }, mock.fields.map((f) => h('span', { class: 'page-field' }, f))) : null,
+        mock.button ? h('span', { class: 'fake-btn page-btn', 'aria-hidden': 'true' }, mock.button) : null),
+      h('p', { class: 'muted small' }, t('mock.page_note')));
   } else if (mock.kind === 'timeline') {
     el = h('div', { class: 'mock mock-timeline', role: 'group', 'aria-label': mock.title },
       h('strong', null, mock.title),
@@ -444,7 +462,74 @@ function renderInbox(round, ctx) {
   return { el: h('div', null, h('div', { class: 'inbox' }, list, view), status, h('div', { class: 'actions' }, check)) };
 }
 
+// Tabuľka šifrovacej abecedy: písmeno a jeho tajný znak. Pri neúplnej abecede (známa zámena) len zamieňané písmená.
+export function cipherTable(id) {
+  const map = alphabet(id);
+  const full = LETTERS.split('').every((l) => map[l] != null);
+  const keys = full ? [...LETTERS] : Object.keys(map);
+  return h('div', null,
+    h('div', { class: 'cipher-table', role: 'list', 'aria-label': t('cipher.table_title') },
+      keys.map((l) => h('div', { class: 'cipher-cell', role: 'listitem' }, h('span', { class: 'cipher-plain' }, l), h('span', { class: 'cipher-code' }, map[l])))),
+    full ? null : h('p', { class: 'muted small' }, t('cipher.rest_same')));
+}
+
+function renderCipher(round, ctx) {
+  const decode = round.mode !== 'encode';
+  const shown = decode ? encode(round.text, round.alphabet) : plain(round.text);
+  const answer = decode ? plain(round.text) : encode(round.text, round.alphabet);
+  const note = h('p', { class: 'muted', role: 'status' });
+  let done = false;
+
+  function finish(given) {
+    if (done) return;
+    done = true;
+    const ok = same(given, answer);
+    const vars = { shown, answer, given };
+    const explain = [{ ok, text: t(`cipher.${ok ? 'right' : 'wrong'}_${decode ? 'decode' : 'encode'}`, vars) }];
+    if (round.why) explain.push({ ok: null, text: round.why });
+    ctx.submit({ correct: ok, explain });
+    return ok;
+  }
+
+  let answerEl;
+  if (round.choices) {
+    const opts = shuffle(round.choices);
+    const btns = opts.map((o) => {
+      const label = decode ? plain(o) : encode(o, round.alphabet);
+      const b = h('button', { type: 'button', class: 'option option-cipher', onclick: () => {
+        btns.forEach((x, i) => {
+          x.disabled = true;
+          if (same(opts[i], round.text)) { x.classList.add('is-correct'); mark(x, 'check'); }
+        });
+        if (!same(o, round.text)) { b.classList.add('is-wrong'); mark(b, 'x'); }
+        finish(label);
+      } }, h('span', { class: 'option-text' }, label), h('span', { class: 'option-mark', 'aria-hidden': 'true' }));
+      return b;
+    });
+    answerEl = h('div', { class: 'options options-cipher', role: 'group', 'aria-label': t('answer.options_aria') }, btns);
+  } else {
+    const id = `cipher-${round.id}`;
+    const input = h('input', { id, type: 'text', class: 'text-input cipher-input', autocomplete: 'off', autocapitalize: 'characters', autocorrect: 'off', spellcheck: 'false', maxlength: '40' });
+    const check = checkButton(t('btn.check'), () => {
+      if (!input.value.trim()) { note.textContent = t('cipher.need_answer'); return; }
+      input.disabled = true;
+      check.hidden = true;
+      input.classList.add(finish(input.value) ? 'is-correct' : 'is-wrong');
+    });
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') check.click(); });
+    answerEl = h('div', { class: 'field' }, h('label', { for: id }, t('cipher.your_answer')), h('div', { class: 'row-gap' }, input, check));
+  }
+
+  return { el: h('div', { class: 'cipher-round' },
+    h('p', { class: 'cipher-label' }, t(decode ? 'cipher.decode_label' : 'cipher.encode_label')),
+    h('div', { class: 'cipher-word' }, shown),
+    round.table === 'none' ? null : h('details', { class: 'cipher-box', open: true }, h('summary', null, t('cipher.table_title')), cipherTable(round.alphabet)),
+    round.hint ? h('p', { class: 'hint' }, icon('bulb', 22), ' ', round.hint) : null,
+    answerEl, note) };
+}
+
 const RENDERERS = {
+  cipher: renderCipher,
   choice: renderChoice,
   multi: renderMulti,
   rows: renderRows,
@@ -732,10 +817,7 @@ export function renderPresentation(round, reveal) {
     wrap.append(renderMock(round.mock, { reveal }).el);
     if (reveal) {
       const items = [];
-      const walk = (p) => { if (p && typeof p === 'object' && p.pick && p.flag) items.push(p); };
-      walk(round.mock.from);
-      walk(round.mock.subject);
-      round.mock.paragraphs.forEach((para) => para.forEach(walk));
+      mockParts(round.mock).forEach((p) => { if (p.pick && p.flag) items.push(p); });
       wrap.append(items.length
         ? h('ul', { class: 'explain' }, items.map((p) => h('li', { class: 'ok' }, icon('flag', 20), h('span', null, t('explain.picked_ok', { text: p.text, why: p.why })))))
         : h('p', { class: 'ok-text' }, icon('check', 22), ' ', t('present.legit')));
@@ -750,6 +832,11 @@ export function renderPresentation(round, reveal) {
         renderMock({ kind: 'email', from: e.from, subject: e.subject, paragraphs: e.paragraphs, attachment: e.attachment }).el);
       if (reveal) wrap.append(h('p', { class: e.scam ? 'bad-text' : 'ok-text' }, icon(e.scam ? 'warning' : 'check', 22), ' ', h('span', null, h('strong', null, (e.scam ? t('inbox.scam') : t('inbox.ok')) + ': '), e.why)));
     });
+  } else if (round.type === 'cipher') {
+    const decode = round.mode !== 'encode';
+    wrap.append(h('div', { class: 'cipher-word' }, decode ? encode(round.text, round.alphabet) : plain(round.text)));
+    if (round.table !== 'none') wrap.append(cipherTable(round.alphabet));
+    if (reveal) wrap.append(h('p', { class: 'ok-text' }, icon('check', 22), ' ', decode ? plain(round.text) : encode(round.text, round.alphabet)));
   } else if (round.type === 'lab') {
     wrap.append(h('p', { class: 'lead' }, round.hint || ''));
     if (round.profile) wrap.append(h('p', null, Object.entries(round.profile).map(([k, v]) => `${k}: ${v}`).join(' · ')));

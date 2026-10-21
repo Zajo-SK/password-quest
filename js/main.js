@@ -8,6 +8,7 @@ import { getLevel, getTask } from './content/index.js';
 import * as views from './views.js';
 import { mountTask } from './engine.js';
 import { renderLabPage } from './lab.js';
+import { renderCipherPage } from './cipherPage.js';
 import { renderTeacher, renderPresent, handleJoin } from './teacher.js';
 
 const app = document.getElementById('app');
@@ -20,6 +21,7 @@ const NAV = [
   ['levels', 'nav.missions', 'shield'],
   ['email', 'nav.email', 'mail'],
   ['lab', 'nav.lab', 'key'],
+  ['cipher', 'nav.cipher', 'lock'],
   ['progress', 'nav.progress', 'star'],
   ['materials', 'nav.materials', 'book'],
   ...(FEATURES.teacher ? [['teacher', 'nav.teacher', 'users']] : []),
@@ -90,6 +92,7 @@ function render() {
       case 'level': result = c === 'summary' ? views.levelSummary(app, b) : views.level(app, b, c === 'all'); break;
       case 'task': result = mountTask(app, b); break;
       case 'lab': result = renderLabPage(app); break;
+      case 'cipher': result = renderCipherPage(app); break;
       case 'howto': result = views.howto(app); break;
       case 'basis': result = views.basis(app); break;
       case 'learn': result = views.learn(app); break;

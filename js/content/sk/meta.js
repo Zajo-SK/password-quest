@@ -13,6 +13,10 @@ export const TOPICS = {
   links: 'Odkazy a adresy',
   attachments: 'Prílohy a odosielatelia',
   reporting: 'Nahlasovanie podvodov',
+  'password-types': 'Druhy hesiel',
+  ciphers: 'Šifry',
+  chat: 'Chat a sociálne siete',
+  websites: 'Falošné stránky',
 };
 
 export const BADGES = {
@@ -28,6 +32,10 @@ export const BADGES = {
   link_checker: { name: 'Kontrolór odkazov', desc: 'Vieš zistiť, kam odkaz naozaj vedie.' },
   inbox_analyst: { name: 'Analytik schránky', desc: 'Roztriedíš schránku a odhalíš falošných odosielateľov aj nebezpečné prílohy.' },
   email_detective: { name: 'Detektív e-mailov', desc: 'Odhalíš aj pokročilé triky a vieš, ako na phishing reagovať.' },
+  code_breaker: { name: 'Lúštiteľ šifier', desc: 'Vieš zašifrovať aj rozlúštiť tajné písmo a vieš, prečo šifra heslo nezachráni.' },
+  types_expert: { name: 'Znalec hesiel', desc: 'Poznáš rôzne druhy hesiel a zámkov a vieš, kedy sa ktorý hodí.' },
+  chat_guard: { name: 'Strážca chatu', desc: 'Spoznáš podvod v chate, v hre, v SMS aj na sociálnej sieti.' },
+  web_checker: { name: 'Kontrolór stránok', desc: 'Spoznáš falošnú prihlasovaciu stránku a vieš, ako sa dostať na pravú.' },
 };
 
 export const PLANNED = {

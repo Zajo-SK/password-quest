@@ -20,6 +20,8 @@
     import { CARDS, COMMON } from '../js/wordlists.js';
     import { checkPassword, splitWords, drawCards, drawCardSet, cardWord, normalize } from '../js/lab.js';
     import { newClassCode, buildCsv } from '../js/teacher.js';
+    import { mockParts } from '../js/content/helpers.js';
+    import { LETTERS, alphabet, encode, decode, same, plain, randomAlphabet } from '../js/cipher.js';
 
     const out = document.getElementById('out');
     let pass = 0, fail = 0;
@@ -81,7 +83,7 @@
       const missingEn = sk.filter((k) => !(k in DICTS.en)), missingSk = en.filter((k) => !(k in DICTS.sk));
       truthy(!missingEn.length && !missingSk.length, `chýba v EN: ${missingEn.join(', ')} | chýba v SK: ${missingSk.join(', ')}`);
     });
-    const files = ['main.js', 'views.js', 'engine.js', 'lab.js', 'teacher.js', 'icons.js'];
+    const files = ['main.js', 'views.js', 'engine.js', 'lab.js', 'teacher.js', 'icons.js', 'cipherPage.js'];
     const sources = await Promise.all(files.map((f) => fetch('../js/' + f, { cache: 'no-store' }).then((r) => r.text())));
     test('všetky statické kľúče t(…) v kóde existujú v slovníkoch', () => {
       const keys = new Set(sources.flatMap((s) => [...s.matchAll(/\bt\('([^']+)'\s*[,)]/g)].map((m) => m[1])));
@@ -121,7 +123,7 @@
       const levels = Object.values(modules).flat();
       const tasks = levels.flatMap((l) => l.tasks);
       test(`[${lang}] moduly majú 4 úrovne obtiažnosti`, () => { eq(Object.keys(modules).join(), 'password-quest,email-detective'); Object.values(modules).forEach((ls) => { eq(ls.length, 4); ls.forEach((l, i) => eq(l.n, i + 1, l.id)); }); });
-      test(`[${lang}] Password Quest má v každej úrovni aspoň 4 misie, ostatné moduly aspoň 2`, () => Object.entries(modules).forEach(([id, ls]) => ls.forEach((l) => truthy(l.tasks.length >= (id === 'password-quest' ? 4 : 2), 'úroveň ' + l.id))));
+      test(`[${lang}] Password Quest má v každej úrovni aspoň 6 misií, Detektív e-mailov aspoň 4`, () => Object.entries(modules).forEach(([id, ls]) => ls.forEach((l) => truthy(l.tasks.length >= (id === 'password-quest' ? 6 : 4), 'úroveň ' + l.id))));
       test(`[${lang}] id úrovní sú jedinečné a odznaky úrovní existujú`, () => { eq(new Set(levels.map((l) => String(l.id))).size, levels.length); levels.forEach((l) => truthy(meta.BADGES[l.badge], l.id)); });
       test(`[${lang}] moduly majú názov a popis`, () => Object.keys(modules).forEach((id) => { truthy(meta.MODULES[id].name, id); truthy(meta.MODULES[id].summary, id); }));
       test(`[${lang}] schránka: každý e-mail má odosielateľa, predmet, vysvetlenie a je aspoň jeden podvod aj jeden pravý`, () => tasks.forEach((x) => x.rounds.filter((r) => r.type === 'inbox').forEach((r) => {
@@ -135,6 +137,20 @@
       test(`[${lang}] rows: správna kategória existuje`, () => tasks.forEach((x) => x.rounds.filter((r) => r.type === 'rows').forEach((r) => r.rows.forEach((row) => {
         if (row.options) eq(row.options.filter((o) => o.correct).length, 1, r.id); else truthy(r.categories.some((c) => c.id === row.answer), r.id);
       }))));
+      test(`[${lang}] každý odznak sa dá získať`, () => {
+        const given = new Set([...levels.map((l) => l.badge), ...tasks.map((x) => x.badge)].filter(Boolean));
+        Object.keys(meta.BADGES).forEach((b) => truthy(given.has(b), b));
+      });
+      test(`[${lang}] šifry: slovo sa dá zašifrovať aj rozlúštiť a možnosti obsahujú správnu odpoveď`, () => tasks.forEach((x) => x.rounds.filter((r) => r.type === 'cipher').forEach((r) => {
+        truthy(/^[A-Z ]+$/.test(plain(r.text)), r.id);
+        truthy(same(decode(encode(r.text, r.alphabet), r.alphabet), r.text), r.id + ' roundtrip');
+        truthy(r.why, r.id + ' why');
+        if (r.choices) {
+          truthy(r.choices.some((c) => same(c, r.text)), r.id + ' choices');
+          eq(new Set(r.choices.map((c) => encode(c, r.alphabet))).size, r.choices.length, r.id + ' rovnaké možnosti');
+        }
+      })));
+      test(`[${lang}] označovanie: každá ukážka má časti na označenie`, () => tasks.forEach((x) => x.rounds.filter((r) => r.type === 'hotspot').forEach((r) => truthy(mockParts(r.mock).some((p) => p.pick), r.id))));
       test(`[${lang}] odznaky majú názov a popis`, () => Object.values(meta.BADGES).forEach((b) => { truthy(b.name); truthy(b.desc); }));
       test(`[${lang}] obsah používa len vymyslené domény (.example, .test)`, () => {
         const text = JSON.stringify(tasks);
@@ -149,7 +165,9 @@
       cats: (r.categories || []).map((c) => c.id),
       rows: (r.rows || []).map((x) => x.answer || (x.options || []).map((o) => !!o.correct).join()),
       items: (r.items || []).map((i) => i.tier),
-      flags: r.type === 'hotspot' ? [r.mock.from, r.mock.subject, ...r.mock.paragraphs.flat()].map((p) => (typeof p === 'object' ? `${!!p.pick}${!!p.flag}${!!p.link}` : 's')) : [],
+      flags: r.type === 'hotspot' ? mockParts(r.mock).map((p) => `${!!p.pick}${!!p.flag}${!!p.link}`) : [],
+      mockKind: r.mock ? r.mock.kind : null,
+      cipher: r.type === 'cipher' ? [typeof r.alphabet === 'object' ? JSON.stringify(r.alphabet) : r.alphabet, r.mode, (r.choices || []).length, r.table] : null,
       goal: r.goal || null, accounts: (r.accounts || []).map((a) => a.id), leakFrom: r.leakFrom || null,
       emails: (r.emails || []).map((e) => `${e.scam}${!!e.attachment}${e.paragraphs.length}`), attachment: !!(r.mock && r.mock.attachment),
     });
@@ -165,6 +183,17 @@
         });
       }));
     });
+
+    // --- Šifrovacie abecedy ---
+    test('šifry: všetky abecedy vedia zašifrovať a rozlúštiť celú abecedu', () => {
+      ['bot', 'leet', 'rot13', 'caesar1', 'caesar3', 'caesar25', randomAlphabet()].forEach((id) => {
+        eq(decode(encode(LETTERS, id), id), LETTERS, typeof id === 'string' ? id : 'náhodná');
+      });
+    });
+    test('šifry: Caesar s posunom 3 a ROT13', () => { eq(encode('ABC xyz', 'caesar3'), 'DEF ABC'); eq(encode(encode('HESLO', 'rot13'), 'rot13'), 'HESLO'); });
+    test('šifry: diakritika sa pred šifrovaním odstráni', () => eq(encode('Ďateľ', 'caesar1'), 'EBUFM'));
+    test('šifry: náhodná abeceda má pre každé písmeno iný znak', () => { const a = randomAlphabet(); eq(new Set(Object.values(a)).size, 26); });
+    test('šifry: Botova abeceda nemá dva rovnaké obrázky', () => { const a = alphabet('bot'); eq(new Set(Object.values(a)).size, 26); });
 
     // --- Materiály pre učiteľov: všetky súbory na stiahnutie existujú ---
     const materialFiles = ['sk/hodina-1-bezpecne-hesla', 'sk/hodina-2-podvodne-emaily', 'en/lesson-1-safe-passwords', 'en/lesson-2-scam-emails']

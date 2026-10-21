@@ -83,3 +83,20 @@ export function mail(from, subject, paragraphs, scam, why, extra = {}) {
 export function inbox(prompt, emails, summary, extra = {}) {
   return { type: 'inbox', prompt, emails, summary, ...extra };
 }
+
+// Všetky časti ukážky (e-mail, chat, stránka), ktoré sú objektom: na označovanie, kontrolu a premietanie.
+export function mockParts(mock) {
+  const list = [];
+  const add = (p) => { if (p && typeof p === 'object') list.push(p); };
+  if (!mock) return list;
+  if (mock.kind === 'chat') mock.messages.forEach((m) => m.parts.forEach(add));
+  else if (mock.kind === 'page') { add(mock.url); add(mock.title); (mock.paragraphs || []).forEach((para) => para.forEach(add)); }
+  else { add(mock.from); add(mock.subject); (mock.paragraphs || []).forEach((para) => para.forEach(add)); }
+  return list;
+}
+
+// cipher: zašifrované slovo. spec = { alphabet: 'bot' | 'leet' | 'caesar3' | 'rot13' | {A:'x', ...}, mode: 'decode' | 'encode',
+// text: pôvodné slovo, choices?: [slová na výber] (bez choices sa odpoveď píše), table?: 'full' | 'used' | 'none', why }.
+export function cipher(prompt, spec, summary, extra = {}) {
+  return { type: 'cipher', prompt, table: 'full', ...spec, summary, ...extra };
+}
