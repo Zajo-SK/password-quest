@@ -1,11 +1,13 @@
 // Jazyky rozhrania. Texty rozhrania sú v js/i18n/<jazyk>.js, obsah úloh v js/content/<jazyk>/.
 import sk from './i18n/sk.js';
 import en from './i18n/en.js';
+import zh from './i18n/zh.js';
 
-export const DICTS = { sk, en };
+export const DICTS = { sk, en, zh };
 export const LANGS = [
   { id: 'sk', short: 'SK', name: 'Slovenčina', locale: 'sk-SK' },
   { id: 'en', short: 'EN', name: 'English', locale: 'en-US' },
+  { id: 'zh', short: '中文', name: '简体中文', locale: 'zh-CN' },
 ];
 
 const KEY = 'pq.lang';

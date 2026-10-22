@@ -490,3 +490,4 @@ ol.present-options { list-style: decimal inside; }
 }
 .basis-item h3 { margin-top: 0; }
 .basis-item p { margin: 0 0 8px; }
+.ws-pinyin { display: block; opacity: 0.8; font-size: 0.78rem; letter-spacing: -0.01em; }

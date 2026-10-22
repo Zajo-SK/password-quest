@@ -93,6 +93,57 @@ export const CARDS = {
     ['⛪', 'Chapel'], ['🗼', 'Tower'], ['🎠', 'Carousel'], ['🎪', 'Circus'], ['🏭', 'Factory'], ['🗿', 'Statue'],
     ['🧱', 'Brick'], ['🧊', 'Iceberg'],
   ],
+  // 中文：[图片, 拼音（写进密码，不带声调）, 汉字]。
+  zh: [
+    ['🐘', 'Daxiang', '大象'], ['🦓', 'Banma', '斑马'], ['🚀', 'Huojian', '火箭'], ['🌵', 'Xianrenzhang', '仙人掌'], ['☂️', 'Yusan', '雨伞'],
+    ['🌉', 'Qiao', '桥'], ['💡', 'Taideng', '台灯'], ['☁️', 'Yunduo', '云朵'], ['🎲', 'Shaizi', '骰子'], ['🦉', 'Maotouying', '猫头鹰'],
+    ['🦊', 'Huli', '狐狸'], ['🚂', 'Huoche', '火车'], ['🚜', 'Tuolaji', '拖拉机'], ['🎈', 'Qiqiu', '气球'], ['🏰', 'Chengbao', '城堡'],
+    ['🐉', 'Long', '龙'], ['🧭', 'Zhinanzhen', '指南针'], ['🗺️', 'Ditu', '地图'], ['⚓', 'Chuanmao', '船锚'], ['⛺', 'Zhangpeng', '帐篷'],
+    ['🕯️', 'Lazhu', '蜡烛'], ['🪞', 'Jingzi', '镜子'], ['🪟', 'Chuanghu', '窗户'], ['👑', 'Huangguan', '皇冠'], ['⏰', 'Naozhong', '闹钟'],
+    ['🚲', 'Zixingche', '自行车'], ['🛴', 'Huabanche', '滑板车'], ['✈️', 'Feiji', '飞机'], ['🪂', 'Jiangluosan', '降落伞'], ['🚇', 'Suidao', '隧道'],
+    ['⛲', 'Penquan', '喷泉'], ['🌷', 'Yujinxiang', '郁金香'], ['🍁', 'Fengye', '枫叶'], ['🍄', 'Mogu', '蘑菇'], ['⛰️', 'Shanqiu', '山丘'],
+    ['🍋', 'Ningmeng', '柠檬'], ['🥕', 'Huluobo', '胡萝卜'], ['🎃', 'Nangua', '南瓜'], ['🌰', 'Lizi', '栗子'], ['🎸', 'Jita', '吉他'],
+    ['🥁', 'Dagu', '大鼓'], ['🎺', 'Xiaohao', '小号'], ['🪑', 'Yizi', '椅子'], ['🧹', 'Saozhou', '扫帚'], ['🐌', 'Woniu', '蜗牛'],
+    ['🦔', 'Ciwei', '刺猬'], ['🦋', 'Hudie', '蝴蝶'], ['🐜', 'Mayi', '蚂蚁'], ['🕷️', 'Zhizhu', '蜘蛛'], ['🐬', 'Haitun', '海豚'],
+    ['🐋', 'Jingyu', '鲸鱼'], ['🐯', 'Laohu', '老虎'], ['🦁', 'Shizi', '狮子'], ['🦜', 'Yingwu', '鹦鹉'], ['🐫', 'Luotuo', '骆驼'],
+    ['🐊', 'Eyu', '鳄鱼'], ['🦘', 'Daishu', '袋鼠'], ['🐧', 'Qie', '企鹅'], ['🚌', 'Gongjiaoche', '公交车'], ['☄️', 'Huixing', '彗星'],
+    ['🪐', 'Xingqiu', '星球'], ['🌋', 'Huoshan', '火山'], ['🏝️', 'Haidao', '海岛'], ['🧲', 'Citie', '磁铁'], ['🔭', 'Wangyuanjing', '望远镜'],
+    ['🍉', 'Xigua', '西瓜'], ['🧦', 'Wazi', '袜子'], ['🎒', 'Shubao', '书包'], ['🐸', 'Qingwa', '青蛙'], ['🐢', 'Wugui', '乌龟'],
+    ['🐙', 'Zhangyu', '章鱼'], ['🦀', 'Pangxie', '螃蟹'], ['🦈', 'Shayu', '鲨鱼'], ['🐝', 'Mifeng', '蜜蜂'], ['🐞', 'Piaochong', '瓢虫'],
+    ['🦒', 'Changjinglu', '长颈鹿'], ['🦏', 'Xiniu', '犀牛'], ['🦛', 'Hema', '河马'], ['🐼', 'Xiongmao', '熊猫'], ['🐨', 'Kaola', '考拉'],
+    ['🦩', 'Huolieniao', '火烈鸟'], ['🦢', 'Tiane', '天鹅'], ['🦆', 'Yazi', '鸭子'], ['🐓', 'Gongji', '公鸡'], ['🦃', 'Huoji', '火鸡'],
+    ['🐿️', 'Songshu', '松鼠'], ['🦇', 'Bianfu', '蝙蝠'], ['🦌', 'Meihualu', '梅花鹿'], ['🐺', 'Yelang', '野狼'], ['🐻', 'Gouxiong', '狗熊'],
+    ['🦡', 'Gouhuan', '狗獾'], ['🦦', 'Shuita', '水獭'], ['🦫', 'Heli', '河狸'], ['🦎', 'Xiyi', '蜥蜴'], ['🦂', 'Xiezi', '蝎子'],
+    ['🦭', 'Haibao', '海豹'], ['🐠', 'Redaiyu', '热带鱼'], ['🦞', 'Longxia', '龙虾'], ['🦐', 'Duixia', '对虾'], ['🦗', 'Xishuai', '蟋蟀'],
+    ['🪲', 'Jiachong', '甲虫'], ['🐎', 'Junma', '骏马'], ['🐑', 'Mianyang', '绵羊'], ['🐐', 'Shanyang', '山羊'], ['🐄', 'Nainiu', '奶牛'],
+    ['🐇', 'Tuzi', '兔子'], ['🦙', 'Yangtuo', '羊驼'], ['🐆', 'Huabao', '花豹'], ['🦍', 'Daxingxing', '大猩猩'], ['🦥', 'Shulan', '树懒'],
+    ['🦚', 'Kongque', '孔雀'], ['🦅', 'Laoying', '老鹰'], ['🕊️', 'Gezi', '鸽子'], ['🍐', 'Xueli', '雪梨'], ['🍒', 'Yingtao', '樱桃'],
+    ['🍑', 'Taozi', '桃子'], ['🍍', 'Boluo', '菠萝'], ['🥝', 'Mihoutao', '猕猴桃'], ['🥥', 'Yezi', '椰子'], ['🥑', 'Niuyouguo', '牛油果'],
+    ['🍆', 'Qiezi', '茄子'], ['🥦', 'Xilanhua', '西兰花'], ['🌽', 'Yumi', '玉米'], ['🥒', 'Huanggua', '黄瓜'], ['🧄', 'Dasuan', '大蒜'],
+    ['🧅', 'Yangcong', '洋葱'], ['🥔', 'Tudou', '土豆'], ['🍞', 'Mianbao', '面包'], ['🧀', 'Nailao', '奶酪'], ['🥚', 'Jidan', '鸡蛋'],
+    ['🥞', 'Jianbing', '煎饼'], ['🍯', 'Fengmi', '蜂蜜'], ['🥜', 'Huasheng', '花生'], ['🍪', 'Binggan', '饼干'], ['🎂', 'Dangao', '蛋糕'],
+    ['🍩', 'Tiantianquan', '甜甜圈'], ['🍿', 'Baomihua', '爆米花'], ['🥛', 'Niunai', '牛奶'], ['🫖', 'Chahu', '茶壶'], ['🍦', 'Bingqilin', '冰淇淋'],
+    ['🍬', 'Tangguo', '糖果'], ['🫐', 'Lanmei', '蓝莓'], ['🍇', 'Putao', '葡萄'], ['🌶️', 'Lajiao', '辣椒'], ['🍅', 'Xihongshi', '西红柿'],
+    ['🔨', 'Chuizi', '锤子'], ['🪚', 'Juzi', '锯子'], ['🪛', 'Luosidao', '螺丝刀'], ['🧰', 'Gongjuxiang', '工具箱'], ['🧶', 'Maoxian', '毛线'],
+    ['🪡', 'Fengyizhen', '缝衣针'], ['✂️', 'Jiandao', '剪刀'], ['📎', 'Huixingzhen', '回形针'], ['📏', 'Chizi', '尺子'], ['✏️', 'Qianbi', '铅笔'],
+    ['🖍️', 'Labi', '蜡笔'], ['🖌️', 'Huabi', '画笔'], ['📖', 'Shuben', '书本'], ['📓', 'Bijiben', '笔记本'], ['🪁', 'Fengzheng', '风筝'],
+    ['🪀', 'Youyouqiu', '悠悠球'], ['🎯', 'Bazi', '靶子'], ['🧩', 'Pintu', '拼图'], ['⛵', 'Fanchuan', '帆船'], ['🚢', 'Lunchuan', '轮船'],
+    ['🚁', 'Zhishengji', '直升机'], ['🚑', 'Jiuhuche', '救护车'], ['🚕', 'Chuzuche', '出租车'], ['🚚', 'Kache', '卡车'], ['🏍️', 'Motuoche', '摩托车'],
+    ['🛷', 'Xueqiao', '雪橇'], ['⛸️', 'Bingxie', '冰鞋'], ['🎿', 'Huaxueban', '滑雪板'], ['🪜', 'Tizi', '梯子'], ['🪣', 'Shuitong', '水桶'],
+    ['🧺', 'Lanzi', '篮子'], ['🪴', 'Huapen', '花盆'], ['🛁', 'Yugang', '浴缸'], ['🚿', 'Huasa', '花洒'], ['🧼', 'Feizao', '肥皂'],
+    ['🪥', 'Yashua', '牙刷'], ['🧽', 'Haimian', '海绵'], ['🛏️', 'Chuangpu', '床铺'], ['🛋️', 'Shafa', '沙发'], ['🚪', 'Damen', '大门'],
+    ['🔦', 'Shoudiantong', '手电筒'], ['🔔', 'Lingdang', '铃铛'], ['🎀', 'Hudiejie', '蝴蝶结'], ['🎩', 'Limao', '礼帽'], ['🧢', 'Bangqiumao', '棒球帽'],
+    ['👓', 'Yanjing', '眼镜'], ['🧤', 'Shoutao', '手套'], ['🧣', 'Weijin', '围巾'], ['👢', 'Xuezi', '靴子'], ['💎', 'Zuanshi', '钻石'],
+    ['🪙', 'Yingbi', '硬币'], ['🏺', 'Huaping', '花瓶'], ['🧪', 'Shiguan', '试管'], ['🔬', 'Xianweijing', '显微镜'], ['🛰️', 'Weixing', '卫星'],
+    ['📡', 'Tianxian', '天线'], ['📷', 'Zhaoxiangji', '照相机'], ['📻', 'Shouyinji', '收音机'], ['🎹', 'Gangqin', '钢琴'], ['🎻', 'Xiaotiqin', '小提琴'],
+    ['🪗', 'Shoufengqin', '手风琴'], ['🎷', 'Sakesi', '萨克斯'], ['🎤', 'Maikefeng', '麦克风'], ['🌲', 'Shanshu', '杉树'], ['🌳', 'Xiangshu', '橡树'],
+    ['🌴', 'Zonglushu', '棕榈树'], ['🌻', 'Xiangrikui', '向日葵'], ['🌹', 'Meigui', '玫瑰'], ['🌼', 'Chuju', '雏菊'], ['🍀', 'Sanyecao', '三叶草'],
+    ['🌾', 'Maisui', '麦穗'], ['🪨', 'Shitou', '石头'], ['🌊', 'Langhua', '浪花'], ['❄️', 'Xuehua', '雪花'], ['🌈', 'Caihong', '彩虹'],
+    ['⚡', 'Shandian', '闪电'], ['🌪️', 'Longjuanfeng', '龙卷风'], ['🌙', 'Yueliang', '月亮'], ['⭐', 'Xingxing', '星星'], ['🏜️', 'Shamo', '沙漠'],
+    ['🏞️', 'Heliu', '河流'], ['🔥', 'Huoyan', '火焰'], ['💧', 'Shuidi', '水滴'], ['🏡', 'Xiaowu', '小屋'], ['🏛️', 'Bowuguan', '博物馆'],
+    ['🏟️', 'Tiyuchang', '体育场'], ['⛪', 'Jiaotang', '教堂'], ['🗼', 'Tieta', '铁塔'], ['🎠', 'Muma', '木马'], ['🎪', 'Maxituan', '马戏团'],
+    ['🏭', 'Gongchang', '工厂'], ['🗿', 'Diaoxiang', '雕像'], ['🧱', 'Zhuantou', '砖头'], ['🧊', 'Bingshan', '冰山'],
+  ],
 };
 
 // Bežné heslá a slová (slovenské aj anglické). Kontrola ich hľadá v normalizovanom tvare (malé písmená, bez diakritiky).
@@ -109,5 +160,7 @@ export const COMMON = new Set((
   'password1 password123 qwerty123 admin123 welcome1 iloveyou1 1q2w3e4r 1qaz2wsx 123qwe zaq12wsx ' +
   'charlie michael jordan hunter ranger buster tigger pepper ginger cookie chocolate banana pizza computer internet ' +
   'heslo1 heslo12 heslo1234 mojeheslo tajneheslo noveheslo laska zlato srdiecko janko peter martin jana maria anna ' +
-  'slovan vianoce'
+  'slovan vianoce ' +
+  'woaini woaini1314 5201314 1314520 520520 888888 666666 aaaaaa qq123456 abc123456 a123456 ' +
+  'nihao mima mima123 mima1234 wodemima zhongguo beijing shanghai xiaoming wangcai wangwei zhangwei lilei hanmeimei'
 ).split(/\s+/).filter(Boolean));

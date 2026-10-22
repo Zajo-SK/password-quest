@@ -5,6 +5,7 @@
 import { getLang } from '../i18n.js';
 import * as skMeta from './sk/meta.js';
 import * as enMeta from './en/meta.js';
+import * as zhMeta from './zh/meta.js';
 import { level1 as sk1 } from './sk/level1.js';
 import { level2 as sk2 } from './sk/level2.js';
 import { level3 as sk3 } from './sk/level3.js';
@@ -13,10 +14,16 @@ import { level1 as en1 } from './en/level1.js';
 import { level2 as en2 } from './en/level2.js';
 import { level3 as en3 } from './en/level3.js';
 import { level4 as en4 } from './en/level4.js';
+import { level1 as zh1 } from './zh/level1.js';
+import { level2 as zh2 } from './zh/level2.js';
+import { level3 as zh3 } from './zh/level3.js';
+import { level4 as zh4 } from './zh/level4.js';
 import { emailLevels as skEmail } from './sk/email.js';
 import { emailLevels as enEmail } from './en/email.js';
+import { emailLevels as zhEmail } from './zh/email.js';
 import { extraTasks as skExtra } from './sk/extra.js';
 import { extraTasks as enExtra } from './en/extra.js';
+import { extraTasks as zhExtra } from './zh/extra.js';
 
 // Spoločné vlastnosti odznakov (texty sú v meta.js daného jazyka).
 const BADGE_STYLE = {
@@ -78,6 +85,7 @@ function withExtra(levels, extra) {
 export const CONTENT = {
   sk: { meta: skMeta, modules: { 'password-quest': prepare('password-quest', withExtra([sk1, sk2, sk3, sk4], skExtra)), 'email-detective': prepare('email-detective', withExtra(skEmail, skExtra)) } },
   en: { meta: enMeta, modules: { 'password-quest': prepare('password-quest', withExtra([en1, en2, en3, en4], enExtra)), 'email-detective': prepare('email-detective', withExtra(enEmail, enExtra)) } },
+  zh: { meta: zhMeta, modules: { 'password-quest': prepare('password-quest', withExtra([zh1, zh2, zh3, zh4], zhExtra)), 'email-detective': prepare('email-detective', withExtra(zhEmail, zhExtra)) } },
 };
 
 const current = () => CONTENT[getLang()] || CONTENT.sk;

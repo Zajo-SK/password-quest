@@ -172,11 +172,12 @@ export function createWorkshop(opts = {}) {
     addBtn.disabled = cards.length >= MAX_CARDS;
     removeBtn.disabled = cards.length <= MIN_CARDS;
     clear(cardRow);
-    cards.forEach(([emoji, word], i) => {
+    // Kartička môže mať aj popis (čínština: znaky), do hesla ide vždy druhá položka (pinyin).
+    cards.forEach(([emoji, word, label], i) => {
       cardRow.append(h('button', {
-        type: 'button', class: 'ws-card', 'aria-label': t('ws.swap_aria', { word }),
+        type: 'button', class: 'ws-card', 'aria-label': t('ws.swap_aria', { word: label ? `${label} (${word})` : word }),
         onclick: () => { const fromCards = input.value === cardsValue(); cards = swapCard(cards, i); drawCards_(); if (fromCards || !input.value) fillFromCards(); },
-      }, h('span', { class: 'ws-emoji', 'aria-hidden': 'true' }, emoji), h('span', { class: 'ws-word' }, word), h('span', { class: 'ws-swap' }, icon('repeat', 16), ' ', t('ws.swap'))));
+      }, h('span', { class: 'ws-emoji', 'aria-hidden': 'true' }, emoji), h('span', { class: 'ws-word' }, label || word), label ? h('span', { class: 'ws-pinyin small' }, word) : null, h('span', { class: 'ws-swap' }, icon('repeat', 16), ' ', t('ws.swap'))));
     });
   }
 
