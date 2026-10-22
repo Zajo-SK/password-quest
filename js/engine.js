@@ -7,6 +7,7 @@ import * as store from './store.js';
 import { t } from './i18n.js';
 import { getTask, getLevel, badge, topicLabel } from './content/index.js';
 import { createWorkshop } from './lab.js';
+import { watchTerms, glossaryBox } from './glossary.js';
 import { mockParts } from './content/helpers.js';
 import { LETTERS, alphabet, encode, plain, same } from './cipher.js';
 import { levelProgress } from './progress.js';
@@ -607,7 +608,9 @@ export function mountTask(root, taskId) {
           h('span', { class: 'chip' }, icon('book', 18), ' ', topicLabel(task.topic)),
           b ? h('span', { class: 'chip chip-badge' }, icon(b.icon, 18), ' ', t('task.badge', { name: b.name })) : null),
         h('p', { class: 'muted' }, t('task.no_penalty')),
+        glossaryBox(task, 'gl.mission'),
         actions)));
+    cleanups.push(watchTerms(shell.querySelector('.intro-body')));
     focusHeading('#task-h1');
   }
 
@@ -641,8 +644,11 @@ export function mountTask(root, taskId) {
       h('h1', { id: 'round-title', class: 'round-prompt', tabindex: '-1' }, round.prompt),
       round.mock && round.type !== 'hotspot' ? renderMock(round.mock).el : null,
       rendered.el,
+      glossaryBox(round, 'gl.round'),
       feedback);
     shell.append(header(true), card);
+    // Neznáme slová (doména, phishing…) sa dajú ťuknúť; vysvetlenie sa označí aj vo vysvetleniach po odpovedi.
+    cleanups.push(watchTerms(card));
     focusHeading('#round-title');
     window.scrollTo({ top: 0 });
   }
