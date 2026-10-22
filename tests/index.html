@@ -16,7 +16,7 @@
   <ul id="out"></ul>
   <script type="module">
     import { CONTENT } from '../js/content/index.js';
-    import { DICTS, setLang, getLang, t } from '../js/i18n.js';
+    import { DICTS, LANGS, setLang, getLang, t } from '../js/i18n.js';
     import { CARDS, COMMON } from '../js/wordlists.js';
     import { checkPassword, splitWords, drawCards, drawCardSet, cardWord, normalize } from '../js/lab.js';
     import { newClassCode, buildCsv } from '../js/teacher.js';
@@ -78,16 +78,19 @@
     test('CSV obsahuje hlavičku', () => { setLang('sk'); truthy(buildCsv().includes('typ;id;nazov')); });
 
     // --- Slovníky rozhrania ---
-    test('slovníky SK a EN majú rovnaké kľúče', () => {
-      const sk = Object.keys(DICTS.sk), en = Object.keys(DICTS.en);
-      const missingEn = sk.filter((k) => !(k in DICTS.en)), missingSk = en.filter((k) => !(k in DICTS.sk));
-      truthy(!missingEn.length && !missingSk.length, `chýba v EN: ${missingEn.join(', ')} | chýba v SK: ${missingSk.join(', ')}`);
-    });
+    const DICT_IDS = Object.keys(DICTS);
+    const inAll = (k) => DICT_IDS.every((l) => k in DICTS[l]);
+    test('slovníky všetkých jazykov majú rovnaké kľúče ako SK', () => DICT_IDS.filter((l) => l !== 'sk').forEach((l) => {
+      const sk = Object.keys(DICTS.sk), other = Object.keys(DICTS[l]);
+      const missing = sk.filter((k) => !(k in DICTS[l])), extra = other.filter((k) => !(k in DICTS.sk));
+      truthy(!missing.length && !extra.length, `${l}: chýba ${missing.join(', ')} | navyše ${extra.join(', ')}`);
+    }));
+    test('každý jazyk obsahu má slovník rozhrania a jazyk v prepínači', () => LANG_IDS.forEach((l) => { truthy(DICTS[l], l); truthy(LANGS.some((x) => x.id === l), l); }));
     const files = ['main.js', 'views.js', 'engine.js', 'lab.js', 'teacher.js', 'icons.js', 'cipherPage.js'];
     const sources = await Promise.all(files.map((f) => fetch('../js/' + f, { cache: 'no-store' }).then((r) => r.text())));
     test('všetky statické kľúče t(…) v kóde existujú v slovníkoch', () => {
       const keys = new Set(sources.flatMap((s) => [...s.matchAll(/\bt\('([^']+)'\s*[,)]/g)].map((m) => m[1])));
-      const missing = [...keys].filter((k) => !(k in DICTS.sk) || !(k in DICTS.en));
+      const missing = [...keys].filter((k) => !inAll(k));
       truthy(!missing.length, missing.join(', '));
     });
     test('dynamické kľúče existujú', () => {
@@ -107,7 +110,7 @@
         ...[1, 2, 3, 4, 5].map((n) => `teacher.priv${n}`),
         'rank.novice', 'rank.guardian', 'rank.detective', 'rank.expert',
       ];
-      const missing = dyn.filter((k) => !(k in DICTS.sk) || !(k in DICTS.en));
+      const missing = dyn.filter((k) => !inAll(k));
       truthy(!missing.length, missing.join(', '));
     });
     test('funkčné texty (množné číslo) fungujú', () => {
@@ -115,6 +118,8 @@
       eq(t('task.n_tasks', { n: 1 }), '1 úloha'); eq(t('task.n_tasks', { n: 3 }), '3 úlohy'); eq(t('task.n_tasks', { n: 5 }), '5 úloh');
       setLang('en');
       eq(t('task.n_tasks', { n: 1 }), '1 task'); eq(t('task.n_tasks', { n: 6 }), '6 tasks');
+      setLang('zh');
+      eq(t('task.n_tasks', { n: 6 }), '6 道题');
     });
 
     // --- Integrita obsahu v každom jazyku ---
@@ -171,10 +176,10 @@
       goal: r.goal || null, accounts: (r.accounts || []).map((a) => a.id), leakFrom: r.leakFrom || null,
       emails: (r.emails || []).map((e) => `${e.scam}${!!e.attachment}${e.paragraphs.length}`), attachment: !!(r.mock && r.mock.attachment),
     });
-    test('SK a EN majú rovnakú štruktúru modulov, úrovní, misií a kôl', () => {
-      eq(Object.keys(CONTENT.en.modules).join(), Object.keys(CONTENT.sk.modules).join());
+    LANG_IDS.filter((lang) => lang !== 'sk').forEach((lang) => test(`SK a ${lang.toUpperCase()} majú rovnakú štruktúru modulov, úrovní, misií a kôl`, () => {
+      eq(Object.keys(CONTENT[lang].modules).join(), Object.keys(CONTENT.sk.modules).join());
       Object.entries(CONTENT.sk.modules).forEach(([mod, skLevels]) => skLevels.forEach((l, li) => {
-        const e = CONTENT.en.modules[mod][li];
+        const e = CONTENT[lang].modules[mod][li];
         eq(e.id, l.id); eq(e.badge, l.badge); eq(e.color, l.color); eq(e.tasks.length, l.tasks.length, `úroveň ${l.id}`);
         l.tasks.forEach((x, ti) => {
           const y = e.tasks[ti];
@@ -182,7 +187,7 @@
           x.rounds.forEach((r, ri) => eq(shape(y.rounds[ri]), shape(r), r.id));
         });
       }));
-    });
+    }));
 
     // --- Šifrovacie abecedy ---
     test('šifry: všetky abecedy vedia zašifrovať a rozlúštiť celú abecedu', () => {

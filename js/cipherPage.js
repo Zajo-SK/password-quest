@@ -23,6 +23,14 @@ const PUZZLES = {
     { alphabet: 'caesar3', text: 'TURN ON TWO STEP LOGIN' },
     { alphabet: 'rot13', text: 'EVERY ACCOUNT NEEDS ITS OWN PASSWORD' },
   ],
+  // 中文：拼音（暗码只处理字母 A – Z）。
+  zh: [
+    { alphabet: 'bot', text: 'CHANG MIMA' },
+    { alphabet: 'caesar1', text: 'SAN GE SUIJI CI' },
+    { alphabet: 'leet', text: 'MIMA BU GAOSU BIEREN' },
+    { alphabet: 'caesar3', text: 'KAIQI SHUANGCHONG YANZHENG' },
+    { alphabet: 'rot13', text: 'MEI GE ZHANGHU YONG BUTONG MIMA' },
+  ],
 };
 
 const KINDS = ['bot', 'caesar', 'leet', 'random'];

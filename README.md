@@ -1,11 +1,11 @@
 # PASSWORD QUEST
 
-*Chráň svoj digitálny svet.* Interaktívna vzdelávacia hra o bezpečných heslách a základoch kybernetickej bezpečnosti pre školy. Rozhranie aj obsah sú v slovenčine a angličtine, jazyk sa prepína v hornej lište (SK / EN).
+*Chráň svoj digitálny svet.* Interaktívna vzdelávacia hra o bezpečných heslách a základoch kybernetickej bezpečnosti pre školy. Rozhranie aj obsah sú v slovenčine, angličtine a zjednodušenej čínštine, jazyk sa prepína v hornej lište (SK / EN / 中文).
 
 - 2 moduly, každý so 4 úrovňami obtiažnosti (ľahká, stredná, náročná, expertná):
   - **Password Quest** – bezpečné heslá, druhy hesiel a zámkov, šifry, MFA a reakcia na únik (25 misií, 135 úloh)
   - **Detektív e-mailov** – odhaľovanie podvodov v e-mailoch, chate, SMS a na sociálnych sieťach: návnady, falošné odkazy a stránky, prílohy, dvojníci domén, podvody s umelou inteligenciou, triedenie schránky a nahlasovanie (16 misií, 80 úloh)
-- Všetko v slovenčine aj angličtine
+- Všetko v slovenčine, angličtine a zjednodušenej čínštine (materiály pre učiteľov v SK a EN)
 - Dielňa hesiel: žiak si z vylosovaných kartičiek (3 až 5 slov z približne 240) postaví heslo a hneď vidí, ako ťažko sa dá uhádnuť: dĺžka aspoň 15 znakov, bežné a známe heslá, vzory a osobné údaje. Rozpozná aj náhodné heslo zo správcu hesiel
 - Šifrovacia abeceda (podstránka Šifry): Botova obrázková abeceda, Caesarova šifra, známa zámena znakov a vlastná náhodná abeceda, nástroj na šifrovanie aj rozšifrovanie, tajné správy na lúštenie a pravdivé vysvetlenie, prečo zašifrované slovo nie je dobré heslo
 - **Pre učiteľov:** dve vzorové 45-minútové hodiny na stiahnutie (PDF, SK aj EN) – *Silné heslo z náhodných slov* a *Detektív e-mailov* – s metodikou, pracovným listom a riešeniami
@@ -55,9 +55,10 @@ Odporúčané hlavičky (voliteľné, ak ich server vie nastaviť): `Content-Sec
 
 ## Jazyky
 
-- Texty rozhrania sú v `js/i18n/sk.js` a `js/i18n/en.js`, obsah úloh v `js/content/sk/` a `js/content/en/`.
+- Texty rozhrania sú v `js/i18n/sk.js`, `js/i18n/en.js` a `js/i18n/zh.js`, obsah úloh v `js/content/sk/`, `js/content/en/` a `js/content/zh/`.
 - Zvolený jazyk sa pamätá v prehliadači (`pq.lang`). Predvolená je slovenčina.
-- Úlohy majú v oboch jazykoch rovnaké identifikátory aj poradie odpovedí, takže postup, body a odznaky platia aj po prepnutí jazyka. Zhodu štruktúry kontrolujú testy.
+- Úlohy majú vo všetkých jazykoch rovnaké identifikátory aj poradie odpovedí, takže postup, body a odznaky platia aj po prepnutí jazyka. Zhodu štruktúry kontrolujú testy.
+- Čínština (简体中文): heslá a šifrované slová sa píšu pinyinom bez tónov (napríklad 大象 → Daxiang), lebo heslá aj šifry pracujú s písmenami A – Z. Kartičky v Dielni hesiel ukazujú znak aj pinyin. Materiály pre učiteľov sa v čínštine ponúkajú v angličtine.
 - Nový jazyk: pridaj slovník do `js/i18n/`, obsah do `js/content/<jazyk>/`, kartičky so slovami do `js/wordlists.js` a záznam do `LANGS` v `js/i18n.js` a `CONTENT` v `js/content/index.js`.
 
 ## Učiteľský režim
