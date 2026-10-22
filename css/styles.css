@@ -491,3 +491,18 @@ ol.present-options { list-style: decimal inside; }
 .basis-item h3 { margin-top: 0; }
 .basis-item p { margin: 0 0 8px; }
 .ws-pinyin { display: block; opacity: 0.8; font-size: 0.78rem; letter-spacing: -0.01em; }
+/* Slovníček pojmov: ťukateľné slová v misiách, okno s vysvetlením a rozbaľovací zoznam */
+.term { display: inline; font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: help; text-decoration: underline dotted var(--cyan); text-decoration-thickness: 2px; text-underline-offset: 3px; border-radius: 4px; }
+.term:hover, .term[aria-expanded='true'] { background: rgba(45, 226, 230, 0.16); }
+.term:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
+.term-pop { position: absolute; z-index: 60; max-width: calc(100vw - 32px); padding: 12px 14px; border-radius: 14px; background: var(--bg2); color: var(--text); border: 1px solid var(--cyan); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45); font-size: 1rem; line-height: 1.45; }
+.term-pop p { margin: 6px 0 8px; }
+.term-pop-head { display: flex; align-items: center; gap: 8px; }
+.term-pop-close { margin-left: auto; background: none; border: 0; color: inherit; cursor: pointer; padding: 6px; min-width: 36px; min-height: 36px; border-radius: 8px; }
+.term-pop-close:focus-visible { outline: 3px solid var(--cyan); }
+.glossary-box { margin: 14px 0; padding: 10px 14px; border-radius: 12px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border); }
+.glossary-box summary { cursor: pointer; font-weight: 700; display: flex; align-items: center; gap: 6px; min-height: 36px; }
+.glossary-box dl, .glossary-page dl { margin: 8px 0 0; }
+.glossary-box dt, .glossary-page dt { font-weight: 700; margin-top: 10px; }
+.glossary-box dd, .glossary-page dd { margin: 2px 0 0; }
+
