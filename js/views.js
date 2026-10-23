@@ -5,6 +5,7 @@ import * as store from './store.js';
 import { t, getLocale } from './i18n.js';
 import { FEATURES } from './config.js';
 import { modules, plannedModules, topics, topicLabel, badges, badge, getLevel, getTask, getModule, nextLevel as nextLevelOf } from './content/index.js';
+import { nextStepCard, nextStepButton } from './nextStep.js';
 import { taskStatus, levelProgress, levelTopicStats, xpForLevel, overall } from './progress.js';
 
 export const RANKS = [
@@ -156,7 +157,7 @@ export function level(root, id, showAll) {
         p.complete
           ? h('p', null, t('final.ready'))
           : h('p', { class: 'muted' }, t('final.locked', { left: p.totalTasks - p.doneTasks, badge: badge(lv.badge).name }))),
-      p.complete ? h('a', { class: 'btn btn-primary btn-lg', href: `#/level/${lv.id}/summary` }, t('final.open')) : null),
+      p.complete ? h('div', { class: 'actions' }, h('a', { class: 'btn btn-primary btn-lg', href: `#/level/${lv.id}/summary` }, t('final.open')), nextStepButton(lv, 'btn btn-secondary btn-lg')) : null),
   );
 }
 
@@ -181,6 +182,7 @@ export function levelSummary(root, id) {
       h('div', { class: 'stat' }, h('strong', null, `${p.doneTasks} / ${p.totalTasks}`), h('span', null, t('stat.missions'))),
       h('div', { class: 'stat' }, h('strong', null, totalAll ? pctText(Math.round((totalOk / totalAll) * 100)) : '–'), h('span', null, t('stat.first_try')))),
     p.complete ? h('div', { class: 'badge-card new' }, icon(b.icon, 44), h('div', null, h('strong', null, t('task.badge', { name: b.name })), h('span', null, b.desc))) : null,
+    p.complete ? nextStepCard(lv) : null,
     h('div', { class: 'two-col' },
       h('section', { class: 'card' }, h('h2', null, icon('check', 26), ' ', t('summary.strong')),
         strong.length
@@ -199,7 +201,7 @@ export function levelSummary(root, id) {
         h('li', null, t('summary.tip_life'))),
       h('div', { class: 'actions' },
         p.complete ? h('a', { class: 'btn btn-primary btn-lg', href: `#/certificate/${lv.id}` }, icon('trophy', 22), ' ', t('summary.certificate')) : null,
-        nextLevel ? h('a', { class: 'btn btn-secondary btn-lg', href: `#/level/${nextLevel.id}` }, t('summary.next_level'), ' ', icon('forward', 22)) : null,
+        !p.complete && nextLevel ? h('a', { class: 'btn btn-secondary btn-lg', href: `#/level/${nextLevel.id}` }, t('summary.next_level'), ' ', icon('forward', 22)) : null,
         h('a', { class: 'btn btn-secondary btn-lg', href: '#/lab' }, icon('key', 22), ' ', t('nav.lab')))),
   );
 }
@@ -232,7 +234,8 @@ export function certificate(root, id) {
       h('p', { class: 'muted' }, t('cert.date', { date: new Date().toLocaleDateString(getLocale()) }))),
     embedded()
       ? h('p', { class: 'muted' }, t('cert.no_print'))
-      : h('div', { class: 'actions' }, printBtn));
+      : h('div', { class: 'actions' }, printBtn),
+    nextStepCard(lv));
 }
 
 // Materiály pre učiteľov: vzorové hodiny na stiahnutie (PDF) v oboch jazykoch.

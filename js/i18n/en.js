@@ -207,6 +207,14 @@ export default {
   'summary.tip_life': 'In real life, use unique passwords, a password manager and multi-factor authentication.',
   'summary.certificate': 'Certificate',
   'summary.next_level': 'Next level',
+  'next.title': 'What’s next?',
+  'next.text': 'Move on to the next level: {name} (difficulty {difficulty}).',
+  'next.go': 'Continue to level {n}: {name}',
+  'next.module_done': 'You have completed every level of {module}!',
+  'next.module_text': 'Try the {module} module too.',
+  'next.other': 'Continue: {module}',
+  'next.all_done': 'You have completed every level in every module. Great work! Now help your classmates.',
+  'next.home': 'Back to home',
 
   // Certificate
   'cert.na_title': 'Certificate not available yet',

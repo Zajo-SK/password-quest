@@ -205,6 +205,14 @@ export default {
   'summary.tip_life': '在现实生活中，请使用独特的密码、密码管理器和多因素认证。',
   'summary.certificate': '证书',
   'summary.next_level': '下一级别',
+  'next.title': '接下来做什么？',
+  'next.text': '继续挑战下一个级别：{name}（难度：{difficulty}）。',
+  'next.go': '继续第 {n} 级：{name}',
+  'next.module_done': '你已经完成了 {module} 的所有级别！',
+  'next.module_text': '也来试试 {module} 模块吧。',
+  'next.other': '继续：{module}',
+  'next.all_done': '你已经完成了所有模块的所有级别。干得好！现在去帮助你的同学吧。',
+  'next.home': '返回首页',
 
   // 证书
   'cert.na_title': '证书暂不可用',

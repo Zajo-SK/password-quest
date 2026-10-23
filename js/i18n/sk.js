@@ -207,6 +207,14 @@ export default {
   'summary.tip_life': 'V skutočnom živote používaj jedinečné heslá, správcu hesiel a viacfaktorové overovanie.',
   'summary.certificate': 'Certifikát',
   'summary.next_level': 'Ďalšia úroveň',
+  'next.title': 'Čo ďalej?',
+  'next.text': 'Pokračuj na ďalšiu úroveň: {name} (obtiažnosť {difficulty}).',
+  'next.go': 'Pokračovať na úroveň {n}: {name}',
+  'next.module_done': 'Zvládol si všetky úrovne modulu {module}!',
+  'next.module_text': 'Vyskúšaj aj modul {module}.',
+  'next.other': 'Pokračovať: {module}',
+  'next.all_done': 'Zvládol si všetky úrovne vo všetkých moduloch. Výborná práca! Pomôž teraz spolužiakom.',
+  'next.home': 'Späť na úvod',
 
   // Certifikát
   'cert.na_title': 'Certifikát zatiaľ nie je k dispozícii',
