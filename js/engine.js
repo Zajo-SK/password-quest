@@ -11,6 +11,7 @@ import { watchTerms, glossaryBox } from './glossary.js';
 import { mockParts } from './content/helpers.js';
 import { LETTERS, alphabet, encode, plain, same } from './cipher.js';
 import { levelProgress } from './progress.js';
+import { nextStepCard } from './nextStep.js';
 
 /* ---------- Ukážky (e-mail, SMS, upozornenie, časová os) ---------- */
 
@@ -774,6 +775,8 @@ export function mountTask(root, taskId) {
           return h('div', { class: 'badge-card new', role: 'status' }, icon(b.icon, 40), h('div', null, h('strong', null, t('sum.new_badge', { name: b.name })), h('span', null, b.desc)));
         }),
         levelDone ? h('p', { class: 'ok-text' }, icon('trophy', 22), ' ', t('sum.level_done', { name: level.name })) : null,
+        // Po dokončení celej úrovne: hneď ponúknuť ďalšiu úroveň (alebo iný modul).
+        levelDone ? nextStepCard(level) : null,
         h('div', { class: 'actions' },
           left.length ? h('button', { type: 'button', class: 'btn btn-primary btn-lg', onclick: () => startRun('unmastered') }, icon('repeat', 22), ' ', t('btn.retry_wrong')) : null,
           levelDone ? h('a', { class: 'btn btn-primary btn-lg', href: `#/level/${level.id}/summary` }, icon('trophy', 22), ' ', t('final.title')) : null,

@@ -18,6 +18,7 @@
     import { CONTENT } from '../js/content/index.js';
     import { DICTS, LANGS, setLang, getLang, t } from '../js/i18n.js';
     import { GLOSSARY, findTerms, termsIn, textsOf, annotate } from '../js/glossary.js';
+    import { nextStep } from '../js/nextStep.js';
     import { CARDS, COMMON } from '../js/wordlists.js';
     import { checkPassword, splitWords, drawCards, drawCardSet, cardWord, normalize } from '../js/lab.js';
     import { newClassCode, buildCsv } from '../js/teacher.js';
@@ -87,7 +88,7 @@
       truthy(!missing.length && !extra.length, `${l}: chýba ${missing.join(', ')} | navyše ${extra.join(', ')}`);
     }));
     test('každý jazyk obsahu má slovník rozhrania a jazyk v prepínači', () => LANG_IDS.forEach((l) => { truthy(DICTS[l], l); truthy(LANGS.some((x) => x.id === l), l); }));
-    const files = ['main.js', 'views.js', 'engine.js', 'lab.js', 'teacher.js', 'icons.js', 'cipherPage.js'];
+    const files = ['main.js', 'views.js', 'engine.js', 'lab.js', 'teacher.js', 'icons.js', 'cipherPage.js', 'glossary.js', 'nextStep.js'];
     const sources = await Promise.all(files.map((f) => fetch('../js/' + f, { cache: 'no-store' }).then((r) => r.text())));
     test('všetky statické kľúče t(…) v kóde existujú v slovníkoch', () => {
       const keys = new Set(sources.flatMap((s) => [...s.matchAll(/\bt\('([^']+)'\s*[,)]/g)].map((m) => m[1])));
@@ -229,6 +230,17 @@
       truthy(box.querySelector('p').textContent.startsWith('Skutočná doména je'));
     });
     test('slovníček: v čínštine sa nič neoznačí', () => eq(findTerms('domain doména', 'zh').length, 0));
+
+    // --- Čo ďalej po dokončení úrovne ---
+    test('po úrovni nasleduje ďalšia úroveň, po poslednej iný modul', () => {
+      setLang('sk');
+      const pq = CONTENT.sk.modules['password-quest'], em = CONTENT.sk.modules['email-detective'];
+      const a = nextStep(pq[0]); eq(a.kind, 'level'); eq(String(a.level.id), String(pq[1].id));
+      const b = nextStep(pq[3]); truthy(b.kind === 'module' || b.kind === 'done', b.kind);
+      if (b.kind === 'module') eq(b.module.id, 'email-detective');
+      const c = nextStep(em[3]); truthy(c.kind === 'module' || c.kind === 'done', c.kind);
+      if (c.kind === 'module') eq(c.module.id, 'password-quest');
+    });
 
     // --- Materiály pre učiteľov: všetky súbory na stiahnutie existujú ---
     const materialFiles = ['sk/hodina-1-bezpecne-hesla', 'sk/hodina-2-podvodne-emaily', 'en/lesson-1-safe-passwords', 'en/lesson-2-scam-emails']

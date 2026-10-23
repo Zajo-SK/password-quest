@@ -505,4 +505,7 @@ ol.present-options { list-style: decimal inside; }
 .glossary-box dl, .glossary-page dl { margin: 8px 0 0; }
 .glossary-box dt, .glossary-page dt { font-weight: 700; margin-top: 10px; }
 .glossary-box dd, .glossary-page dd { margin: 2px 0 0; }
+/* Karta „Čo ďalej?“ po dokončení úrovne */
+.next-card { border: 2px solid var(--cyan); background: rgba(45, 226, 230, 0.08); margin-top: 16px; }
+.next-card h2 { display: flex; align-items: center; gap: 8px; margin-top: 0; }
 
