@@ -26,7 +26,7 @@ export const BADGES = {
   phishing_hunter: { name: 'Lovec phishingu', desc: 'Odhalíš podvodné správy a odkazy.' },
   account_guardian: { name: 'Strážca účtov', desc: 'Úroveň Strážcovia účtov je za tebou a vieš chrániť školský účet.' },
   mfa_expert: { name: 'Odborník na MFA', desc: 'Vieš správne reagovať na žiadosti o druhý faktor.' },
-  cyber_detective: { name: 'Cyber detektív', desc: 'Zvládneš vyšetrovanie úniku aj reakciu na incident.' },
+  cyber_detective: { name: 'Cyber detektív', desc: 'Pomôžeš pri ukradnutom hesle aj pri reakcii na incident.' },
   cyber_expert: { name: 'Cyber expert', desc: 'Zvládaš realistické scenáre a navrhneš bezpečnostný plán.' },
   bait_spotter: { name: 'Odhaľovač návnad', desc: 'Spoznáš správu, ktorá ťa chce nachytať na výhru alebo strach.' },
   link_checker: { name: 'Kontrolór odkazov', desc: 'Vieš zistiť, kam odkaz naozaj vedie.' },

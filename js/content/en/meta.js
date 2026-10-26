@@ -26,7 +26,7 @@ export const BADGES = {
   phishing_hunter: { name: 'Phishing Hunter', desc: 'You can spot scam messages and links.' },
   account_guardian: { name: 'Account Guardian', desc: 'You completed Account Guardians and know how to protect a school account.' },
   mfa_expert: { name: 'MFA Expert', desc: 'You know how to respond to second-factor requests.' },
-  cyber_detective: { name: 'Cyber Detective', desc: 'You can handle a leak investigation and an incident response.' },
+  cyber_detective: { name: 'Cyber Detective', desc: 'You can help with a stolen password and an incident response.' },
   cyber_expert: { name: 'Cyber Expert', desc: 'You handle realistic scenarios and can design a security plan.' },
   bait_spotter: { name: 'Bait Spotter', desc: 'You can spot a message that tries to hook you with a prize or a scare.' },
   link_checker: { name: 'Link Checker', desc: 'You know how to find out where a link really goes.' },

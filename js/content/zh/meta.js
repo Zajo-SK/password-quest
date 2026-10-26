@@ -26,7 +26,7 @@ export const BADGES = {
   phishing_hunter: { name: '钓鱼猎手', desc: '你能识破诈骗消息和链接。' },
   account_guardian: { name: '账户守护者', desc: '你完成了“账户守护者”级别，知道如何保护学校账户。' },
   mfa_expert: { name: 'MFA 专家', desc: '你知道如何应对第二重验证的请求。' },
-  cyber_detective: { name: '网络侦探', desc: '你能应对泄露调查和事件处理。' },
+  cyber_detective: { name: '网络侦探', desc: '你能应对被偷的密码和事件处理。' },
   cyber_expert: { name: '网络专家', desc: '你能应对真实的情境，并能设计安全计划。' },
   bait_spotter: { name: '诱饵识破者', desc: '你能识破用奖品或恐吓来引诱你的消息。' },
   link_checker: { name: '链接检查员', desc: '你知道如何查清链接真正指向哪里。' },

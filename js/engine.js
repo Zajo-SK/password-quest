@@ -131,13 +131,15 @@ function renderMulti(round, ctx) {
   const sel = new Set();
   const check = checkButton(t('btn.check'), evaluate);
   check.disabled = true;
+  const count = h('p', { class: 'multi-count', 'aria-live': 'polite' }, t('answer.multi_count', { n: 0 }));
   const btns = opts.map((o, i) => {
     const b = h('button', { type: 'button', class: 'option option-toggle', 'aria-pressed': 'false', onclick: () => {
       if (sel.has(i)) sel.delete(i); else sel.add(i);
       b.setAttribute('aria-pressed', String(sel.has(i)));
       b.classList.toggle('selected', sel.has(i));
       check.disabled = sel.size === 0;
-    } }, h('span', { class: 'option-text' }, o.text), h('span', { class: 'option-mark', 'aria-hidden': 'true' }));
+      count.textContent = t('answer.multi_count', { n: sel.size });
+    } }, h('span', { class: 'option-box', 'aria-hidden': 'true' }, icon('check', 22)), h('span', { class: 'option-text' }, o.text), h('span', { class: 'option-mark', 'aria-hidden': 'true' }));
     return b;
   });
 
@@ -153,9 +155,10 @@ function renderMulti(round, ctx) {
       else if (!picked && o.correct) { b.classList.add('is-missed'); mark(b, 'flag'); correct = false; explain.push({ ok: false, text: t('explain.missed', { text: o.text, why: o.why }) }); }
     });
     check.hidden = true;
+    count.hidden = true;
     ctx.submit({ correct, explain });
   }
-  return { el: h('div', null, h('div', { class: 'options', role: 'group', 'aria-label': t('answer.multi_aria') }, btns), h('div', { class: 'actions' }, check)) };
+  return { el: h('div', null, h('div', { class: 'options', role: 'group', 'aria-label': t('answer.multi_aria') }, btns), h('div', { class: 'actions' }, count, check)) };
 }
 
 function renderRows(round, ctx) {
