@@ -1,6 +1,6 @@
 // Offline režim: network-first (vždy čerstvé súbory, keď je pripojenie), inak z cache.
 // Cache obsahuje len statické súbory aplikácie, nikdy žiadne údaje žiaka.
-const CACHE = 'password-quest-v11';
+const CACHE = 'password-quest-v12';
 const FILES = [
   './', 'index.html', 'icon.svg', 'manifest.webmanifest', 'css/styles.css',
   'js/main.js', 'js/config.js', 'js/i18n.js', 'js/i18n/sk.js', 'js/i18n/en.js', 'js/i18n/zh.js', 'js/util.js', 'js/icons.js', 'js/store.js',
