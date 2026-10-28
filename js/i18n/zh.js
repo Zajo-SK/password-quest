@@ -341,6 +341,7 @@ export default {
   // 答案解释
   'answer.options_aria': '答案选项',
   'answer.multi_aria': '选项，可以选择多个',
+  'answer.multi_count': '已选答案：{n}',
   'explain.your_choice': '你的选择“{text}”：{why}',
   'explain.correct_is': '正确答案是“{text}”：{why}',
   'explain.picked_ok': '“{text}”：{why}',

@@ -50,7 +50,7 @@ Router (`main.js`) je založený na `location.hash`. Dá sa preto obnoviť strá
 | `rows` | `rows()`, `rowsPer()` | triedenie do kategórií, alebo výber pravidla pre každú oblasť |
 | `hotspot` | `hotspot()` | označovanie podozrivých častí správy (alebo „správa je v poriadku“) |
 | `order` | `order()` | zostavenie plánu v poradí priority, zavádzajúce kroky sú `tier: null` |
-| `reuse` | ručne | simulácia úniku pri opakovanom hesle |
+| `reuse` | ručne | simulácia úniku pri opakovanom hesle (momentálne ho žiadna misia nepoužíva) |
 | `lab` | ručne | úloha v Dielni hesiel; splnená, keď kontrola ukáže „Silné“ (voliteľný vymyslený `profile`) |
 | `inbox` | `inbox()`, `mail()` | simulovaná schránka: žiak otvorí každý e-mail a označí ho „v poriadku“ alebo „podvod“ |
 | `cipher` | `cipher()` | šifra: rozlúštiť (`mode: 'decode'`) alebo zašifrovať (`'encode'`) slovo podľa abecedy (`bot`, `leet`, `caesarN`, `rot13` alebo vlastná tabuľka); s `choices` sa vyberá, bez nich sa odpoveď píše |

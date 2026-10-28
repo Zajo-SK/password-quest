@@ -343,6 +343,7 @@ export default {
   // Answer explanations
   'answer.options_aria': 'Answer options',
   'answer.multi_aria': 'Options, you can pick more than one',
+  'answer.multi_count': 'Selected answers: {n}',
   'explain.your_choice': 'Your choice “{text}”: {why}',
   'explain.correct_is': 'The right answer is “{text}”: {why}',
   'explain.picked_ok': '“{text}”: {why}',

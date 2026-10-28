@@ -343,6 +343,7 @@ export default {
   // Vysvetlenia odpovedí
   'answer.options_aria': 'Možnosti odpovede',
   'answer.multi_aria': 'Možnosti, môžeš vybrať viac',
+  'answer.multi_count': 'Vybraté odpovede: {n}',
   'explain.your_choice': 'Tvoja voľba „{text}“: {why}',
   'explain.correct_is': 'Správne je „{text}“: {why}',
   'explain.picked_ok': '„{text}“: {why}',
